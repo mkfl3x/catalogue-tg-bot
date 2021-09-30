@@ -3,15 +3,14 @@ package bot
 import com.pengrad.telegrambot.TelegramBot
 import com.pengrad.telegrambot.request.SendMessage
 import com.pengrad.telegrambot.request.SetWebhook
+import utils.PropertiesManager
 
 object Bot {
 
-    // TODO: move bot token to config
-    private val bot = TelegramBot("[bot_token]")
+    private val bot = TelegramBot(PropertiesManager.get("bot.token"))
 
     fun init() {
-        // TODO: move url to config
-        bot.execute(SetWebhook().url("https://[your_server]/callback"))
+        bot.execute(SetWebhook().url(PropertiesManager.get("bot.webhook")))
     }
 
     fun sendMessage(chatId: Long, messageText: String) {

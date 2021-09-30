@@ -5,16 +5,21 @@ import com.pengrad.telegrambot.model.Update
 import io.ktor.application.*
 import io.ktor.features.*
 import io.ktor.gson.*
+import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
+import utils.PropertiesManager
 
 object Server {
 
-    // TODO: move 'port' and 'host' values to config file
-    private val server = embeddedServer(Netty, port = 8080, host = "localhost") {
+    private val server = embeddedServer(
+        Netty,
+        port = PropertiesManager.get("server.port").toInt(),
+        host = PropertiesManager.get("server.host")
+    ) {
         install(ContentNegotiation) {
             gson()
         }
@@ -25,6 +30,7 @@ object Server {
             post("/callback") {
                 val update = call.receive<Update>()
                 Bot.sendMessage(update.message().chat().id(), "echo: ${update.message().text()}")
+                call.respond(HttpStatusCode.OK, "ok")
             }
         }
     }
