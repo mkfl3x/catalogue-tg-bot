@@ -23,4 +23,7 @@ dependencies {
 
     // telegram api
     implementation 'com.github.pengrad:java-telegram-bot-api:5.2.0'
+
+    // mongo
+    implementation("org.mongodb:mongo-java-driver:3.12.10")
 }
