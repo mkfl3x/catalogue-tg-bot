@@ -1,19 +1,16 @@
 package bot
 
 import com.pengrad.telegrambot.TelegramBot
-import com.pengrad.telegrambot.request.SendMessage
 import com.pengrad.telegrambot.request.SetWebhook
-import utils.PropertiesManager
+import utils.Properties
 
-object Bot {
+class Bot {
 
-    private val bot = TelegramBot(PropertiesManager.get("bot.token"))
+    private val bot = TelegramBot(Properties.get("bot.token"))
+    val actions = BotActions(this.bot)
 
-    fun init() {
-        bot.execute(SetWebhook().url(PropertiesManager.get("bot.webhook")))
-    }
-
-    fun sendMessage(chatId: Long, messageText: String) {
-        bot.execute(SendMessage(chatId, messageText))
+    init {
+        val webhookAddress =
+        bot.execute(SetWebhook().url(Properties.get("bot.webhook.host") + Properties.get("bot.webhook.endpoint")))
     }
 }

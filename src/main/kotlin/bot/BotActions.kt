@@ -1,0 +1,11 @@
+package bot
+
+import com.pengrad.telegrambot.TelegramBot
+import com.pengrad.telegrambot.request.SendMessage
+
+class BotActions(private val bot: TelegramBot) {
+
+    fun sendMessage(chatId: Long, messageText: String) {
+        bot.execute(SendMessage(chatId, messageText))
+    }
+}

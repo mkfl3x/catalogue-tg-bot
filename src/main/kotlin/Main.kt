@@ -1,4 +1,3 @@
-import bot.Bot
 import server.Server
 
 fun main() {
@@ -10,6 +9,5 @@ fun main() {
     //  - add admin panel (react?)
     //  - add messages handling
 
-    Bot.init()
-    Server.start()
+    Server().start()
 }
