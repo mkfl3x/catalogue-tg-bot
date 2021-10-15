@@ -28,8 +28,13 @@ class Server {
                 call.respondText("I am fine")
             }
             post(Properties.get("bot.webhook.endpoint")) {
-                handler.handleUpdate(call.receive())
-                call.respond(HttpStatusCode.OK, "ok")
+                try {
+                    handler.handleUpdate(call.receive())
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                } finally {
+                    call.respond(HttpStatusCode.OK, "ok")
+                }
             }
         }
     }
