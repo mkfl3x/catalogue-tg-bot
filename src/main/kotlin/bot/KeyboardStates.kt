@@ -11,9 +11,10 @@ class KeyboardStates {
         states[chatId]!!.add(state)
     }
 
-    fun removeKeyboard(chatId: Long) {
+    fun getPreviousKeyboard(chatId: Long): String {
         states[chatId]!!.removeLast()
+        return getCurrentKeyboard(chatId)
     }
 
-    fun getLastKeyboard(chatId: Long) = states[chatId]!!.last()
+    fun getCurrentKeyboard(chatId: Long) = states[chatId]!!.last()
 }

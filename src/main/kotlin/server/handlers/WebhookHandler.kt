@@ -16,20 +16,23 @@ class WebhookHandler {
         val message = update.message().text()
 
         when (message) {
-            "/start" -> { // TODO: this message should be placed as button
+            "/start" -> {
                 bot.actions.sendReplyKeyboard(chatId, getKeyboardAsMarkup("MainKeyboard"))
                 bot.states.addKeyboard(chatId, "MainKeyboard")
                 return
             }
             "Back" -> {
-                bot.states.removeKeyboard(chatId)
-                bot.actions.sendReplyKeyboard(chatId, getKeyboardAsMarkup(bot.states.getLastKeyboard(chatId)))
+                bot.actions.sendReplyKeyboard(chatId, getKeyboardAsMarkup(bot.states.getPreviousKeyboard(chatId)))
                 return
+            }
+            else -> {
+                val keyboard = getKeyboard(bot.states.getCurrentKeyboard(chatId))
+                if (keyboard.buttons.firstOrNull { it.text == message } == null)
+                    bot.actions.sendMessage(chatId, "Unrecognized command")
             }
         }
 
-        // check is current keyboard contains button with message text and interact with it
-        val currentKeyboard = getKeyboard(bot.states.getLastKeyboard(chatId))
+        val currentKeyboard = getKeyboard(bot.states.getCurrentKeyboard(chatId))
         val currentKeyboardButton = currentKeyboard.buttons.firstOrNull { it.text == message }
         if (currentKeyboardButton != null) {
             when (currentKeyboardButton.type) {
