@@ -4,28 +4,28 @@ import com.mongodb.MongoClient
 import com.mongodb.MongoClientSettings
 import org.bson.codecs.configuration.CodecRegistries
 import org.bson.codecs.pojo.PojoCodecProvider
+import utils.Properties
 
-class MongoClient(
-    private val dbName: String,
-    private val host: String,
-    private val port: Int
-) {
+object MongoClient {
+
+    private val client = MongoClient(
+        Properties.get("mongo.host"),
+        Properties.get("mongo.port").toInt()
+    )
 
     private val codecs = CodecRegistries.fromRegistries(
         MongoClientSettings.getDefaultCodecRegistry(),
         CodecRegistries.fromProviders(PojoCodecProvider.builder().automatic(true).build())
     )
 
-    private val client = MongoClient(host, port)
-
-    private val db = client.getDatabase(dbName)
+    private val database = client.getDatabase(Properties.get("mongo.database"))
         .withCodecRegistry(codecs)
 
     fun <T> insert(collection: String, entry: T, entryType: Class<T>) {
-        db.getCollection(collection, entryType).insertOne(entry)
+        database.getCollection(collection, entryType).insertOne(entry)
     }
 
     fun <T> read(collection: String, entryType: Class<T>): List<T> {
-        return db.getCollection(collection, entryType).find().toList()
+        return database.getCollection(collection, entryType).find().toList()
     }
 }

@@ -9,6 +9,7 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
+import server.handlers.WebhookHandler
 import utils.Properties
 
 class Server {
@@ -36,6 +37,9 @@ class Server {
                     call.respond(HttpStatusCode.OK, "ok")
                 }
             }
+            // TODO: add endpoint for insert keyboards
+            // TODO: add endpoint for update keyboards
+            // TODO: add endpoint for delete keyboards
         }
     }
 
