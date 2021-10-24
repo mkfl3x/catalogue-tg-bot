@@ -1,8 +1,5 @@
 package server
 
-import com.mongodb.BasicDBObject
-import database.Keyboard
-import database.MongoClient
 import io.ktor.application.*
 import io.ktor.features.*
 import io.ktor.gson.*
@@ -12,16 +9,14 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
-import keyboards.KeyboardsManager
-import keyboards.Schemas
+import server.handlers.KeyboardsHandler
 import server.handlers.WebhookHandler
-import utils.GsonMapper
 import utils.Properties
-import utils.SchemaValidator
 
 class Server {
 
     private val webhookHandler = WebhookHandler()
+    private val keyboardsHandler = KeyboardsHandler()
 
     private val server = embeddedServer(
         Netty,
@@ -47,21 +42,7 @@ class Server {
                 }
             }
             post("/keyboards/add") { // TODO: add new keyboard to some button
-                val body = call.receive<String>()
-
-                if (!SchemaValidator.isValid(body, Schemas.KEYBOARD)) {
-                    call.respond(HttpStatusCode.NotAcceptable, "Not valid keyboard model")
-                    return@post
-                }
-
-                val keyboard = GsonMapper.deserialize(body, Keyboard::class.java)
-                if (KeyboardsManager.getAllKeyboards().contains(keyboard.name)) {
-                    // TODO: add error log entry
-                    call.respond(HttpStatusCode.Conflict, "Adding already existing keyboard")
-                }
-
-                MongoClient.create(Properties.get("mongo.collection.keyboards"), keyboard, Keyboard::class.java)
-
+                keyboardsHandler.addKeyboard(call.receive(), this)
                 call.respond(HttpStatusCode.OK, "ok")
             }
             post("/keyboards/update") {
@@ -69,10 +50,8 @@ class Server {
                 ///call.respond(HttpStatusCode.OK, "ok")
             }
             get("/keyboards/delete") {
-                // TODO: add validation of keyboard name
-                val keyboardName = call.request.queryParameters["keyboard_name"]
-                MongoClient.delete(Properties.get("mongo.collection.keyboards"), BasicDBObject("name", keyboardName))
-                // TODO: add delete result
+                // TODO: handle parameter
+                keyboardsHandler.deleteKeyboard(call.request.queryParameters["keyboard_name"]!!)
                 call.respond(HttpStatusCode.OK, "ok")
             }
         }
