@@ -26,4 +26,7 @@ dependencies {
 
     // mongo
     implementation("org.mongodb:mongo-java-driver:3.12.10")
+
+    // json-schema
+    implementation("com.worldturner.medeia:medeia-validator-gson:1.1.0")
 }

@@ -2,8 +2,7 @@ package bot
 
 import com.pengrad.telegrambot.TelegramBot
 import com.pengrad.telegrambot.request.SetWebhook
-import database.Keyboard
-import database.MongoClient
+import keyboards.KeyboardStates
 import utils.Properties
 
 class Bot {
@@ -12,12 +11,10 @@ class Bot {
 
     val actions = BotActions(this.bot)
 
-    val keyboards = MongoClient.read(Properties.get("mongo.collection.keyboards"), Keyboard::class.java)
-
-    // TODO: it should be moved to Redis
-    val states = KeyboardStates()
+    val keyboardStates = KeyboardStates()  // TODO: it should be moved to Redis
 
     init {
+        // registering bot webhook endpoint at telegram
         bot.execute(SetWebhook().url(Properties.get("bot.webhook.host") + Properties.get("bot.webhook.endpoint")))
     }
 }
