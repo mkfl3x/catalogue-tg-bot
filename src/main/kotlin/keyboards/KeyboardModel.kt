@@ -16,8 +16,6 @@ data class Keyboard @BsonCreator constructor(
 data class Button @BsonCreator constructor(
     @BsonProperty(value = "text") val text: String,
     @BsonProperty(value = "type") val type: ButtonType,
-    @BsonProperty(value = "payload") val payload: String?,
-    @BsonProperty(value = "keyboard") val keyboard: String?
+    @BsonProperty(value = "payload") val payload: String? = null,
+    @BsonProperty(value = "keyboard") val keyboard: String? = null
 )
-
-// TODO: add json schema for keyboard validation
