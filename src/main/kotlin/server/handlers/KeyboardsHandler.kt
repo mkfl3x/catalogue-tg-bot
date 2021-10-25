@@ -21,17 +21,19 @@ class KeyboardsHandler {
             pipeline.call.respond(HttpStatusCode.NotAcceptable, "Not valid keyboard model")
             return
         }
-        val pojoKeyboard = GsonMapper.deserialize(keyboardJson, Keyboard::class.java)
-        if (KeyboardsManager.getAllKeyboards().contains(pojoKeyboard.name)) {
+        val keyboard = GsonMapper.deserialize(keyboardJson, Keyboard::class.java)
+        if (KeyboardsManager.getAllKeyboards().contains(keyboard.name)) {
             // TODO: add error log entry
             pipeline.call.respond(HttpStatusCode.Conflict, "Adding already existing keyboard")
             return
         }
-        MongoClient.create(Properties.get("mongo.collection.keyboards"), pojoKeyboard, Keyboard::class.java)
+        MongoClient.create(Properties.get("mongo.collection.keyboards"), keyboard, Keyboard::class.java)
     }
 
     // TODO: add analyzing of delete result
     fun deleteKeyboard(name: String) {
         MongoClient.delete(Properties.get("mongo.collection.keyboards"), BasicDBObject("name", name))
     }
+
+    fun getKeyboardAsJson(name: String) = GsonMapper.serialize(KeyboardsManager.getKeyboard(name))
 }

@@ -2,7 +2,6 @@ package server.handlers
 
 import bot.Bot
 import com.pengrad.telegrambot.model.Update
-import database.ButtonType
 import keyboards.KeyboardsManager
 
 class WebhookHandler {
@@ -38,10 +37,10 @@ class WebhookHandler {
         val currentKeyboardButton = currentKeyboard.buttons.firstOrNull { it.text == message }
         if (currentKeyboardButton != null) {
             when (currentKeyboardButton.type) {
-                ButtonType.PAYLOAD -> {
+                "payload" -> {
                     bot.actions.sendMessage(chatId, currentKeyboardButton.payload!!)
                 }
-                ButtonType.KEYBOARD -> {
+                "keyboard" -> {
                     val keyboard = KeyboardsManager.getKeyboardAsMarkup(currentKeyboardButton.keyboard!!)
                     bot.actions.sendReplyKeyboard(chatId, keyboard)
                     bot.keyboardStates.addKeyboard(chatId, currentKeyboardButton.keyboard)

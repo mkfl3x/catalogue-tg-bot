@@ -43,6 +43,7 @@ class Server {
             }
             post("/keyboards/add") { // TODO: add new keyboard to some button
                 keyboardsHandler.addKeyboard(call.receive(), this)
+                // IMPORTANT TODO: immediately update keyboards in KeyboardsManager
                 call.respond(HttpStatusCode.OK, "ok")
             }
             post("/keyboards/update") {
@@ -50,9 +51,14 @@ class Server {
                 ///call.respond(HttpStatusCode.OK, "ok")
             }
             get("/keyboards/delete") {
-                // TODO: handle parameter
+                // TODO: handle parameter safety
                 keyboardsHandler.deleteKeyboard(call.request.queryParameters["keyboard_name"]!!)
                 call.respond(HttpStatusCode.OK, "ok")
+            }
+            get("/keyboards/get") {
+                // TODO: handle parameter safety
+                val keyboard = keyboardsHandler.getKeyboardAsJson(call.request.queryParameters["keyboard_name"]!!)
+                call.respond(HttpStatusCode.OK, keyboard)
             }
         }
     }
