@@ -9,31 +9,35 @@ import io.ktor.response.*
 import io.ktor.util.pipeline.*
 import keyboards.KeyboardsManager
 import keyboards.Schemas
+import server.AddKeyboardRequest
 import utils.GsonMapper
-import utils.Properties
 import utils.SchemaValidator
 
-class KeyboardsHandler {
+class KeyboardsHandler : BaseHandler() {
 
-    // TODO: link new keyboard to some button
-    suspend fun addKeyboard(keyboardJson: String, pipeline: PipelineContext<Unit, ApplicationCall>) {
-        if (!SchemaValidator.isValid(keyboardJson, Schemas.KEYBOARD)) {
+    fun getAllKeyboards(): MutableList<Keyboard> {
+        return KeyboardsManager.getAllKeyboards()
+    }
+
+    // TODO: add handling Mongo operations result
+    // TODO: link with button also on another keyboard
+    suspend fun addKeyboard(addKeyboardRequest: AddKeyboardRequest, pipeline: PipelineContext<Unit, ApplicationCall>) {
+        if (!SchemaValidator.isValid(GsonMapper.serialize(addKeyboardRequest.keyboard), Schemas.KEYBOARD)) {
             pipeline.call.respond(HttpStatusCode.NotAcceptable, "Not valid keyboard model")
             return
         }
-        val keyboard = GsonMapper.deserialize(keyboardJson, Keyboard::class.java)
-        if (KeyboardsManager.getAllKeyboards().contains(keyboard.name)) {
-            // TODO: add error log entry
+        val keyboard = addKeyboardRequest.keyboard
+        if (KeyboardsManager.getAllKeyboardNames().contains(keyboard.name)) {
+            logger.info("Already existing keyboard with '${keyboard.name}' name was tried to add")
             pipeline.call.respond(HttpStatusCode.Conflict, "Adding already existing keyboard")
             return
         }
-        MongoClient.create(Properties.get("mongo.collection.keyboards"), keyboard, Keyboard::class.java)
+        MongoClient.create(mongoCollection, keyboard, Keyboard::class.java)
     }
 
-    // TODO: add analyzing of delete result
-    fun deleteKeyboard(name: String) {
-        MongoClient.delete(Properties.get("mongo.collection.keyboards"), BasicDBObject("name", name))
+    // TODO: add handling Mongo operations result
+    suspend fun deleteKeyboard(name: String, pipeline: PipelineContext<Unit, ApplicationCall>) {
+        if (!doesKeyboardExists(name, pipeline)) return
+        MongoClient.delete(mongoCollection, BasicDBObject("name", name))
     }
-
-    fun getKeyboardAsJson(name: String) = GsonMapper.serialize(KeyboardsManager.getKeyboard(name))
 }
