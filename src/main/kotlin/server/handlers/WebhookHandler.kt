@@ -28,13 +28,13 @@ class WebhookHandler {
             }
             else -> {
                 val keyboard = KeyboardsManager.getKeyboard(bot.keyboardStates.getCurrentKeyboard(chatId))
-                if (keyboard.buttons.firstOrNull { it.text == message } == null)
+                if (keyboard!!.buttons.firstOrNull { it.text == message } == null)
                     bot.actions.sendMessage(chatId, "Not recognized command")
             }
         }
 
         val currentKeyboard = KeyboardsManager.getKeyboard(bot.keyboardStates.getCurrentKeyboard(chatId))
-        val currentKeyboardButton = currentKeyboard.buttons.firstOrNull { it.text == message }
+        val currentKeyboardButton = currentKeyboard!!.buttons.firstOrNull { it.text == message }
         if (currentKeyboardButton != null) {
             when (currentKeyboardButton.type) {
                 "payload" -> {

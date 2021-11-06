@@ -1,7 +1,5 @@
 package keyboards
 
-import database.Button
-import database.Keyboard
 import java.lang.reflect.Type
 
 enum class Schemas(val path: String, val type: Type) {

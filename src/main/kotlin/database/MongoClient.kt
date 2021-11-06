@@ -30,7 +30,7 @@ object MongoClient {
         return database.getCollection(collection, entryType).find().toList()
     }
 
-    fun <T> update(collection: String, entryType: Class<T>, condition: BasicDBObject, query: BasicDBObject){
+    fun <T> update(collection: String, entryType: Class<T>, condition: BasicDBObject, query: BasicDBObject) {
         database.getCollection(collection, entryType).updateOne(condition, query)
     }
 
@@ -40,6 +40,5 @@ object MongoClient {
 
     fun delete(collection: String, condition: BasicDBObject) {
         database.getCollection(collection).deleteOne(condition)
-        // TODO: add log entry
     }
 }

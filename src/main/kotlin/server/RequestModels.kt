@@ -1,12 +1,16 @@
 package server
 
-import database.Button
-import database.Keyboard
+import keyboards.Button
+import keyboards.Keyboard
 
 data class AddKeyboardRequest(
-    val keyboardName: String,
+    val parenKeyboard: String,
     val newButton: String,
-    val keyboard: Keyboard
+    val newKeyboard: Keyboard
+)
+
+data class DeleteKeyboardRequest(
+    val keyboard: String
 )
 
 data class AddButtonRequest(

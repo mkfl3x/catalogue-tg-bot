@@ -7,6 +7,10 @@
       "description": "Keyboard name/identifier",
       "type": "string"
     },
+    "parent_keyboard": {
+      "description": "Keyboard which contains current one",
+      "type": "string"
+    },
     "buttons": {
       "description": "Keyboard buttons",
       "type": "array",
@@ -56,6 +60,7 @@
   },
   "required": [
     "name",
+    "parent_keyboard",
     "buttons"
   ],
   "additionalProperties": false

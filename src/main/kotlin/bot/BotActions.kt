@@ -11,9 +11,6 @@ class BotActions(private val bot: TelegramBot) {
     }
 
     fun sendReplyKeyboard(chatId: Long, keyboard: Keyboard) {
-        // TODO: find way not to send message with keyboard
         bot.execute(SendMessage(chatId, "Default text").replyMarkup(keyboard))
     }
-
-    // TODO: add function for deleting message
 }

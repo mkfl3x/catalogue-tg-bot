@@ -30,6 +30,28 @@ class Server {
             get("/ping") {
                 call.respondText("I am fine")
             }
+
+            // get("/keyboards/getAll") {
+            //     call.respond(keyboardsHandler.getAllKeyboards())
+            //     // TODO: add response
+            // }
+            post("/keyboards/add") {
+                keyboardsHandler.addKeyboard(call.receive(), this)
+            }
+            post("/keyboards/delete") {
+                keyboardsHandler.deleteKeyboard(call.receive(), this)
+            }
+            // TODO: add "keyboards/update" endpoint
+
+            post("/keyboards/buttons/add") {
+                keyboardsHandler.addButton(call.receive(), this)
+            }
+            post("/keyboards/buttons/delete") {
+                keyboardsHandler.deleteButton(call.receive(), this)
+            }
+            // TODO: add "buttons/update" endpoint
+
+
             post(Properties.get("bot.webhook.endpoint")) { // TODO: handle exception implicitly
                 try {
                     webhookHandler.handleUpdate(call.receive())
@@ -40,25 +62,6 @@ class Server {
                     // in each case following response should be sent for complete interaction with telegram server
                     call.respond(HttpStatusCode.OK, "ok")
                 }
-            }
-            post("/keyboards/add") { // TODO: add new keyboard to some button
-                keyboardsHandler.addKeyboard(call.receive(), this)
-                // IMPORTANT TODO: immediately update keyboards in KeyboardsManager
-                call.respond(HttpStatusCode.OK, "ok")
-            }
-            post("/keyboards/update") {
-                // TODO: implement it
-                ///call.respond(HttpStatusCode.OK, "ok")
-            }
-            get("/keyboards/delete") {
-                // TODO: handle parameter safety
-                keyboardsHandler.deleteKeyboard(call.request.queryParameters["keyboard_name"]!!)
-                call.respond(HttpStatusCode.OK, "ok")
-            }
-            get("/keyboards/get") {
-                // TODO: handle parameter safety
-                val keyboard = keyboardsHandler.getKeyboardAsJson(call.request.queryParameters["keyboard_name"]!!)
-                call.respond(HttpStatusCode.OK, keyboard)
             }
         }
     }

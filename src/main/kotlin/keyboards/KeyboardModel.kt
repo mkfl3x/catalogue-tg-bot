@@ -1,10 +1,11 @@
-package database
+package keyboards
 
 import org.bson.codecs.pojo.annotations.BsonCreator
 import org.bson.codecs.pojo.annotations.BsonProperty
 
 data class Keyboard @BsonCreator constructor(
     @BsonProperty(value = "name") val name: String,
+    @BsonProperty(value = "parent_keyboard") val parentKeyboard: String,
     @BsonProperty(value = "buttons") val buttons: List<Button>
 )
 
