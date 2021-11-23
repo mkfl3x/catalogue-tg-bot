@@ -8,13 +8,13 @@ class WebhookHandler {
 
     private val bot = Bot()
 
-    // TODO: handle manual 'Back' command
     fun handleUpdate(update: Update) {
         val chatId = update.message().chat().id()
         val message = update.message().text()
 
         when (message) {
             "/start" -> {
+                bot.keyboardStates.dropState(chatId)
                 bot.actions.sendReplyKeyboard(chatId, KeyboardsManager.getKeyboardAsMarkup("MainKeyboard"))
                 bot.keyboardStates.addKeyboard(chatId, "MainKeyboard")
                 return

@@ -16,10 +16,17 @@ class KeyboardStates {
 
     // returns previous keyboard and remove last one
     fun getPreviousKeyboard(chatId: Long): String {
+        if (getCurrentKeyboard(chatId) == "MainKeyboard")
+            return getCurrentKeyboard(chatId)
         states[chatId]!!.removeLast()
         return getCurrentKeyboard(chatId)
     }
 
     // returns current user's keyboard
     fun getCurrentKeyboard(chatId: Long) = states[chatId]!!.last()
+
+    // remove user from states map
+    fun dropState(chatId: Long) {
+        states.remove(chatId)
+    }
 }

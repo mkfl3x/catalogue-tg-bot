@@ -19,8 +19,10 @@ object MongoClient {
         CodecRegistries.fromProviders(PojoCodecProvider.builder().automatic(true).build())
     )
 
-    private val database = client.getDatabase(Properties.get("mongo.database"))
-        .withCodecRegistry(codecs)
+    private val database by lazy {
+        client.getDatabase(Properties.get("mongo.database"))
+            .withCodecRegistry(codecs)
+    }
 
     fun <T> create(collection: String, entry: T, entryType: Class<T>) {
         database.getCollection(collection, entryType).insertOne(entry)
