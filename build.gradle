@@ -1,5 +1,6 @@
 plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.5.10'
+    id("com.github.johnrengelman.shadow") version "7.0.0"
 }
 
 group 'org.bot'
@@ -29,4 +30,10 @@ dependencies {
 
     // json-schema
     implementation("com.worldturner.medeia:medeia-validator-gson:1.1.0")
+}
+
+shadowJar {
+    manifest {
+        attributes 'Main-Class': 'MainKt'
+    }
 }

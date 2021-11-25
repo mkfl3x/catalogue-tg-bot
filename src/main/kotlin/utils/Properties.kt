@@ -1,6 +1,5 @@
 package utils
 
-import java.io.FileInputStream
 import java.util.Properties
 
 object Properties {
@@ -8,7 +7,7 @@ object Properties {
     private val properties = Properties()
 
     init {
-        properties.load(FileInputStream("src/main/resources/config.properties"))
+        properties.load(Thread.currentThread().contextClassLoader.getResourceAsStream("config.properties"))
     }
 
     fun get(propertyName: String): String {
