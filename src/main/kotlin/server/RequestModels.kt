@@ -1,24 +1,32 @@
 package server
 
+import com.google.gson.annotations.SerializedName
 import keyboards.Button
 import keyboards.Keyboard
 
+enum class RequestSchemas(val path: String) {
+    ADD_KEYBOARD_REQUEST("/json-schemas/requests/add_keyboard_request.json"),
+    ADD_BUTTON_REQUEST("/json-schemas/requests/add_button_request.json"),
+    DELETE_KEYBOARD_REQUEST("/json-schemas/requests/add_keyboard_request.json"),
+    DELETE_BUTTON_REQUEST("/json-schemas/requests/delete_button_request.json")
+}
+
 data class AddKeyboardRequest(
-    val parenKeyboard: String,
-    val newButton: String,
-    val newKeyboard: Keyboard
+    @SerializedName("host_keyboard") val parenKeyboard: String,
+    @SerializedName("new_button") val newButton: String,
+    @SerializedName("new_keyboard") val newKeyboard: Keyboard
 )
 
 data class DeleteKeyboardRequest(
-    val keyboard: String
+    @SerializedName("keyboard") val keyboard: String
 )
 
 data class AddButtonRequest(
-    val keyboard: String,
-    val button: Button
+    @SerializedName("keyboard") val keyboard: String,
+    @SerializedName("new_button") val newButton: Button
 )
 
 data class DeleteButtonRequest(
-    val keyboard: String,
-    val buttonText: String
+    @SerializedName("keyboard") val keyboard: String,
+    @SerializedName("button_text") val buttonText: String
 )

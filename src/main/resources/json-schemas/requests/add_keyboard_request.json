@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Add keyboard request",
+  "type": "object",
+  "properties": {
+    "host_keyboard": {
+      "description": "Name of keyboard stores to new one",
+      "type": "string"
+    },
+    "new_button": {
+      "description": "Button leads to new keyboard",
+      "type": "string"
+    },
+    "new_keyboard": {
+      "description": "New keyboard",
+      "$ref": "/json-schemas/models/keyboard.json"
+    },
+    "required": [
+      "host_keyboard",
+      "new_button",
+      "new_keyboard"
+    ],
+    "additionalProperties": false
+  }
+}

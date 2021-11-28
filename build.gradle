@@ -29,7 +29,7 @@ dependencies {
     implementation("org.mongodb:mongo-java-driver:3.12.10")
 
     // json-schema
-    implementation("com.worldturner.medeia:medeia-validator-gson:1.1.0")
+    implementation("com.github.java-json-tools:json-schema-validator:2.2.14")
 }
 
 shadowJar {

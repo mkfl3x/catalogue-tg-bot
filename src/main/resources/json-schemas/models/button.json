@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Button",
+  "type": "object",
+  "properties": {
+    "text": {
+      "description": "Text on button",
+      "type": "string"
+    },
+    "type": {
+      "description": "Button type",
+      "type": "string",
+      "enum": [
+        "payload",
+        "keyboard"
+      ]
+    },
+    "payload": {
+      "description": "Payload data of button",
+      "type": "string"
+    },
+    "host_keyboard": {
+      "description": "Link to another keyboard",
+      "type": "string"
+    }
+  },
+  "oneOf": [
+    {
+      "required": [
+        "text",
+        "type",
+        "payload"
+      ]
+    },
+    {
+      "required": [
+        "text",
+        "type",
+        "keyboard"
+      ]
+    }
+  ],
+  "additionalProperties": false
+}

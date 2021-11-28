@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Add button request",
+  "type": "object",
+  "properties": {
+    "host_keyboard": {
+      "description": "Host keyboard for new button",
+      "type": "string"
+    },
+    "new_button": {
+      "description": "New button",
+      "$ref": "/json-schemas/models/button.json"
+    },
+    "required": [
+      "host_keyboard",
+      "new_button"
+    ],
+    "additionalProperties": false
+  }
+}

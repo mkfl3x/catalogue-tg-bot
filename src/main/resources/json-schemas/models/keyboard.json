@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Keyboard",
+  "type": "object",
+  "properties": {
+    "name": {
+      "description": "Keyboard name/identifier",
+      "type": "string"
+    },
+    "parent_keyboard": {
+      "description": "Keyboard which contains current one",
+      "type": "string"
+    },
+    "buttons": {
+      "description": "Keyboard buttons",
+      "type": "array",
+      "items": {
+        "$ref": "button.json"
+      }
+    },
+    "required": [
+      "name",
+      "parent_keyboard",
+      "buttons"
+    ],
+    "additionalProperties": false
+  }
+}
