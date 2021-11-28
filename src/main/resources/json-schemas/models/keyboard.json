@@ -7,7 +7,7 @@
       "description": "Keyboard name/identifier",
       "type": "string"
     },
-    "parent_keyboard": {
+    "host_keyboard": {
       "description": "Keyboard which contains current one",
       "type": "string"
     },
@@ -15,14 +15,14 @@
       "description": "Keyboard buttons",
       "type": "array",
       "items": {
-        "$ref": "button.json"
+        "$ref": "../models/button.json"
       }
-    },
-    "required": [
-      "name",
-      "parent_keyboard",
-      "buttons"
-    ],
-    "additionalProperties": false
-  }
+    }
+  },
+  "required": [
+    "name",
+    "parent_keyboard",
+    "buttons"
+  ],
+  "additionalProperties": false
 }

@@ -13,6 +13,8 @@ object KeyboardsManager {
         uploadKeyboards()
     }
 
+    fun getKeyboards(): List<Keyboard> = keyboards
+
     fun getKeyboard(name: String): Keyboard? = keyboards.firstOrNull { it.name == name }
 
     fun getKeyboardAsMarkup(name: String): ReplyKeyboardMarkup {

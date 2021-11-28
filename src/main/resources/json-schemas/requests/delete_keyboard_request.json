@@ -7,9 +7,14 @@
       "description": "Name of keyboard to delete",
       "type": "string"
     },
-    "required": [
-      "keyboard"
-    ],
-    "additionalProperties": false
-  }
+    "host_keyboard": {
+      "description": "Name of host keyboard",
+      "type": "string"
+    }
+  },
+  "required": [
+    "keyboard",
+    "host_keyboard"
+  ],
+  "additionalProperties": false
 }

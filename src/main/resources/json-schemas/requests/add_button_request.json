@@ -9,12 +9,12 @@
     },
     "new_button": {
       "description": "New button",
-      "$ref": "/json-schemas/models/button.json"
-    },
-    "required": [
-      "host_keyboard",
-      "new_button"
-    ],
-    "additionalProperties": false
-  }
+      "$ref": "../models/button.json"
+    }
+  },
+  "required": [
+    "host_keyboard",
+    "new_button"
+  ],
+  "additionalProperties": false
 }

@@ -10,11 +10,11 @@
     "button_text": {
       "description": "Text of removing button",
       "type": "string"
-    },
-    "required": [
-      "keyboard",
-      "button_text"
-    ],
-    "additionalProperties": false
-  }
+    }
+  },
+  "required": [
+    "keyboard",
+    "button_text"
+  ],
+  "additionalProperties": false
 }
