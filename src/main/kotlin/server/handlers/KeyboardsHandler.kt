@@ -18,112 +18,89 @@ import utils.SchemaValidator
 
 class KeyboardsHandler {
 
-    // TODO:
-    //  - update HTTP codes
-    //  - implement more elegance way for return responds
-
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass.name)
     private val mongoCollection = Properties.get("mongo.collection.keyboards")
 
     // Keyboards handling
 
     suspend fun addKeyboard(request: AddKeyboardRequest, pipeline: PipelineContext<Unit, ApplicationCall>) {
-        if (!SchemaValidator.isValid(GsonMapper.serialize(request), RequestSchemas.ADD_KEYBOARD_REQUEST)) {
-            val error = "Request has wrong model"
-            logger.error(error)
-            pipeline.call.respond(HttpStatusCode.NotAcceptable, error)
-        }
-        if (getKeyboard(request.parenKeyboard) == null) {
-            val error =
-                "Trying to add '${request.newKeyboard}' keyboard linked with '${request.newButton}' button to not existing '${request.parenKeyboard}' parent keyboard"
-            logger.error(error)
-            pipeline.call.respond(HttpStatusCode.Conflict, error)
-        }
-        if (getButton(request.parenKeyboard, request.newButton) != null) {
-            val error =
-                "Trying to add '${request.newKeyboard}' keyboard linked with already existing button '${request.newButton}' on '${request.parenKeyboard}' parent keyboard"
-            logger.error(error)
-            pipeline.call.respond(HttpStatusCode.Conflict, error)
-        }
-        if (getKeyboard(request.newKeyboard.name) != null) {
-            val error =
-                "Trying to add already existing '${request.newKeyboard}' keyboard linked with '${request.newButton}' button on '${request.parenKeyboard}' parent keyboard"
-            logger.error(error)
-            pipeline.call.respond(HttpStatusCode.Conflict, error)
-        }
+        if (SchemaValidator.isValid(GsonMapper.serialize(request), Schemas.ADD_KEYBOARD_REQUEST))
+            reportError("Schema is not valid", pipeline)
+
+        if (getKeyboard(request.newKeyboard.hostKeyboard) == null)
+            reportError("Host keyboard '${request.newKeyboard.hostKeyboard}' doesn't exist", pipeline)
+
+        if (getButton(request.newKeyboard.hostKeyboard, request.newButton) != null)
+            reportError("Button '${request.newButton}' already exists on host keyboard", pipeline)
+
+        if (getKeyboard(request.newKeyboard.name) != null)
+            reportError("Keyboard with name '${request.newKeyboard.name}' already exists", pipeline)
+
         addKeyboard(request.newKeyboard)
-        addButton(request.parenKeyboard, Button(request.newButton, "keyboard", keyboard = request.newKeyboard.name))
+        addButton(
+            request.newKeyboard.hostKeyboard,
+            Button(request.newButton, "keyboard", keyboard = request.newKeyboard.name)
+        )
+
         pipeline.call.respond(HttpStatusCode.OK, "Keyboard added successfully")
     }
 
     suspend fun deleteKeyboard(request: DeleteKeyboardRequest, pipeline: PipelineContext<Unit, ApplicationCall>) {
-        if (!SchemaValidator.isValid(GsonMapper.serialize(request), RequestSchemas.DELETE_KEYBOARD_REQUEST)) {
-            val error = "Request has wrong model"
-            logger.error(error)
-            pipeline.call.respond(HttpStatusCode.NotAcceptable, error)
-        }
-        val keyboard = getKeyboard(request.keyboard)
-        if (keyboard == null) {
-            val error = "'${request.keyboard}' keyboard doesn't exist"
-            logger.error(error)
-            pipeline.call.respond(HttpStatusCode.Conflict, error)
+        if (SchemaValidator.isValid(GsonMapper.serialize(request), Schemas.DELETE_KEYBOARD_REQUEST))
+            reportError("Schema is not valid", pipeline)
+
+        if (getKeyboard(request.keyboard) == null) {
+            reportError("'${request.keyboard}' keyboard doesn't exist", pipeline)
         } else {
-            deleteKeyboard(keyboard.name)
-            val parentKeyboard = getKeyboard(keyboard.parentKeyboard)
-            val linkedButton = parentKeyboard!!.buttons
+            deleteKeyboard(request.keyboard)
+            val hostKeyboard = getKeyboard(request.hostKeyboard)
+            val linkedButton = hostKeyboard!!.buttons
                 .filter { it.type == "keyboard" }
-                .first { it.keyboard == keyboard.name }
-            deleteButton(parentKeyboard.name, linkedButton.text)
+                .first { it.keyboard == request.keyboard }
+            deleteButton(hostKeyboard.name, linkedButton.text)
         }
+
         pipeline.call.respond(HttpStatusCode.OK, "Keyboard deleted successfully")
     }
-
 
     // Buttons handling
 
     suspend fun addButton(request: AddButtonRequest, pipeline: PipelineContext<Unit, ApplicationCall>) {
-        if (!SchemaValidator.isValid(GsonMapper.serialize(request), RequestSchemas.ADD_BUTTON_REQUEST)) {
-            val error = "Request has wrong model"
-            logger.error(error)
-            pipeline.call.respond(HttpStatusCode.NotAcceptable, error)
-        }
-        if (getKeyboard(request.keyboard) == null) {
-            val error = "Trying to add '${request.newButton.text}' to not existing '${request.keyboard}' keyboard"
-            logger.error(error)
-            pipeline.call.respond(HttpStatusCode.Conflict, error)
-        }
+        if (SchemaValidator.isValid(GsonMapper.serialize(request), Schemas.ADD_BUTTON_REQUEST))
+            reportError("Schema is not valid", pipeline)
+
+        if (getKeyboard(request.keyboard) == null)
+            reportError("Keyboard '${request.keyboard}' doesn't exist", pipeline)
+
         addButton(request.keyboard, request.newButton)
+
         pipeline.call.respond(HttpStatusCode.OK, "Button added successfully")
     }
 
     suspend fun deleteButton(request: DeleteButtonRequest, pipeline: PipelineContext<Unit, ApplicationCall>) {
-        if (!SchemaValidator.isValid(GsonMapper.serialize(request), RequestSchemas.DELETE_BUTTON_REQUEST)) {
-            val error = "Request has wrong model"
-            logger.error(error)
-            pipeline.call.respond(HttpStatusCode.NotAcceptable, error)
-        }
-        if (getKeyboard(request.keyboard) == null) {
-            val error =
-                "Trying to delete '${request.buttonText}' button from not existing '${request.keyboard}' keyboard"
-            logger.error(error)
-            pipeline.call.respond(HttpStatusCode.Conflict, error)
-        }
+        if (SchemaValidator.isValid(GsonMapper.serialize(request), Schemas.DELETE_BUTTON_REQUEST))
+            reportError("Schema is not valid", pipeline)
+
+        if (getKeyboard(request.keyboard) == null)
+            reportError("Keyboard '${request.keyboard}' doesn't exist", pipeline)
+
         val button = getButton(request.keyboard, request.buttonText)
-        if (button != null) {
-            if (button.type == "keyboard")
-                deleteKeyboard(button.keyboard!!)
-            deleteButton(request.keyboard, request.buttonText)
-        } else {
-            val error =
-                "Trying to delete not existing '${request.buttonText}' button from '${request.keyboard}' keyboard"
-            logger.error(error)
-            pipeline.call.respond(HttpStatusCode.Conflict, error)
-        }
+        if (button == null)
+            reportError("Button '${request.buttonText}' doesn't exist", pipeline)
+
+        if (button!!.type == "keyboard")
+            deleteKeyboard(button.keyboard!!)
+        deleteButton(request.keyboard, request.buttonText)
+
         pipeline.call.respond(HttpStatusCode.OK, "Button deleted successfully")
     }
 
-
     // Service methods
+
+    private suspend fun reportError(error: String, pipeline: PipelineContext<Unit, ApplicationCall>) {
+        logger.error(error)
+        pipeline.call.respond(HttpStatusCode.BadRequest, error)
+    }
 
     private fun addKeyboard(keyboard: Keyboard) {
         MongoClient.create(mongoCollection, keyboard, Keyboard::class.java)
