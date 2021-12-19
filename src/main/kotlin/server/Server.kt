@@ -20,8 +20,7 @@ class Server {
 
     private val server = embeddedServer(
         Netty,
-        port = Properties.get("server.port").toInt(),
-        host = Properties.get("server.host")
+        port = Properties.get("server.port").toInt()
     ) {
         install(ContentNegotiation) {
             gson()
