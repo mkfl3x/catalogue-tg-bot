@@ -7,10 +7,10 @@ import utils.Properties
 
 object KeyboardsManager {
 
-    private val keyboards: MutableList<Keyboard> = mutableListOf()
+    private var keyboards: MutableList<Keyboard> = emptyList()
 
     init {
-        uploadKeyboards()
+        reloadKeyboards()
     }
 
     fun getKeyboards(): List<Keyboard> = keyboards
@@ -26,12 +26,10 @@ object KeyboardsManager {
             .resizeKeyboard(true)
     }
 
-    private fun uploadKeyboards() {
-        keyboards.addAll(
-            MongoClient.readAllEntries(
-                Properties.get("mongo.collection.keyboards"),
-                Keyboard::class.java
-            )
+    fun reloadKeyboards() {
+        keyboards = MongoClient.readAllEntries(
+            Properties.get("mongo.collection.keyboards"),
+            Keyboard::class.java
         )
     }
 }

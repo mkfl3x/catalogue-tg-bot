@@ -30,10 +30,9 @@ class Server {
                 call.respondText("I am fine")
             }
 
-            // get("/keyboards/getAll") {
-            //     call.respond(keyboardsHandler.getAllKeyboards())
-            //     // TODO: add response
-            // }
+            get("/keyboards/getAll") {
+                keyboardsHandler.getAllKeyboards(this)
+            }
             post("/keyboards/add") {
                 keyboardsHandler.addKeyboard(call.receive(), this)
             }

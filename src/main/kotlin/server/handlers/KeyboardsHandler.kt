@@ -23,6 +23,11 @@ class KeyboardsHandler {
 
     // Keyboards handling
 
+    suspend fun getAllKeyboards(pipeline: PipelineContext<Unit, ApplicationCall>) {
+        KeyboardsManager.getKeyboards()
+        pipeline.call.respond(KeyboardsManager.getKeyboards())
+    }
+
     suspend fun addKeyboard(request: AddKeyboardRequest, pipeline: PipelineContext<Unit, ApplicationCall>) {
         if (SchemaValidator.isValid(GsonMapper.serialize(request), Schemas.ADD_KEYBOARD_REQUEST))
             reportError("Schema is not valid", pipeline)
@@ -42,6 +47,7 @@ class KeyboardsHandler {
             Button(request.newButton, "keyboard", keyboard = request.newKeyboard.name)
         )
 
+        KeyboardsManager.reloadKeyboards()
         pipeline.call.respond(HttpStatusCode.OK, "Keyboard added successfully")
     }
 
@@ -60,6 +66,7 @@ class KeyboardsHandler {
             deleteButton(hostKeyboard.name, linkedButton.text)
         }
 
+        KeyboardsManager.reloadKeyboards()
         pipeline.call.respond(HttpStatusCode.OK, "Keyboard deleted successfully")
     }
 
@@ -74,6 +81,7 @@ class KeyboardsHandler {
 
         addButton(request.keyboard, request.newButton)
 
+        KeyboardsManager.reloadKeyboards()
         pipeline.call.respond(HttpStatusCode.OK, "Button added successfully")
     }
 
@@ -92,6 +100,7 @@ class KeyboardsHandler {
             deleteKeyboard(button.keyboard!!)
         deleteButton(request.keyboard, request.buttonText)
 
+        KeyboardsManager.reloadKeyboards()
         pipeline.call.respond(HttpStatusCode.OK, "Button deleted successfully")
     }
 

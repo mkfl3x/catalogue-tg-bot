@@ -5,10 +5,11 @@ import org.bson.codecs.pojo.annotations.BsonCreator
 import org.bson.codecs.pojo.annotations.BsonProperty
 
 data class Keyboard @BsonCreator constructor(
-    @BsonProperty(value = "name")
     @SerializedName("name")
+    @BsonProperty(value = "name")
     val name: String,
 
+    // TODO: fix naming for mongo
     @SerializedName("host_keyboard")
     @BsonProperty(value = "host_keyboard")
     val hostKeyboard: String,
