@@ -7,7 +7,7 @@ import utils.Properties
 
 object KeyboardsManager {
 
-    private var keyboards: MutableList<Keyboard> = emptyList()
+    private lateinit var keyboards: List<Keyboard>
 
     init {
         reloadKeyboards()

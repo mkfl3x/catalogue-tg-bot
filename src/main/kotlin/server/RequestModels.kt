@@ -7,7 +7,7 @@ import keyboards.Keyboard
 enum class Schemas(val path: String) {
     ADD_KEYBOARD_REQUEST("json-schemas/requests/add_keyboard_request.json"),
     ADD_BUTTON_REQUEST("json-schemas/requests/add_button_request.json"),
-    DELETE_KEYBOARD_REQUEST("json-schemas/requests/add_keyboard_request.json"),
+    DELETE_KEYBOARD_REQUEST("json-schemas/requests/delete_keyboard_request.json"),
     DELETE_BUTTON_REQUEST("json-schemas/requests/delete_button_request.json"),
 
     KEYBOARD("json-schemas/models/keyboard.json"),

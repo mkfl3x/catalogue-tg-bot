@@ -19,7 +19,7 @@
       "description": "Payload data of button",
       "type": "string"
     },
-    "host_keyboard": {
+    "keyboard": {
       "description": "Link to another keyboard",
       "type": "string"
     }
@@ -36,7 +36,7 @@
       "required": [
         "text",
         "type",
-        "host_keyboard"
+        "keyboard"
       ]
     }
   ],

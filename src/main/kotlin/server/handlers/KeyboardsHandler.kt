@@ -29,7 +29,7 @@ class KeyboardsHandler {
     }
 
     suspend fun addKeyboard(request: AddKeyboardRequest, pipeline: PipelineContext<Unit, ApplicationCall>) {
-        if (SchemaValidator.isValid(GsonMapper.serialize(request), Schemas.ADD_KEYBOARD_REQUEST))
+        if (!SchemaValidator.isValid(GsonMapper.serialize(request), Schemas.ADD_KEYBOARD_REQUEST))
             reportError("Schema is not valid", pipeline)
 
         if (getKeyboard(request.newKeyboard.hostKeyboard) == null)
@@ -52,7 +52,10 @@ class KeyboardsHandler {
     }
 
     suspend fun deleteKeyboard(request: DeleteKeyboardRequest, pipeline: PipelineContext<Unit, ApplicationCall>) {
-        if (SchemaValidator.isValid(GsonMapper.serialize(request), Schemas.DELETE_KEYBOARD_REQUEST))
+        if (request.keyboard == "MainKeyboard")
+            reportError("MainKeyboard can't be deleted", pipeline)
+
+        if (!SchemaValidator.isValid(GsonMapper.serialize(request), Schemas.DELETE_KEYBOARD_REQUEST))
             reportError("Schema is not valid", pipeline)
 
         if (getKeyboard(request.keyboard) == null) {
@@ -73,7 +76,7 @@ class KeyboardsHandler {
     // Buttons handling
 
     suspend fun addButton(request: AddButtonRequest, pipeline: PipelineContext<Unit, ApplicationCall>) {
-        if (SchemaValidator.isValid(GsonMapper.serialize(request), Schemas.ADD_BUTTON_REQUEST))
+        if (!SchemaValidator.isValid(GsonMapper.serialize(request), Schemas.ADD_BUTTON_REQUEST))
             reportError("Schema is not valid", pipeline)
 
         if (getKeyboard(request.keyboard) == null)
@@ -86,7 +89,7 @@ class KeyboardsHandler {
     }
 
     suspend fun deleteButton(request: DeleteButtonRequest, pipeline: PipelineContext<Unit, ApplicationCall>) {
-        if (SchemaValidator.isValid(GsonMapper.serialize(request), Schemas.DELETE_BUTTON_REQUEST))
+        if (!SchemaValidator.isValid(GsonMapper.serialize(request), Schemas.DELETE_BUTTON_REQUEST))
             reportError("Schema is not valid", pipeline)
 
         if (getKeyboard(request.keyboard) == null)
