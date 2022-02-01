@@ -21,7 +21,7 @@
   },
   "required": [
     "name",
-    "parent_keyboard",
+    "host_keyboard",
     "buttons"
   ],
   "additionalProperties": false
