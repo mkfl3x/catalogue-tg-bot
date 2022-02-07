@@ -17,37 +17,57 @@ enum class Schemas(val path: String) {
     DETACH_KEYBOARD_REQUEST("json-schemas/requests/detach_keyboard_request.json")
 }
 
-abstract class Request(val schema: Schemas) {
+abstract class Request {
+
+    protected abstract val schema: Schemas
 
     fun validateSchema(): ProcessingReport {
-        return SchemaValidator.validate(GsonMapper.serialize(this), this.schema)
+        return SchemaValidator.validate(GsonMapper.serialize(this), schema)
     }
 }
 
 data class AddKeyboardRequest(
     @SerializedName("new_keyboard") val newKeyboard: Keyboard
-) : Request(Schemas.ADD_KEYBOARD_REQUEST)
+) : Request() {
+    override val schema: Schemas
+        get() = Schemas.ADD_KEYBOARD_REQUEST
+}
 
 data class DeleteKeyboardRequest(
     @SerializedName("keyboard_name") val keyboard: String,
     @SerializedName("recursively") val recursively: Boolean
-) : Request(Schemas.DELETE_KEYBOARD_REQUEST)
+) : Request() {
+    override val schema: Schemas
+        get() = Schemas.DELETE_KEYBOARD_REQUEST
+}
 
 data class LinkKeyboardRequest(
     @SerializedName("keyboard_name") val keyboardName: String,
     @SerializedName("keyboard_location") val keyboardLocation: KeyboardLocation
-) : Request(Schemas.LINK_KEYBOARD_REQUEST)
+) : Request() {
+    override val schema: Schemas
+        get() = Schemas.LINK_KEYBOARD_REQUEST
+}
 
 data class DetachKeyboardRequest(
     @SerializedName("keyboard_name") val keyboard: String
-) : Request(Schemas.DETACH_KEYBOARD_REQUEST)
+) : Request() {
+    override val schema: Schemas
+        get() = Schemas.DETACH_KEYBOARD_REQUEST
+}
 
 data class AddButtonRequest(
     @SerializedName("keyboard") val keyboard: String,
     @SerializedName("new_button") val newButton: Button
-) : Request(Schemas.ADD_BUTTON_REQUEST)
+) : Request() {
+    override val schema: Schemas
+        get() = Schemas.ADD_BUTTON_REQUEST
+}
 
 data class DeleteButtonRequest(
     @SerializedName("keyboard") val keyboard: String,
     @SerializedName("button_text") val buttonText: String
-) : Request(Schemas.DELETE_BUTTON_REQUEST)
+) : Request() {
+    override val schema: Schemas
+        get() = Schemas.DELETE_BUTTON_REQUEST
+}
