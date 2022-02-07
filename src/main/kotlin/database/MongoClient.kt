@@ -3,7 +3,6 @@ package database
 import com.mongodb.BasicDBObject
 import com.mongodb.MongoClient
 import com.mongodb.MongoClientSettings
-import com.mongodb.client.model.Updates.unset
 import org.bson.codecs.configuration.CodecRegistries
 import org.bson.codecs.pojo.PojoCodecProvider
 import org.bson.conversions.Bson
@@ -36,10 +35,6 @@ object MongoClient {
 
     fun <T> update(collection: String, entryType: Class<T>, condition: BasicDBObject, query: Bson) {
         database.getCollection(collection, entryType).updateOne(condition, query)
-    }
-
-    fun <T> unsetValue(collection: String, entryType: Class<T>, condition: BasicDBObject, field: String){
-        database.getCollection(collection, entryType).updateOne(condition, unset(field))
     }
 
     fun <T> read(collection: String, entryType: Class<T>, condition: BasicDBObject): T {

@@ -1,6 +1,7 @@
 package bot
 
 import com.pengrad.telegrambot.TelegramBot
+import com.pengrad.telegrambot.request.SetWebhook
 import keyboards.KeyboardStates
 import utils.Properties
 

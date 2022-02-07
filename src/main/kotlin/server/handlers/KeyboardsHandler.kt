@@ -3,20 +3,16 @@ package server.handlers
 import com.mongodb.BasicDBObject
 import database.MongoClient
 import io.ktor.http.*
-import keyboards.Button
-import keyboards.Keyboard
-import keyboards.KeyboardLocation
 import keyboards.KeyboardsManager
+import keyboards.models.Button
+import keyboards.models.Keyboard
+import keyboards.models.KeyboardLocation
 import org.bson.BsonNull
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import server.*
+import server.models.Result
 import utils.Properties
-
-data class Result(
-    val responseCode: HttpStatusCode,
-    val responseData: Any
-)
 
 class KeyboardsHandler {
 
@@ -130,6 +126,9 @@ class KeyboardsHandler {
     // Buttons
 
     fun addButton(request: AddButtonRequest): Result {
+
+        // TODO: forbid "/start" and "Back" as buttons name
+
         if (!request.validateSchema().isSuccess)
             return Result(HttpStatusCode.BadRequest, "Not valid json schema")
         if (!isKeyboardExist(request.keyboard))

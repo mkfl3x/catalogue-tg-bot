@@ -2,9 +2,9 @@ package server
 
 import com.github.fge.jsonschema.core.report.ProcessingReport
 import com.google.gson.annotations.SerializedName
-import keyboards.Button
-import keyboards.Keyboard
-import keyboards.KeyboardLocation
+import keyboards.models.Button
+import keyboards.models.Keyboard
+import keyboards.models.KeyboardLocation
 import utils.GsonMapper
 import utils.SchemaValidator
 

@@ -6,6 +6,10 @@ import io.ktor.gson.*
 import io.ktor.routing.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
+import server.Routes.buttonsRoute
+import server.Routes.keyboardRoutes
+import server.Routes.serviceRoute
+import server.Routes.telegramRoute
 import utils.Properties
 
 class Server {

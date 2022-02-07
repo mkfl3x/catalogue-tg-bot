@@ -14,9 +14,10 @@ class WebhookHandler {
 
         when (message) {
             "/start" -> {
-                bot.keyboardStates.dropState(chatId)
-                bot.actions.sendReplyKeyboard(chatId, KeyboardsManager.getKeyboardAsMarkup("MainKeyboard"))
-                bot.keyboardStates.addKeyboard(chatId, "MainKeyboard")
+                val startKeyboard = "MainKeyboard"
+                KeyboardsManager.keyboardStates.dropState(chatId)
+                bot.actions.sendReplyKeyboard(chatId, KeyboardsManager.getKeyboardAsMarkup(startKeyboard))
+                KeyboardsManager.keyboardStates.addKeyboard(chatId, startKeyboard)
                 return
             }
             "Back" -> {
@@ -29,7 +30,7 @@ class WebhookHandler {
             else -> {
                 val keyboard = KeyboardsManager.getKeyboard(bot.keyboardStates.getCurrentKeyboard(chatId))
                 if (keyboard!!.buttons.firstOrNull { it.text == message } == null)
-                    bot.actions.sendMessage(chatId, "Not recognized command")
+                    bot.actions.sendMessage(chatId, "Unknown command")
             }
         }
 

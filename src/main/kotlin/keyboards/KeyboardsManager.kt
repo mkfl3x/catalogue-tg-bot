@@ -3,15 +3,12 @@ package keyboards
 import com.pengrad.telegrambot.model.request.KeyboardButton
 import com.pengrad.telegrambot.model.request.ReplyKeyboardMarkup
 import database.MongoClient
+import keyboards.models.Keyboard
 import utils.Properties
 
 object KeyboardsManager {
 
-
-
-
-
-
+    val keyboardStates = KeyboardStates()
     private lateinit var keyboards: List<Keyboard>
 
     init {
