@@ -1,15 +1,15 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Add keyboard request",
+  "title": "Detach keyboard request",
   "type": "object",
   "properties": {
-    "new_keyboard": {
-      "description": "New keyboard",
-      "$ref": "../models/keyboard.json"
+    "keyboard_name": {
+      "description": "Name of keyboard to detach",
+      "type": "string"
     }
   },
   "required": [
-    "new_keyboard"
+    "keyboard_name"
   ],
   "additionalProperties": false
 }

@@ -7,9 +7,10 @@
       "description": "Keyboard name/identifier",
       "type": "string"
     },
-    "host_keyboard": {
-      "description": "Keyboard which contains current one",
-      "type": "string"
+    "keyboard_location": {
+      "description": "Keyboard location",
+      "type": "object",
+      "$ref": "../models/keyboard_location.json"
     },
     "buttons": {
       "description": "Keyboard buttons",
@@ -21,7 +22,7 @@
   },
   "required": [
     "name",
-    "host_keyboard",
+    "keyboard_location",
     "buttons"
   ],
   "additionalProperties": false
