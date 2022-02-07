@@ -31,4 +31,11 @@ class KeyboardStates {
     fun dropState(chatId: Long) {
         states.remove(chatId)
     }
+
+    // delete removed keyboard from all states
+    fun delete(keyboard: String) {
+        states.values.forEach { list ->
+            list.removeIf { it.name == keyboard }
+        }
+    }
 }

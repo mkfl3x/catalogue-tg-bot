@@ -68,12 +68,22 @@ class KeyboardsHandler {
             deleteButton(keyboard.keyboardLocation.hostKeyboard, keyboard.keyboardLocation.linkButton)
 
         deleteKeyboard(keyboard!!.name)
-        // TODO: delete from states
+        KeyboardsManager.keyboardStates.delete(keyboard.name)
 
         if (request.recursively) {
-            // TODO: delete all nested buttons and keyboards
+            keyboard.buttons.forEach {
+                if (it.type == "payload")
+                    deleteButton(keyboard.name, it.text)
+                if (it.type == "keyboard")
+                    deleteKeyboard(request.keyboard, true)
+            }
         } else {
-            // TODO: delete nested buttons, detach keyboards
+            keyboard.buttons.forEach {
+                if (it.type == "payload")
+                    deleteButton(keyboard.name, it.text)
+                if (it.type == "keyboard")
+                    setKeyboardLocation(keyboard.name, null)
+            }
         }
 
         KeyboardsManager.reloadKeyboards()
@@ -152,13 +162,10 @@ class KeyboardsHandler {
         val button = getButton(request.keyboard, request.buttonText)
             ?: return Result(HttpStatusCode.OK, "Button '${request.buttonText}' doesn't exist")
 
-        if (button.type == "keyboard") {
-            // TODO: detach keyboard
-        }
+        if (button.type == "keyboard")
+            setKeyboardLocation(request.keyboard, null)
         deleteButton(request.keyboard, request.buttonText)
 
-        // if button has keyboard type - detach keyboard
-        // if  remove all nested keyboards
         KeyboardsManager.reloadKeyboards()
         return Result(HttpStatusCode.OK, "Button deleted successfully")
     }
@@ -192,6 +199,20 @@ class KeyboardsHandler {
 
     private fun deleteKeyboard(keyboardName: String) {
         MongoClient.delete(mongoCollection, BasicDBObject("name", keyboardName))
+    }
+
+    private fun deleteKeyboard(keyboardName: String, recursively: Boolean) {
+        if (recursively) {
+            val keyboard = getKeyboard(keyboardName)
+            keyboard!!.buttons.forEach {
+                if (it.type == "payload")
+                    deleteButton(keyboard.name, it.text)
+                if (it.type == "keyboard") {
+                    deleteKeyboard(keyboard.name)
+                    deleteKeyboard(keyboard.name, true)
+                }
+            }
+        }
     }
 
     private fun deleteButton(keyboard: String, buttonText: String) {
