@@ -11,8 +11,7 @@ object SchemaValidator {
 
     fun validate(json: String, schema: Schemas): ProcessingReport {
         val schemaPath = javaClass.classLoader.getResource(schema.path).toURI().toString()
-        val result = schemaFactory.getJsonSchema(schemaPath)
+        return schemaFactory.getJsonSchema(schemaPath)
             .validate(JsonLoader.fromString(json))
-        return result
     }
 }

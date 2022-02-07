@@ -1,22 +1,24 @@
 package keyboards
 
+import keyboards.models.Keyboard
+
 // TODO: should be refactored
 class KeyboardStates {
 
-    // stores sent keyboards. key: chatId; value: list of keyboard names
-    private val states = mutableMapOf<Long, MutableList<String>>()
+    // stores sent keyboards. key: chatId; value: list of keyboards
+    private val states = mutableMapOf<Long, MutableList<Keyboard>>()
 
     // add keyboard to list of sent keyboards
-    fun addKeyboard(chatId: Long, state: String) {
+    fun addKeyboard(chatId: Long, keyboard: Keyboard) {
         if (states[chatId] == null) {
             states[chatId] = mutableListOf()
         }
-        states[chatId]!!.add(state)
+        states[chatId]!!.add(keyboard)
     }
 
     // returns previous keyboard and remove last one
-    fun getPreviousKeyboard(chatId: Long): String {
-        if (getCurrentKeyboard(chatId) == "MainKeyboard")
+    fun getPreviousKeyboard(chatId: Long): Keyboard {
+        if (getCurrentKeyboard(chatId).name == "MainKeyboard")
             return getCurrentKeyboard(chatId)
         states[chatId]!!.removeLast()
         return getCurrentKeyboard(chatId)

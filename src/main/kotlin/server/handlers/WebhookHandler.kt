@@ -14,37 +14,37 @@ class WebhookHandler {
 
         when (message) {
             "/start" -> {
-                val startKeyboard = "MainKeyboard"
+                val startKeyboard = KeyboardsManager.getKeyboard("MainKeyboard")
                 KeyboardsManager.keyboardStates.dropState(chatId)
-                bot.actions.sendReplyKeyboard(chatId, KeyboardsManager.getKeyboardAsMarkup(startKeyboard))
+                bot.actions.sendReplyKeyboard(chatId, startKeyboard!!.toMarkup())
                 KeyboardsManager.keyboardStates.addKeyboard(chatId, startKeyboard)
                 return
             }
             "Back" -> {
                 bot.actions.sendReplyKeyboard(
                     chatId,
-                    KeyboardsManager.getKeyboardAsMarkup(bot.keyboardStates.getPreviousKeyboard(chatId))
+                    KeyboardsManager.keyboardStates.getPreviousKeyboard(chatId).toMarkup()
                 )
                 return
             }
             else -> {
-                val keyboard = KeyboardsManager.getKeyboard(bot.keyboardStates.getCurrentKeyboard(chatId))
-                if (keyboard!!.buttons.firstOrNull { it.text == message } == null)
+                val keyboard = KeyboardsManager.keyboardStates.getCurrentKeyboard(chatId)
+                if (keyboard.buttons.firstOrNull { it.text == message } == null)
                     bot.actions.sendMessage(chatId, "Unknown command")
             }
         }
 
-        val currentKeyboard = KeyboardsManager.getKeyboard(bot.keyboardStates.getCurrentKeyboard(chatId))
-        val currentKeyboardButton = currentKeyboard!!.buttons.firstOrNull { it.text == message }
+        val currentKeyboard = KeyboardsManager.keyboardStates.getCurrentKeyboard(chatId)
+        val currentKeyboardButton = currentKeyboard.buttons.firstOrNull { it.text == message }
         if (currentKeyboardButton != null) {
             when (currentKeyboardButton.type) {
                 "payload" -> {
                     bot.actions.sendMessage(chatId, currentKeyboardButton.payload!!)
                 }
                 "keyboard" -> {
-                    val keyboard = KeyboardsManager.getKeyboardAsMarkup(currentKeyboardButton.keyboard!!)
-                    bot.actions.sendReplyKeyboard(chatId, keyboard)
-                    bot.keyboardStates.addKeyboard(chatId, currentKeyboardButton.keyboard)
+                    val keyboard = KeyboardsManager.getKeyboard(currentKeyboardButton.keyboard!!)
+                    bot.actions.sendReplyKeyboard(chatId, keyboard!!.toMarkup())
+                    KeyboardsManager.keyboardStates.addKeyboard(chatId, keyboard)
                 }
             }
         } else {
