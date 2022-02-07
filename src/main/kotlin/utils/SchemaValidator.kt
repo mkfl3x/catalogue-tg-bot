@@ -1,6 +1,7 @@
 package utils
 
 import com.github.fge.jackson.JsonLoader
+import com.github.fge.jsonschema.core.report.ProcessingReport
 import com.github.fge.jsonschema.main.JsonSchemaFactory
 import server.Schemas
 
@@ -8,10 +9,9 @@ object SchemaValidator {
 
     private val schemaFactory = JsonSchemaFactory.byDefault()
 
-    fun isValid(json: String, schema: Schemas): Boolean {
+    fun validate(json: String, schema: Schemas): ProcessingReport {
         val schemaPath = javaClass.classLoader.getResource(schema.path).toURI().toString()
-        val report = schemaFactory.getJsonSchema(schemaPath)
+        return schemaFactory.getJsonSchema(schemaPath)
             .validate(JsonLoader.fromString(json))
-        return report.isSuccess
     }
 }

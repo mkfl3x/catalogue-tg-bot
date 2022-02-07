@@ -2,235 +2,181 @@ package server.handlers
 
 import com.mongodb.BasicDBObject
 import database.MongoClient
-import io.ktor.application.*
 import io.ktor.http.*
-import io.ktor.response.*
-import io.ktor.util.pipeline.*
 import keyboards.Button
 import keyboards.Keyboard
+import keyboards.KeyboardLocation
 import keyboards.KeyboardsManager
 import org.bson.BsonNull
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import server.*
-import utils.GsonMapper
 import utils.Properties
-import utils.SchemaValidator
+
+data class Result(
+    val responseCode: HttpStatusCode,
+    val responseData: Any
+)
 
 class KeyboardsHandler {
 
-    // TODO: add returns after errorReport
+    // TODO: add logging
 
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass.name)
     private val mongoCollection = Properties.get("mongo.collection.keyboards")
 
-    // Keyboards handling
+    // Keyboards
 
-    suspend fun getAllKeyboards(pipeline: PipelineContext<Unit, ApplicationCall>) {
-        KeyboardsManager.getKeyboards()
-        pipeline.call.respond(KeyboardsManager.getKeyboards())
+    fun getKeyboards(filter: String): Result {
+        val keyboards = when (filter) {
+            "all" -> KeyboardsManager.getKeyboards()
+            "detached" -> KeyboardsManager.getKeyboards().filter { it.keyboardLocation == null }.toList()
+            else -> return Result(HttpStatusCode.BadRequest, "Unknown '$filter' filter parameter")
+        }
+        return Result(HttpStatusCode.OK, keyboards)
     }
 
-    suspend fun addKeyboard(request: AddKeyboardRequest, pipeline: PipelineContext<Unit, ApplicationCall>) {
-        // TODO: support 'nullable' fields in schema
-        // TODO: print results of validation
-        // if (!SchemaValidator.isValid(GsonMapper.serialize(request), Schemas.ADD_KEYBOARD_REQUEST)) {
-        //     reportError("Schema is not valid", pipeline)
-        //     return
-        // }
+    fun addKeyboard(request: AddKeyboardRequest): Result {
+        if (!request.validateSchema().isSuccess)
+            return Result(HttpStatusCode.BadRequest, "Not valid json schema")
+        if (isKeyboardExist(request.newKeyboard.name))
+            return Result(HttpStatusCode.OK, "Keyboard '${request.newKeyboard.name}' already exists")
 
-        if (getKeyboard(request.newKeyboard.name) != null) {
-            reportError("Keyboard with name '${request.newKeyboard.name}' already exists", pipeline)
-            return
-        }
-
-        if (request.newKeyboard.keyboardLocation != null) {
-            val location = request.newKeyboard.keyboardLocation
-            if (getKeyboard(location.hostKeyboard) == null) {
-                reportError("Host keyboard '${location.hostKeyboard}' doesn't exist", pipeline)
-                return
-            }
-            if (getButton(
-                    location.hostKeyboard,
-                    location.linkButton
-                ) != null
-            ) { // TODO: add method getButtons (of some keyboard)
-                reportError("Button '${location.linkButton}' already exists on host keyboard", pipeline)
-                return
-            }
-
+        val location = request.newKeyboard.keyboardLocation
+        if (location != null) {
+            if (!isKeyboardExist(location.hostKeyboard))
+                return Result(HttpStatusCode.OK, "Keyboard '${location.hostKeyboard}' doesn't exist")
+            if (isButtonExist(location.hostKeyboard, location.linkButton))
+                return Result(HttpStatusCode.OK, "Button '${location.linkButton}' already exists")
             addButton(
                 location.hostKeyboard,
                 Button(location.linkButton, "keyboard", keyboard = request.newKeyboard.name)
             )
         }
-
         addKeyboard(request.newKeyboard)
 
         KeyboardsManager.reloadKeyboards()
-        pipeline.call.respond(HttpStatusCode.OK, "Keyboard added successfully")
+        return Result(HttpStatusCode.OK, "Keyboard successfully added")
     }
 
-    suspend fun deleteKeyboard(request: DeleteKeyboardRequest, pipeline: PipelineContext<Unit, ApplicationCall>) {
-        if (request.keyboard == "MainKeyboard") {
-            reportError("MainKeyboard can't be deleted", pipeline)
-            return
-        }
+    fun deleteKeyboard(request: DeleteKeyboardRequest): Result {
+        if (!request.validateSchema().isSuccess)
+            return Result(HttpStatusCode.BadRequest, "Not valid json schema")
+        if (request.keyboard == "MainKeyboard") // TODO: move to constants
+            return Result(HttpStatusCode.BadRequest, "'MainKeyboard' can't be deleted")
+        if (!isKeyboardExist(request.keyboard))
+            return Result(HttpStatusCode.OK, "'${request.keyboard}' keyboard doesn't exist")
 
-        if (!SchemaValidator.isValid(GsonMapper.serialize(request), Schemas.DELETE_KEYBOARD_REQUEST)) {
-            reportError("Schema is not valid", pipeline)
-            return
-        }
+        val keyboard = KeyboardsManager.getKeyboard(request.keyboard)
+        if (keyboard?.keyboardLocation != null)
+            deleteButton(keyboard.keyboardLocation.hostKeyboard, keyboard.keyboardLocation.linkButton)
 
-        val keyboard = getKeyboard(request.keyboard)
-        if (keyboard == null) {
-            reportError("'${request.keyboard}' keyboard doesn't exist", pipeline)
-            return
+        deleteKeyboard(keyboard!!.name)
+        // TODO: delete from states
+
+        if (request.recursively) {
+            // TODO: delete all nested buttons and keyboards
         } else {
-
-
-            // detach nested keyboards
-
-
-            if (keyboard.keyboardLocation != null)
-                deleteButton(keyboard.keyboardLocation.hostKeyboard, keyboard.keyboardLocation.linkButton)
-            deleteKeyboard(keyboard.name)
+            // TODO: delete nested buttons, detach keyboards
         }
 
-        // TODO: delete keyboard from states
-        // TODO: set as detached (empty host)
-        // TODO: delete all nested keyboards
         KeyboardsManager.reloadKeyboards()
-        pipeline.call.respond(HttpStatusCode.OK, "Keyboard deleted successfully")
+        return Result(HttpStatusCode.OK, "Keyboard successfully deleted")
     }
 
-    suspend fun linkKeyboard(request: LinkKeyboardRequest, pipeline: PipelineContext<Unit, ApplicationCall>) {
-        if (request.keyboardName == "MainKeyboard") {
-            reportError("MainKeyboard can't be re-linked", pipeline)
-            return
-        }
-
-        if (getKeyboard(request.keyboardName) == null) {
-            reportError("${request.keyboardName} doesn't exist", pipeline)
-            return
-        }
-
-        if (getKeyboard(request.keyboardName)!!.keyboardLocation != null) {
-            reportError("Can't relink linked keyboard", pipeline)
-            return
-        }
-
-        if (!SchemaValidator.isValid(GsonMapper.serialize(request), Schemas.LINK_KEYBOARD_REQUEST)) {
-            reportError("Schema is not valid", pipeline)
-            return
-        }
-
-        val hostKeyboard = getKeyboard(request.keyboardLocation.hostKeyboard)
-        if (hostKeyboard == null) {
-            reportError("Host keyboard '${request.keyboardLocation.hostKeyboard}' doesn't exist", pipeline)
-            return
-        }
-
-        if (hostKeyboard.buttons.firstOrNull { it.text == request.keyboardLocation.linkButton } != null) {
-            reportError("Button '${request.keyboardLocation.linkButton}' already exists on host keyboard", pipeline)
-            return
-        }
+    fun linkKeyboard(request: LinkKeyboardRequest): Result {
+        if (!request.validateSchema().isSuccess)
+            return Result(HttpStatusCode.BadRequest, "Not valid json schema")
+        if (request.keyboardName == "MainKeyboard") // TODO: move to constants
+            return Result(HttpStatusCode.BadRequest, "'MainKeyboard' can't be linked")
+        if (!isKeyboardExist(request.keyboardName))
+            return Result(HttpStatusCode.OK, "Keyboard '${request.keyboardName}' doesn't exist")
+        if (getKeyboard(request.keyboardName)?.keyboardLocation != null) // TODO: add ability to relink
+            return Result(HttpStatusCode.BadRequest, "Keyboard '${request.keyboardName}' already linked")
+        if (!isKeyboardExist(request.keyboardLocation.hostKeyboard))
+            return Result(HttpStatusCode.OK, "Keyboard '${request.keyboardLocation.hostKeyboard}' doesn't exist")
+        if (isButtonExist(request.keyboardLocation.hostKeyboard, request.keyboardLocation.linkButton))
+            return Result(HttpStatusCode.OK, "Button '${request.keyboardLocation.linkButton}' already exists")
 
         addButton(
             request.keyboardLocation.hostKeyboard,
             Button(request.keyboardLocation.linkButton, "keyboard", keyboard = request.keyboardName)
         )
-        MongoClient.update(
-            mongoCollection,
-            Keyboard::class.java,
-            BasicDBObject("name", request.keyboardName),
-            BasicDBObject("\$set", BasicDBObject("keyboard_location", request.keyboardLocation))
-        )
+        setKeyboardLocation(request.keyboardName, request.keyboardLocation)
 
         KeyboardsManager.reloadKeyboards()
-        pipeline.call.respond(HttpStatusCode.OK, "Keyboard linked successfully")
+        return Result(HttpStatusCode.OK, "Keyboard successfully linked")
     }
 
-    suspend fun detachKeyboard(request: DetachKeyboardRequest, pipeline: PipelineContext<Unit, ApplicationCall>) {
-        if (request.keyboard == "MainKeyboard") {
-            reportError("MainKeyboard can't be detached", pipeline)
-            return
-        }
+    fun detachKeyboard(request: DetachKeyboardRequest): Result {
+        if (!request.validateSchema().isSuccess)
+            return Result(HttpStatusCode.BadRequest, "Not valid json schema")
+        if (request.keyboard == "MainKeyboard") // TODO: move to constants
+            return Result(HttpStatusCode.BadRequest, "'MainKeyboard' can't be detached")
+        if (!isKeyboardExist(request.keyboard))
+            return Result(HttpStatusCode.OK, "Keyboard '${request.keyboard}' doesn't exist")
 
-        if (getKeyboard(request.keyboard) == null) {
-            reportError("${request.keyboard} doesn't exist", pipeline)
-            return
-        }
+        val keyboard = getKeyboard(request.keyboard)
+        if (keyboard?.keyboardLocation == null)
+            return Result(HttpStatusCode.BadRequest, "Keyboard '${request.keyboard}' already detached")
 
-        val location = getKeyboard(request.keyboard)!!.keyboardLocation
-        if (location == null) {
-            reportError("Keyboard already detached", pipeline)
-            return
-        }
-
-        if (!SchemaValidator.isValid(GsonMapper.serialize(request), Schemas.DETACH_KEYBOARD_REQUEST)) {
-            reportError("Schema is not valid", pipeline)
-            return
-        }
-
-        deleteButton(location.hostKeyboard, location.linkButton)
-        MongoClient.update(
-            mongoCollection,
-            Keyboard::class.java,
-            BasicDBObject("name", request.keyboard),
-            BasicDBObject("\$unset", BasicDBObject("keyboard_location", BsonNull()))
-        )
+        deleteButton(keyboard.keyboardLocation.hostKeyboard, keyboard.keyboardLocation.linkButton)
+        setKeyboardLocation(keyboard.name, null)
 
         KeyboardsManager.reloadKeyboards()
-        pipeline.call.respond(HttpStatusCode.OK, "Keyboard detached successfully")
+        return Result(HttpStatusCode.OK, "Keyboard successfully detached")
     }
 
+    // Buttons
 
-// Buttons handling
-
-    suspend fun addButton(request: AddButtonRequest, pipeline: PipelineContext<Unit, ApplicationCall>) {
-        if (!SchemaValidator.isValid(GsonMapper.serialize(request), Schemas.ADD_BUTTON_REQUEST))
-            reportError("Schema is not valid", pipeline)
-
-        if (request.keyboard == request.newButton.keyboard)
-            reportError("Schema is not valid", pipeline)
-
-        if (getKeyboard(request.keyboard) == null)
-            reportError("Keyboard '${request.keyboard}' doesn't exist", pipeline)
+    fun addButton(request: AddButtonRequest): Result {
+        if (!request.validateSchema().isSuccess)
+            return Result(HttpStatusCode.BadRequest, "Not valid json schema")
+        if (!isKeyboardExist(request.keyboard))
+            return Result(HttpStatusCode.OK, "Keyboard '${request.keyboard}' doesn't exist")
+        if (isButtonExist(request.keyboard, request.newButton.text))
+            return Result(HttpStatusCode.OK, "Button '${request.newButton.text}' already exists")
+        // TODO: add check for closure
 
         addButton(request.keyboard, request.newButton)
 
         KeyboardsManager.reloadKeyboards()
-        pipeline.call.respond(HttpStatusCode.OK, "Button added successfully")
+        return Result(HttpStatusCode.OK, "Button successfully added")
     }
 
-    suspend fun deleteButton(request: DeleteButtonRequest, pipeline: PipelineContext<Unit, ApplicationCall>) {
-        if (!SchemaValidator.isValid(GsonMapper.serialize(request), Schemas.DELETE_BUTTON_REQUEST))
-            reportError("Schema is not valid", pipeline)
-
-        if (getKeyboard(request.keyboard) == null)
-            reportError("Keyboard '${request.keyboard}' doesn't exist", pipeline)
+    fun deleteButton(request: DeleteButtonRequest): Result {
+        if (!request.validateSchema().isSuccess)
+            return Result(HttpStatusCode.BadRequest, "Not valid json schema")
+        if (!isKeyboardExist(request.keyboard))
+            return Result(HttpStatusCode.OK, "Keyboard '${request.keyboard}' doesn't exist")
 
         val button = getButton(request.keyboard, request.buttonText)
-        if (button == null)
-            reportError("Button '${request.buttonText}' doesn't exist", pipeline)
+            ?: return Result(HttpStatusCode.OK, "Button '${request.buttonText}' doesn't exist")
 
-        if (button!!.type == "keyboard")
-            deleteKeyboard(button.keyboard!!)
+        if (button.type == "keyboard") {
+            // TODO: detach keyboard
+        }
         deleteButton(request.keyboard, request.buttonText)
 
         // if button has keyboard type - detach keyboard
         // if  remove all nested keyboards
         KeyboardsManager.reloadKeyboards()
-        pipeline.call.respond(HttpStatusCode.OK, "Button deleted successfully")
+        return Result(HttpStatusCode.OK, "Button deleted successfully")
     }
 
-// Service methods
+    // Service
 
-    private suspend fun reportError(error: String, pipeline: PipelineContext<Unit, ApplicationCall>) {
-        logger.error(error)
-        pipeline.call.respond(HttpStatusCode.BadRequest, error)
-    }
+    private fun getKeyboard(keyboardName: String): Keyboard? =
+        KeyboardsManager.getKeyboard(keyboardName)
+
+    private fun getButton(keyboardName: String, buttonText: String): Button? =
+        getKeyboard(keyboardName)?.buttons?.firstOrNull { it.text == buttonText }
+
+    private fun isKeyboardExist(keyboard: String): Boolean =
+        KeyboardsManager.getKeyboard(keyboard) != null
+
+    private fun isButtonExist(keyboard: String, button: String): Boolean =
+        KeyboardsManager.getKeyboard(keyboard)!!.buttons.firstOrNull { it.text == button } != null
 
     private fun addKeyboard(keyboard: Keyboard) {
         MongoClient.create(mongoCollection, keyboard, Keyboard::class.java)
@@ -245,6 +191,10 @@ class KeyboardsHandler {
         )
     }
 
+    private fun deleteKeyboard(keyboardName: String) {
+        MongoClient.delete(mongoCollection, BasicDBObject("name", keyboardName))
+    }
+
     private fun deleteButton(keyboard: String, buttonText: String) {
         MongoClient.update(
             mongoCollection,
@@ -254,24 +204,11 @@ class KeyboardsHandler {
         )
     }
 
-    private fun getKeyboard(keyboardName: String): Keyboard? =
-        KeyboardsManager.getKeyboard(keyboardName)
-
-    private fun getButton(keyboardName: String, buttonText: String): Button? =
-        getKeyboard(keyboardName)?.buttons?.firstOrNull { it.text == buttonText }
-
-    private fun deleteKeyboard(keyboard: Keyboard, recursively: Boolean) {
-        if (!recursively) {
-            // TODO: detach nested keyboards and buttons
-            MongoClient.delete(mongoCollection, BasicDBObject("name", keyboard.name))
-        } else {
-            keyboard.buttons
-                .filter { it.type == "keyboard" }
-                .forEach { deleteKeyboard(getKeyboard(it.keyboard!!)!!, true) }
-        }
-    }
-
-    private fun deleteKeyboard(keyboardName: String) {
-        MongoClient.delete(mongoCollection, BasicDBObject("name", keyboardName))
+    private fun setKeyboardLocation(keyboard: String, location: KeyboardLocation?) {
+        val query = if (location != null)
+            BasicDBObject("\$set", BasicDBObject("keyboard_location", location))
+        else
+            BasicDBObject("\$unset", BasicDBObject("keyboard_location", BsonNull()))
+        MongoClient.update(mongoCollection, Keyboard::class.java, BasicDBObject("name", keyboard), query)
     }
 }

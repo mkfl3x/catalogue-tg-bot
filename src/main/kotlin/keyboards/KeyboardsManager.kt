@@ -7,6 +7,11 @@ import utils.Properties
 
 object KeyboardsManager {
 
+
+
+
+
+
     private lateinit var keyboards: List<Keyboard>
 
     init {
