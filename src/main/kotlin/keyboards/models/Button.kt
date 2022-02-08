@@ -6,6 +6,11 @@ import org.bson.codecs.pojo.annotations.BsonProperty
 
 data class Button @BsonCreator constructor(
 
+    @SerializedName("host_keyboard")
+    @param:BsonProperty("host_keyboard")
+    @field:BsonProperty("host_keyboard")
+    val hostKeyboard: String,
+
     @SerializedName("text")
     @param:BsonProperty("text")
     @field:BsonProperty("text")

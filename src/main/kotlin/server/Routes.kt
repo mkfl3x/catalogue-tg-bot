@@ -27,10 +27,10 @@ object Routes {
             call.respond(result.responseCode, result.responseData)
         }
 
-        post("$section/detach") {
-            val result = keyboardsHandler.detachKeyboard(call.receive())
-            call.respond(result.responseCode, result.responseData)
-        }
+        // post("$section/detach") {
+        //     val result = keyboardsHandler.detachKeyboard(call.receive())
+        //     call.respond(result.responseCode, result.responseData)
+        // }
 
         post("$section/link") {
             val result = keyboardsHandler.linkKeyboard(call.receive())

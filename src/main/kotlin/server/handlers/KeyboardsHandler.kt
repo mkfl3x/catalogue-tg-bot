@@ -14,14 +14,27 @@ import server.*
 import server.models.Result
 import utils.Properties
 
-class KeyboardsHandler {
+enum class ReservedString(val text: String) {
+    START("/start"),
+    BACK("Back"),
+    MAIN_KEYBOARD("MainKeyboard")
+}
 
-    // TODO: add logging
+enum class Error(cause: String, httpCode: HttpStatusCode = HttpStatusCode.OK) {
+    NOT_VALID_JSON_SCHEMA("Request body is not valid", HttpStatusCode.BadRequest),
+    KEYBOARD_ALREADY_EXISTS("Keyboard '%s' already exists"),
+    KEYBOARD_DOES_NOT_EXIST("Keyboard '%s' doesn't exists"),
+    BUTTON_DOES_NOT_EXIST("Button '%s' doesn't exist"),
+    BUTTON_ALREADY_EXISTS("Button '%s' already exists");
+}
+
+class KeyboardsHandler {
 
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass.name)
     private val mongoCollection = Properties.get("mongo.collection.keyboards")
 
-    // Keyboards
+
+    // Keyboards handling
 
     fun getKeyboards(filter: String): Result {
         val keyboards = when (filter) {
@@ -33,35 +46,22 @@ class KeyboardsHandler {
     }
 
     fun addKeyboard(request: AddKeyboardRequest): Result {
-        if (!request.validateSchema().isSuccess)
-            return Result(HttpStatusCode.BadRequest, "Not valid json schema")
-        if (isKeyboardExist(request.newKeyboard.name))
-            return Result(HttpStatusCode.OK, "Keyboard '${request.newKeyboard.name}' already exists")
-
-        val location = request.newKeyboard.keyboardLocation
-        if (location != null) {
-            if (!isKeyboardExist(location.hostKeyboard))
-                return Result(HttpStatusCode.OK, "Keyboard '${location.hostKeyboard}' doesn't exist")
-            if (isButtonExist(location.hostKeyboard, location.linkButton))
-                return Result(HttpStatusCode.OK, "Button '${location.linkButton}' already exists")
-            addButton(
-                location.hostKeyboard,
-                Button(location.linkButton, "keyboard", keyboard = request.newKeyboard.name)
-            )
+        validateSchema(request)
+        validateKeyboardAddition(request.newKeyboard)
+        request.newKeyboard.keyboardLocation?.let {
+            // TODO: !!! critical importance
+            // addButton(it.hostKeyboard, Button(it.linkButton, "keyboard", keyboard = request.newKeyboard.name))
         }
         addKeyboard(request.newKeyboard)
 
         KeyboardsManager.reloadKeyboards()
+
         return Result(HttpStatusCode.OK, "Keyboard successfully added")
     }
 
     fun deleteKeyboard(request: DeleteKeyboardRequest): Result {
-        if (!request.validateSchema().isSuccess)
-            return Result(HttpStatusCode.BadRequest, "Not valid json schema")
-        if (request.keyboard == "MainKeyboard") // TODO: move to constants
-            return Result(HttpStatusCode.BadRequest, "'MainKeyboard' can't be deleted")
-        if (!isKeyboardExist(request.keyboard))
-            return Result(HttpStatusCode.OK, "'${request.keyboard}' keyboard doesn't exist")
+        validateSchema(request)
+        validateKeyboardDeletion(request)
 
         val keyboard = KeyboardsManager.getKeyboard(request.keyboard)
         if (keyboard?.keyboardLocation != null)
@@ -91,77 +91,57 @@ class KeyboardsHandler {
     }
 
     fun linkKeyboard(request: LinkKeyboardRequest): Result {
-        if (!request.validateSchema().isSuccess)
-            return Result(HttpStatusCode.BadRequest, "Not valid json schema")
-        if (request.keyboardName == "MainKeyboard") // TODO: move to constants
-            return Result(HttpStatusCode.BadRequest, "'MainKeyboard' can't be linked")
-        if (!isKeyboardExist(request.keyboardName))
-            return Result(HttpStatusCode.OK, "Keyboard '${request.keyboardName}' doesn't exist")
-        if (getKeyboard(request.keyboardName)?.keyboardLocation != null) // TODO: add ability to relink
-            return Result(HttpStatusCode.BadRequest, "Keyboard '${request.keyboardName}' already linked")
-        if (!isKeyboardExist(request.keyboardLocation.hostKeyboard))
-            return Result(HttpStatusCode.OK, "Keyboard '${request.keyboardLocation.hostKeyboard}' doesn't exist")
-        if (isButtonExist(request.keyboardLocation.hostKeyboard, request.keyboardLocation.linkButton))
-            return Result(HttpStatusCode.OK, "Button '${request.keyboardLocation.linkButton}' already exists")
+        validateSchema(request)
+        validateKeyboardLinking(request)
 
-        addButton(
-            request.keyboardLocation.hostKeyboard,
-            Button(request.keyboardLocation.linkButton, "keyboard", keyboard = request.keyboardName)
-        )
+        // TODO: !!! critical importance
+        // addButton(
+        //     request.keyboardLocation.hostKeyboard,
+        //     Button(request.keyboardLocation.linkButton, "keyboard", keyboard = request.keyboardName)
+        // )
         setKeyboardLocation(request.keyboardName, request.keyboardLocation)
 
         KeyboardsManager.reloadKeyboards()
         return Result(HttpStatusCode.OK, "Keyboard successfully linked")
     }
 
-    fun detachKeyboard(request: DetachKeyboardRequest): Result {
-        if (!request.validateSchema().isSuccess)
-            return Result(HttpStatusCode.BadRequest, "Not valid json schema")
-        if (request.keyboard == "MainKeyboard") // TODO: move to constants
-            return Result(HttpStatusCode.BadRequest, "'MainKeyboard' can't be detached")
-        if (!isKeyboardExist(request.keyboard))
-            return Result(HttpStatusCode.OK, "Keyboard '${request.keyboard}' doesn't exist")
+    /* TODO: probably it's not necessary
+   fun detachKeyboard(request: DetachKeyboardRequest): Result {
+       if (!request.validateSchema().isSuccess)
+           return Result(HttpStatusCode.BadRequest, "Not valid json schema")
+       if (request.keyboard == "MainKeyboard") // TODO: move to constants
+           return Result(HttpStatusCode.BadRequest, "'MainKeyboard' can't be detached")
+       if (!isKeyboardExist(request.keyboard))
+           return Result(HttpStatusCode.OK, "Keyboard '${request.keyboard}' doesn't exist")
 
-        val keyboard = getKeyboard(request.keyboard)
-        if (keyboard?.keyboardLocation == null)
-            return Result(HttpStatusCode.BadRequest, "Keyboard '${request.keyboard}' already detached")
+       val keyboard = getKeyboard(request.keyboard)
+       if (keyboard?.keyboardLocation == null)
+           return Result(HttpStatusCode.BadRequest, "Keyboard '${request.keyboard}' already detached")
 
-        deleteButton(keyboard.keyboardLocation.hostKeyboard, keyboard.keyboardLocation.linkButton)
-        setKeyboardLocation(keyboard.name, null)
+       deleteButton(keyboard.keyboardLocation.hostKeyboard, keyboard.keyboardLocation.linkButton)
+       setKeyboardLocation(keyboard.name, null)
 
-        KeyboardsManager.reloadKeyboards()
-        return Result(HttpStatusCode.OK, "Keyboard successfully detached")
-    }
+       KeyboardsManager.reloadKeyboards()
+       return Result(HttpStatusCode.OK, "Keyboard successfully detached")
+   } */
 
-    // Buttons
+
+    // Buttons handling
 
     fun addButton(request: AddButtonRequest): Result {
-
-        // TODO: forbid "/start" and "Back" as buttons name
-
-        if (!request.validateSchema().isSuccess)
-            return Result(HttpStatusCode.BadRequest, "Not valid json schema")
-        if (!isKeyboardExist(request.keyboard))
-            return Result(HttpStatusCode.OK, "Keyboard '${request.keyboard}' doesn't exist")
-        if (isButtonExist(request.keyboard, request.newButton.text))
-            return Result(HttpStatusCode.OK, "Button '${request.newButton.text}' already exists")
-        // TODO: add check for closure
-
-        addButton(request.keyboard, request.newButton)
+        validateSchema(request)
+        validateButtonAddition(request.newButton)
+        addButton(request.newButton)
 
         KeyboardsManager.reloadKeyboards()
         return Result(HttpStatusCode.OK, "Button successfully added")
     }
 
     fun deleteButton(request: DeleteButtonRequest): Result {
-        if (!request.validateSchema().isSuccess)
-            return Result(HttpStatusCode.BadRequest, "Not valid json schema")
-        if (!isKeyboardExist(request.keyboard))
-            return Result(HttpStatusCode.OK, "Keyboard '${request.keyboard}' doesn't exist")
+        validateSchema(request)
+        validateButtonDeletion(request)
 
-        val button = getButton(request.keyboard, request.buttonText)
-            ?: return Result(HttpStatusCode.OK, "Button '${request.buttonText}' doesn't exist")
-
+        val button = getButton(request.keyboard, request.buttonText)!!
         if (button.type == "keyboard")
             setKeyboardLocation(request.keyboard, null)
         deleteButton(request.keyboard, request.buttonText)
@@ -169,6 +149,7 @@ class KeyboardsHandler {
         KeyboardsManager.reloadKeyboards()
         return Result(HttpStatusCode.OK, "Button deleted successfully")
     }
+
 
     // Service
 
@@ -184,8 +165,19 @@ class KeyboardsHandler {
     private fun isButtonExist(keyboard: String, button: String): Boolean =
         KeyboardsManager.getKeyboard(keyboard)!!.buttons.firstOrNull { it.text == button } != null
 
+    private fun isTextReserved(text: String): Boolean = ReservedString.values().find { it.text == text } != null
+
     private fun addKeyboard(keyboard: Keyboard) {
         MongoClient.create(mongoCollection, keyboard, Keyboard::class.java)
+    }
+
+    private fun addButton(button: Button) {
+        MongoClient.update(
+            mongoCollection,
+            Keyboard::class.java,
+            BasicDBObject("name", button.hostKeyboard),
+            BasicDBObject("\$push", BasicDBObject("buttons", button))
+        )
     }
 
     private fun addButton(keyboard: String, button: Button) {
@@ -230,5 +222,83 @@ class KeyboardsHandler {
         else
             BasicDBObject("\$unset", BasicDBObject("keyboard_location", BsonNull()))
         MongoClient.update(mongoCollection, Keyboard::class.java, BasicDBObject("name", keyboard), query)
+    }
+
+
+    // Validators
+
+    private fun validateSchema(request: Request): Result? {
+        if (!request.validateSchema().isSuccess)
+            return Result(HttpStatusCode.BadRequest, "Not valid json schema")
+        return null
+    }
+
+    private fun validateNames(vararg names: String?): Result? {
+        names.forEach { name ->
+            if (ReservedString.values().any { it.text == name })
+                return Result(HttpStatusCode.BadRequest, "'$name' is reserved and can't be used")
+        }
+        return null
+    }
+
+    private fun validateKeyboardAddition(keyboard: Keyboard): Result? {
+        validateNames(keyboard.name, keyboard.keyboardLocation?.linkButton ?: " ")
+        if (isKeyboardExist(keyboard.name))
+            return Result(HttpStatusCode.OK, "Keyboard '${keyboard.name}' already exists")
+        keyboard.keyboardLocation?.let {
+            if (!isKeyboardExist(it.hostKeyboard))
+                return Result(HttpStatusCode.OK, "Keyboard '${it.hostKeyboard}' doesn't exist")
+            if (isButtonExist(it.hostKeyboard, it.linkButton))
+                return Result(HttpStatusCode.OK, "Button '${it.linkButton}' already exists")
+        }
+        return null
+    }
+
+    private fun validateButtonAddition(button: Button): Result? {
+        validateNames(button.text, button.payload)
+        if (!isKeyboardExist(button.hostKeyboard))
+            return Result(HttpStatusCode.OK, "Keyboard '${button.hostKeyboard}' doesn't exist")
+        if (isButtonExist(button.hostKeyboard, button.text))
+            return Result(HttpStatusCode.OK, "Button '${button.text}' already exists")
+        if (button.type == "keyboard" && (button.hostKeyboard == button.keyboard))
+            return Result(HttpStatusCode.OK, "Button can't leads to it's host keyboard")
+        return null
+    }
+
+    private fun validateKeyboardDeletion(request: DeleteKeyboardRequest): Result? {
+        if (request.keyboard == ReservedString.MAIN_KEYBOARD.text)
+            return Result(HttpStatusCode.BadRequest, "'MainKeyboard' can't be deleted")
+        if (!isKeyboardExist(request.keyboard))
+            return Result(HttpStatusCode.OK, "'${request.keyboard}' keyboard doesn't exist")
+
+        return null
+    }
+
+    private fun validateButtonDeletion(request: DeleteButtonRequest): Result? {
+        if (!isKeyboardExist(request.keyboard))
+            return Result(HttpStatusCode.OK, "Keyboard '${request.keyboard}' doesn't exist")
+        if (!isButtonExist(request.keyboard, request.buttonText))
+            return Result(HttpStatusCode.OK, "Button '${request.buttonText}' doesn't exist")
+        return null
+    }
+
+    private fun validateKeyboardLinking(request: LinkKeyboardRequest): Result? {
+        if (request.keyboardName == ReservedString.MAIN_KEYBOARD.text)
+            return Result(HttpStatusCode.BadRequest, "'MainKeyboard' can't be linked/detached")
+        if (!isKeyboardExist(request.keyboardName))
+            return Result(HttpStatusCode.OK, "Keyboard '${request.keyboardName}' doesn't exist")
+        getKeyboard(request.keyboardName)?.keyboardLocation?.let {
+            // TODO: add ability to re-link linked keyboard
+            return Result(HttpStatusCode.BadRequest, "Keyboard '${request.keyboardName}' already linked")
+        }
+        if (!isKeyboardExist(request.keyboardLocation.hostKeyboard))
+            return Result(HttpStatusCode.OK, "Keyboard '${request.keyboardLocation.hostKeyboard}' doesn't exist")
+        if (isButtonExist(request.keyboardLocation.hostKeyboard, request.keyboardLocation.linkButton))
+            return Result(HttpStatusCode.OK, "Button '${request.keyboardLocation.linkButton}' already exists")
+        return null
+    }
+
+    private fun validation(code: KeyboardsHandler.() -> Result?): Result? {
+        return let(code)
     }
 }
