@@ -12,20 +12,8 @@ import org.bson.BsonNull
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import server.*
+import server.models.Error
 import server.models.Result
-
-enum class Error(val message: String, val code: HttpStatusCode = HttpStatusCode.OK) {
-    UNKNOWN_PARAMETER("Unknown '%s' parameter"),
-    NOT_VALID_JSON_SCHEMA("Request body is not valid", HttpStatusCode.BadRequest),
-    KEYBOARD_ALREADY_EXISTS("Keyboard '%s' already exists"),
-    KEYBOARD_DOES_NOT_EXIST("Keyboard '%s' doesn't exists"),
-    BUTTON_DOES_NOT_EXIST("Button '%s' doesn't exist"),
-    BUTTON_ALREADY_EXISTS("Button '%s' already exists"),
-    LOOPED_BUTTON("Button can't leads to it's host keyboard"),
-    DELETE_MAIN_KEYBOARD("'MainKeyboard' can't be deleted"),
-    LINK_DETACH_MAIN_KEYBOARD("'MainKeyboard' can't be linked/detached"),
-    KEYBOARD_ALREADY_LINKED("Keyboard '%s' already linked")
-}
 
 class KeyboardsHandler(private val mongoKeyboards: String) {
 
@@ -67,7 +55,7 @@ class KeyboardsHandler(private val mongoKeyboards: String) {
             deleteKeyboard(keyboard!!.name)
             KeyboardsManager.keyboardStates.delete(keyboard.name)
 
-
+            // TODO: !!!
             // if (request.recursively) {
             //     keyboard.buttons.forEach {
             //         if (it.type == "payload")
@@ -103,25 +91,16 @@ class KeyboardsHandler(private val mongoKeyboards: String) {
         }
     }
 
-    /* TODO: probably it's not necessary
-   fun detachKeyboard(request: DetachKeyboardRequest): Result {
-       if (!request.validateSchema().isSuccess)
-           return Result(HttpStatusCode.BadRequest, "Not valid json schema")
-       if (request.keyboard == "MainKeyboard") // TODO: move to constants
-           return Result(HttpStatusCode.BadRequest, "'MainKeyboard' can't be detached")
-       if (!isKeyboardExist(request.keyboard))
-           return Result(HttpStatusCode.OK, "Keyboard '${request.keyboard}' doesn't exist")
-
-       val keyboard = getKeyboard(request.keyboard)
-       if (keyboard?.keyboardLocation == null)
-           return Result(HttpStatusCode.BadRequest, "Keyboard '${request.keyboard}' already detached")
-
-       deleteButton(keyboard.keyboardLocation.hostKeyboard, keyboard.keyboardLocation.linkButton)
-       setKeyboardLocation(keyboard.name, null)
-
-       KeyboardsManager.reloadKeyboards()
-       return Result(HttpStatusCode.OK, "Keyboard successfully detached")
-   } */
+    fun detachKeyboard(request: DetachKeyboardRequest): Result {
+        return validateRequest(request) ?: let {
+            getKeyboard(request.keyboard)?.let {
+                deleteButton(it.keyboardLocation!!.hostKeyboard, it.keyboardLocation.linkButton)
+                setKeyboardLocation(it.name, null)
+            }
+            KeyboardsManager.reloadKeyboards()
+            return Result(HttpStatusCode.OK, "Keyboard successfully detached")
+        }
+    }
 
 
     // Buttons handling
@@ -235,6 +214,7 @@ class KeyboardsHandler(private val mongoKeyboards: String) {
             is AddKeyboardRequest -> validateKeyboardAddition(request)
             is DeleteKeyboardRequest -> validateKeyboardDeletion(request)
             is LinkKeyboardRequest -> validateKeyboardLinking(request)
+            is DetachKeyboardRequest -> validateKeyboardDetaching(request)
             is AddButtonRequest -> validateButtonAddition(request)
             is DeleteButtonRequest -> validateButtonDeletion(request)
             else -> throw Exception("Unexpected request for validation")
@@ -280,6 +260,16 @@ class KeyboardsHandler(private val mongoKeyboards: String) {
             return error(Error.DELETE_MAIN_KEYBOARD)
         if (!isKeyboardExist(request.keyboard))
             return error(Error.KEYBOARD_DOES_NOT_EXIST, request.keyboard)
+        return null
+    }
+
+    private fun validateKeyboardDetaching(request: DetachKeyboardRequest): Result? {
+        if (request.keyboard == ReservedNames.MAIN_KEYBOARD.text)
+            return error(Error.LINK_DETACH_MAIN_KEYBOARD)
+        if (!isKeyboardExist(request.keyboard))
+            return error(Error.KEYBOARD_DOES_NOT_EXIST)
+        if (getKeyboard(request.keyboard)!!.keyboardLocation == null)
+            return error(Error.KEYBOARD_ALREADY_DETACHED)
         return null
     }
 
