@@ -57,6 +57,7 @@ data class DetachKeyboardRequest(
 }
 
 data class AddButtonRequest(
+    @SerializedName("keyboard") val keyboard: String,
     @SerializedName("new_button") val newButton: Button
 ) : Request() {
     override val schema: Schemas

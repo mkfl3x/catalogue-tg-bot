@@ -11,7 +11,7 @@ import utils.Properties
 
 object Routes {
 
-    private val keyboardsHandler = KeyboardsHandler()
+    private val keyboardsHandler = KeyboardsHandler(Properties.get("mongo.collection.keyboards"))
     private val webhookHandler = WebhookHandler()
 
     fun Route.keyboardRoutes(section: String) {
