@@ -5,7 +5,8 @@
   "properties": {
     "keyboard_name": {
       "description": "Name of keyboard to link",
-      "type": "string"
+      "type": "string",
+      "minLength": 1
     },
     "keyboard_location": {
       "description": "New location of keyboard",

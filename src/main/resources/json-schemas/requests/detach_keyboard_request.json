@@ -5,7 +5,8 @@
   "properties": {
     "keyboard_name": {
       "description": "Name of keyboard to detach",
-      "type": "string"
+      "type": "string",
+      "minLength": 1
     }
   },
   "required": [

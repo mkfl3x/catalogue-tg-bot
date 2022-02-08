@@ -5,11 +5,13 @@
   "properties": {
     "text": {
       "description": "Text on button",
-      "type": "string"
+      "type": "string",
+      "minLength": 1
     },
     "type": {
       "description": "Button type",
       "type": "string",
+      "minLength": 1,
       "enum": [
         "payload",
         "keyboard"
@@ -17,11 +19,13 @@
     },
     "payload": {
       "description": "Payload data of button",
-      "type": "string"
+      "type": "string",
+      "minLength": 1
     },
     "keyboard": {
       "description": "Link to another keyboard",
-      "type": "string"
+      "type": "string",
+      "minLength": 1
     }
   },
   "oneOf": [

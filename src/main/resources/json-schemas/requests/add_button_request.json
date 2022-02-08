@@ -5,7 +5,8 @@
   "properties": {
     "host_keyboard": {
       "description": "Host keyboard for new button",
-      "type": "string"
+      "type": "string",
+      "minLength": 1
     },
     "new_button": {
       "description": "New button",

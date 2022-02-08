@@ -5,7 +5,8 @@
   "properties": {
     "name": {
       "description": "Keyboard name/identifier",
-      "type": "string"
+      "type": "string",
+      "minLength": 1
     },
     "keyboard_location": {
       "description": "Keyboard location",
