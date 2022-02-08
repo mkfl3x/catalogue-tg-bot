@@ -22,7 +22,6 @@
   },
   "required": [
     "name",
-    "keyboard_location",
     "buttons"
   ],
   "additionalProperties": false
