@@ -190,6 +190,7 @@ class KeyboardsHandler(private val mongoKeyboards: String) {
     // Validators
 
     private fun validateSchema(request: Request): Result? {
+        // TODO: add cause of fail to response
         if (!request.validateSchema().isSuccess)
             return error(Error.NOT_VALID_JSON_SCHEMA)
         return null

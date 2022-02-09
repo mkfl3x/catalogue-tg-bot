@@ -32,7 +32,7 @@ class KeyboardStates {
         states.remove(chatId)
     }
 
-    // delete removed keyboard from all states
+    // delete removed keyboard from states of all users
     fun delete(keyboard: String) {
         states.values.forEach { list ->
             list.removeIf { it.name == keyboard }

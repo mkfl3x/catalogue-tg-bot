@@ -15,28 +15,23 @@ object Routes {
     private val webhookHandler = WebhookHandler()
 
     fun Route.keyboardRoutes(section: String) {
-
         get("$section/get") {
             val filter = call.request.queryParameters["filter"] ?: "all"
             val result = keyboardsHandler.getKeyboards(filter)
             call.respond(result.responseCode, result.responseData)
         }
-
         post("$section/add") {
             val result = keyboardsHandler.addKeyboard(call.receive())
             call.respond(result.responseCode, result.responseData)
         }
-
         post("$section/detach") {
             val result = keyboardsHandler.detachKeyboard(call.receive())
             call.respond(result.responseCode, result.responseData)
         }
-
         post("$section/link") {
             val result = keyboardsHandler.linkKeyboard(call.receive())
             call.respond(result.responseCode, result.responseData)
         }
-
         post("$section/delete") {
             val result = keyboardsHandler.deleteKeyboard(call.receive())
             call.respond(result.responseCode, result.responseData)
@@ -44,7 +39,6 @@ object Routes {
     }
 
     fun Route.buttonsRoute(section: String) {
-
         post("$section/add") {
             val result = keyboardsHandler.addButton(call.receive())
             call.respond(result.responseCode, result.responseData)
@@ -56,14 +50,12 @@ object Routes {
     }
 
     fun Route.serviceRoute(section: String) {
-
         get("$section/ping") {
             call.respond(HttpStatusCode.OK, "I am fine")
         }
     }
 
     fun Route.telegramRoute() {
-
         post(Properties.get("bot.webhook.endpoint")) {
             try {
                 webhookHandler.handleUpdate(call.receive())
