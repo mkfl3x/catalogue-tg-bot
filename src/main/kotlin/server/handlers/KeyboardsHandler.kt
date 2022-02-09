@@ -49,28 +49,28 @@ class KeyboardsHandler(private val mongoKeyboards: String) {
         return validateRequest(request) ?: let {
 
             val keyboard = KeyboardsManager.getKeyboard(request.keyboard)
-            if (keyboard?.keyboardLocation != null)
+
+            // Drop from states
+            KeyboardsManager.keyboardStates.delete(keyboard!!.name)
+
+            // Delete leads button on host keyboard
+            if (keyboard.keyboardLocation != null)
                 deleteButton(keyboard.keyboardLocation.hostKeyboard, keyboard.keyboardLocation.linkButton)
 
-            deleteKeyboard(keyboard!!.name)
-            KeyboardsManager.keyboardStates.delete(keyboard.name)
+            // Detach/delete nested keyboards and remove buttons
+            if (request.recursively) {
+                // TODO:
+            } else {
+                keyboard.buttons.forEach { button ->
+                    if (button.type == "keyboard")
+                        detachKeyboard(button.keyboard!!)
+                    if (button.type == "button")
+                        deleteButton(keyboard.name, button.text)
+                }
+            }
 
-            // TODO: !!!
-            // if (request.recursively) {
-            //     keyboard.buttons.forEach {
-            //         if (it.type == "payload")
-            //             deleteButton(keyboard.name, it.text)
-            //         if (it.type == "keyboard")
-            //             deleteKeyboard(request.keyboard, true)
-            //     }
-            // } else {
-            //     keyboard.buttons.forEach {
-            //         if (it.type == "payload")
-            //             deleteButton(keyboard.name, it.text)
-            //         if (it.type == "keyboard")
-            //             setKeyboardLocation(keyboard.name, null)
-            //     }
-            // }
+            // Delete keyboard
+            deleteKeyboard(keyboard.name, false)
 
             KeyboardsManager.reloadKeyboards()
             return Result(HttpStatusCode.OK, "Keyboard successfully deleted")
@@ -93,10 +93,7 @@ class KeyboardsHandler(private val mongoKeyboards: String) {
 
     fun detachKeyboard(request: DetachKeyboardRequest): Result {
         return validateRequest(request) ?: let {
-            getKeyboard(request.keyboard)?.let {
-                deleteButton(it.keyboardLocation!!.hostKeyboard, it.keyboardLocation.linkButton)
-                setKeyboardLocation(it.name, null)
-            }
+            detachKeyboard(request.keyboard)
             KeyboardsManager.reloadKeyboards()
             return Result(HttpStatusCode.OK, "Keyboard successfully detached")
         }
@@ -156,25 +153,17 @@ class KeyboardsHandler(private val mongoKeyboards: String) {
         )
     }
 
-    private fun deleteKeyboard(keyboardName: String) {
+    private fun deleteKeyboard(keyboardName: String, recursively: Boolean) {
         MongoClient.delete(mongoKeyboards, BasicDBObject("name", keyboardName))
     }
 
-    /* TODO: probably it might be implemented later
-    private fun deleteKeyboard(keyboardName: String, recursively: Boolean) {
-        if (recursively) {
-            val keyboard = getKeyboard(keyboardName)
-            keyboard!!.buttons.forEach {
-                if (it.type == "payload")
-                    deleteButton(keyboard.name, it.text)
-                if (it.type == "keyboard") {
-                    deleteKeyboard(keyboard.name)
-                    deleteKeyboard(keyboard.name, true)
-                }
-            }
+    private fun detachKeyboard(keyboard: String) {
+        getKeyboard(keyboard)?.let {
+            deleteButton(it.keyboardLocation!!.hostKeyboard, it.keyboardLocation.linkButton)
+            setKeyboardLocation(it.name, null)
+            KeyboardsManager.keyboardStates.delete(keyboard)
         }
     }
-     */
 
     private fun deleteButton(keyboard: String, buttonText: String) {
         MongoClient.update(
