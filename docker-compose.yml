@@ -1,0 +1,20 @@
+version: '3'
+services:
+  tg-bot:
+    build: .
+    #image: tg-bot
+    container_name: tg-bot
+    ports:
+      - "8082:8080"
+    depends_on:
+      - mongo-db
+
+  mongo-db:
+    image: mongo
+    container_name: mongo-db
+    environment:
+      MONGO_INITDB_DATABASE: data
+    ports:
+      - "27018:27017"
+    volumes:
+      - ./scripts/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
