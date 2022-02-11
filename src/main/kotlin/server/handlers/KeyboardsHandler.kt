@@ -17,6 +17,12 @@ import server.models.Result
 
 class KeyboardsHandler(private val mongoKeyboards: String) {
 
+    // TODO:
+    //  - handle exceptions/errors inside methods interacted with mongo
+    //  - add logging
+    //  - add javadocs
+
+
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass.name)
 
     // Keyboards handling
@@ -33,30 +39,22 @@ class KeyboardsHandler(private val mongoKeyboards: String) {
     }
 
     fun addKeyboard(request: AddKeyboardRequest): Result {
-        return validateRequest(request) ?: let {
-
+        return handleRequest(request) {
             request.newKeyboard.keyboardLocation?.let {
                 addButton(it.hostKeyboard, Button(it.linkButton, "keyboard", keyboard = request.newKeyboard.name))
             }
             addKeyboard(request.newKeyboard)
-
-            KeyboardsManager.reloadKeyboards()
-            return Result(HttpStatusCode.OK, "Keyboard successfully added")
         }
     }
 
     fun deleteKeyboard(request: DeleteKeyboardRequest): Result {
-        return validateRequest(request) ?: let {
-
+        return handleRequest(request) {
             val keyboard = KeyboardsManager.getKeyboard(request.keyboard)
-
             // Drop from states
             KeyboardsManager.keyboardStates.delete(keyboard!!.name)
-
             // Delete leads button on host keyboard
             if (keyboard.keyboardLocation != null)
                 deleteButton(keyboard.keyboardLocation.hostKeyboard, keyboard.keyboardLocation.linkButton)
-
             // Detach/delete nested keyboards and remove buttons
             if (request.recursively) {
                 // TODO:
@@ -68,34 +66,24 @@ class KeyboardsHandler(private val mongoKeyboards: String) {
                         deleteButton(keyboard.name, button.text)
                 }
             }
-
             // Delete keyboard
             deleteKeyboard(keyboard.name, false)
-
-            KeyboardsManager.reloadKeyboards()
-            return Result(HttpStatusCode.OK, "Keyboard successfully deleted")
         }
     }
 
     fun linkKeyboard(request: LinkKeyboardRequest): Result {
-        return validateRequest(request) ?: let {
-
+        return handleRequest(request) {
             addButton(
                 request.keyboardLocation.hostKeyboard,
                 Button(request.keyboardLocation.linkButton, "keyboard", keyboard = request.keyboardName)
             )
             setKeyboardLocation(request.keyboardName, request.keyboardLocation)
-
-            KeyboardsManager.reloadKeyboards()
-            return Result(HttpStatusCode.OK, "Keyboard successfully linked")
         }
     }
 
     fun detachKeyboard(request: DetachKeyboardRequest): Result {
-        return validateRequest(request) ?: let {
+        return handleRequest(request) {
             detachKeyboard(request.keyboard)
-            KeyboardsManager.reloadKeyboards()
-            return Result(HttpStatusCode.OK, "Keyboard successfully detached")
         }
     }
 
@@ -103,42 +91,46 @@ class KeyboardsHandler(private val mongoKeyboards: String) {
     // Buttons handling
 
     fun addButton(request: AddButtonRequest): Result {
-        return validateRequest(request) ?: let {
-
+        return handleRequest(request) {
             addButton(request.keyboard, request.newButton)
-
-            KeyboardsManager.reloadKeyboards()
-            return Result(HttpStatusCode.OK, "Button successfully added")
         }
     }
 
     fun deleteButton(request: DeleteButtonRequest): Result {
-        return validateRequest(request) ?: let {
-
+        return handleRequest(request) {
             val button = getButton(request.keyboard, request.buttonText)!!
             if (button.type == "keyboard")
                 setKeyboardLocation(request.keyboard, null)
             deleteButton(request.keyboard, request.buttonText)
-
-            KeyboardsManager.reloadKeyboards()
-            return Result(HttpStatusCode.OK, "Button deleted successfully")
         }
     }
 
 
     // Service
 
+    private fun handleRequest(request: Request, code: () -> Unit): Result {
+        validateRequest(request)?.let { return it }
+        run { code } // TODO: should handle result
+        KeyboardsManager.reloadKeyboards()
+        return Result(HttpStatusCode.OK, "Keyboard successfully added")
+    }
+
+    // TODO: move to KeyboardsManager
     private fun getKeyboard(keyboardName: String): Keyboard? =
         KeyboardsManager.getKeyboard(keyboardName)
 
+    // TODO: move to KeyboardsManager
     private fun getButton(keyboardName: String, buttonText: String): Button? =
         getKeyboard(keyboardName)?.buttons?.firstOrNull { it.text == buttonText }
 
+    // TODO: move to KeyboardsManager
     private fun isKeyboardExist(keyboard: String): Boolean =
         KeyboardsManager.getKeyboard(keyboard) != null
 
+    // TODO: move to KeyboardsManager
     private fun isButtonExist(keyboard: String, button: String): Boolean =
         KeyboardsManager.getKeyboard(keyboard)!!.buttons.firstOrNull { it.text == button } != null
+
 
     private fun addKeyboard(keyboard: Keyboard) {
         MongoClient.create(mongoKeyboards, keyboard, Keyboard::class.java)
