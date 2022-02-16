@@ -3,7 +3,7 @@ package utils
 import com.github.fge.jackson.JsonLoader
 import com.github.fge.jsonschema.core.report.ProcessingReport
 import com.github.fge.jsonschema.main.JsonSchemaFactory
-import server.Schemas
+import server.models.Schemas
 
 object SchemaValidator {
 
