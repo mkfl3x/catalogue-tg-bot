@@ -3,7 +3,8 @@ package server.handlers
 import bot.Bot
 import com.pengrad.telegrambot.model.Update
 import common.ReservedNames
-import keyboards.KeyboardsManager
+import keyboards.KeyboardsManager.getKeyboard
+import keyboards.KeyboardsManager.keyboardStates
 import keyboards.models.Button
 
 class WebhookHandler {
@@ -14,22 +15,19 @@ class WebhookHandler {
         val chatId = update.message().chat().id()
         when (val message = update.message().text()) {
             ReservedNames.START.text -> {
-                val startKeyboard = KeyboardsManager.getKeyboard(ReservedNames.MAIN_KEYBOARD.text)
-                KeyboardsManager.keyboardStates.dropState(chatId)
+                val startKeyboard = getKeyboard(ReservedNames.MAIN_KEYBOARD.text)
+                keyboardStates.dropState(chatId)
                 bot.actions.sendReplyKeyboard(chatId, startKeyboard!!.toMarkup())
-                KeyboardsManager.keyboardStates.addKeyboard(chatId, startKeyboard)
+                keyboardStates.addKeyboard(chatId, startKeyboard)
                 return
             }
             ReservedNames.BACK.text -> {
-                bot.actions.sendReplyKeyboard(
-                    chatId,
-                    KeyboardsManager.keyboardStates.getPreviousKeyboard(chatId).toMarkup()
-                )
+                bot.actions.sendReplyKeyboard(chatId, keyboardStates.getPreviousKeyboard(chatId).toMarkup())
                 return
             }
             else -> {
-                KeyboardsManager.keyboardStates.getCurrentKeyboard(chatId)
-                    .buttons.firstOrNull { it.text == message }?.let {
+                keyboardStates.getCurrentKeyboard(chatId).buttons
+                    .firstOrNull { it.text == message }?.let {
                         handleButtonClick(it, chatId)
                         return
                     }
@@ -43,10 +41,9 @@ class WebhookHandler {
         when (button.type) {
             "payload" -> bot.actions.sendMessage(chatId, button.payload ?: "Empty button content")
             "keyboard" -> {
-                val keyboard =
-                    KeyboardsManager.getKeyboard(button.keyboard ?: throw Exception("Keyboard was not found"))
+                val keyboard = getKeyboard(button.keyboard ?: throw Exception("Keyboard was not found"))
                 bot.actions.sendReplyKeyboard(chatId, keyboard!!.toMarkup())
-                KeyboardsManager.keyboardStates.addKeyboard(chatId, keyboard)
+                keyboardStates.addKeyboard(chatId, keyboard)
             }
         }
     }

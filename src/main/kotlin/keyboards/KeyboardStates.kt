@@ -25,7 +25,8 @@ class KeyboardStates {
     }
 
     // returns current user's keyboard
-    fun getCurrentKeyboard(chatId: Long) = states[chatId]!!.last()
+    fun getCurrentKeyboard(chatId: Long) =
+        states[chatId]!!.last()
 
     // remove user from states map
     fun dropState(chatId: Long) {

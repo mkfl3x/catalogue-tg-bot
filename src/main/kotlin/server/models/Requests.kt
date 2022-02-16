@@ -23,9 +23,11 @@ enum class Schemas(val path: String) {
 
 abstract class Request {
 
+    abstract val successMessage: String
+
     protected abstract val schema: Schemas
 
-    abstract fun validateRequest(): Result?
+    abstract fun validateData(): Result?
 
     protected fun validateNames(vararg names: String?): Result? {
         names.forEach { name ->
@@ -35,14 +37,11 @@ abstract class Request {
         return null
     }
 
-    protected fun error(error: Error, vararg args: String): Result {
-        // TODO: add logging here
-        return Result(error.code, error.message.format(args))
-    }
-
     fun validateSchema(): Result? {
         val schemaReport = SchemaValidator.validate(GsonMapper.serialize(this), schema)
-        return if (!schemaReport.isSuccess) error(Error.NOT_VALID_JSON_SCHEMA) else null
+        return if (!schemaReport.isSuccess)
+            Result.error(Error.NOT_VALID_JSON_SCHEMA)
+        else null
     }
 }
 
@@ -53,15 +52,18 @@ data class AddKeyboardRequest(
     override val schema: Schemas
         get() = Schemas.ADD_KEYBOARD_REQUEST
 
-    override fun validateRequest(): Result? {
+    override val successMessage: String
+        get() = "Keyboard ${newKeyboard.name} successfully added"
+
+    override fun validateData(): Result? {
         validateNames(newKeyboard.name, newKeyboard.keyboardLocation?.linkButton ?: " ")
         if (isKeyboardExist(newKeyboard.name))
-            return error(Error.KEYBOARD_ALREADY_EXISTS, newKeyboard.name)
+            return Result.error(Error.KEYBOARD_ALREADY_EXISTS, newKeyboard.name)
         newKeyboard.keyboardLocation?.let {
             if (!isKeyboardExist(it.hostKeyboard))
-                return error(Error.KEYBOARD_DOES_NOT_EXIST, it.hostKeyboard)
+                return Result.error(Error.KEYBOARD_DOES_NOT_EXIST, it.hostKeyboard)
             if (isButtonExist(it.hostKeyboard, it.linkButton))
-                return error(Error.BUTTON_ALREADY_EXISTS, it.linkButton)
+                return Result.error(Error.BUTTON_ALREADY_EXISTS, it.linkButton)
         }
         return null
     }
@@ -75,11 +77,14 @@ data class DeleteKeyboardRequest(
     override val schema: Schemas
         get() = Schemas.DELETE_KEYBOARD_REQUEST
 
-    override fun validateRequest(): Result? {
+    override val successMessage: String
+        get() = "Keyboard '$keyboard' successfully deleted"
+
+    override fun validateData(): Result? {
         if (keyboard == ReservedNames.MAIN_KEYBOARD.text)
-            return error(Error.DELETE_MAIN_KEYBOARD)
+            return Result.error(Error.DELETE_MAIN_KEYBOARD)
         if (isKeyboardExist(keyboard))
-            return error(Error.KEYBOARD_DOES_NOT_EXIST, keyboard)
+            return Result.error(Error.KEYBOARD_DOES_NOT_EXIST, keyboard)
         return null
     }
 }
@@ -92,19 +97,21 @@ data class LinkKeyboardRequest(
     override val schema: Schemas
         get() = Schemas.LINK_KEYBOARD_REQUEST
 
-    override fun validateRequest(): Result? {
+    override val successMessage: String
+        get() = "Keyboard '$keyboardName' successfully linked to '${keyboardLocation.hostKeyboard}' with '${keyboardLocation.linkButton}' button"
+
+    override fun validateData(): Result? {
         if (keyboardName == ReservedNames.MAIN_KEYBOARD.text)
-            return error(Error.LINK_DETACH_MAIN_KEYBOARD)
+            return Result.error(Error.LINK_DETACH_MAIN_KEYBOARD)
         if (!isKeyboardExist(keyboardName))
-            return error(Error.KEYBOARD_DOES_NOT_EXIST, keyboardName)
+            return Result.error(Error.KEYBOARD_DOES_NOT_EXIST, keyboardName)
         KeyboardsManager.getKeyboard(keyboardName)?.keyboardLocation?.let {
-            // TODO: add ability to re-link linked keyboard
-            error(Error.KEYBOARD_ALREADY_LINKED, keyboardName)
+            Result.error(Error.KEYBOARD_ALREADY_LINKED, keyboardName)
         }
         if (!isKeyboardExist(keyboardLocation.hostKeyboard))
-            error(Error.KEYBOARD_DOES_NOT_EXIST, keyboardLocation.hostKeyboard)
+            Result.error(Error.KEYBOARD_DOES_NOT_EXIST, keyboardLocation.hostKeyboard)
         if (isButtonExist(keyboardLocation.hostKeyboard, keyboardLocation.linkButton))
-            error(Error.BUTTON_ALREADY_EXISTS, keyboardLocation.linkButton)
+            Result.error(Error.BUTTON_ALREADY_EXISTS, keyboardLocation.linkButton)
         return null
     }
 }
@@ -116,13 +123,16 @@ data class DetachKeyboardRequest(
     override val schema: Schemas
         get() = Schemas.DETACH_KEYBOARD_REQUEST
 
-    override fun validateRequest(): Result? {
+    override val successMessage: String
+        get() = "Keyboard '$keyboard' successfully detached"
+
+    override fun validateData(): Result? {
         if (keyboard == ReservedNames.MAIN_KEYBOARD.text)
-            return error(Error.LINK_DETACH_MAIN_KEYBOARD)
+            return Result.error(Error.LINK_DETACH_MAIN_KEYBOARD)
         if (!isKeyboardExist(keyboard))
-            return error(Error.KEYBOARD_DOES_NOT_EXIST)
+            return Result.error(Error.KEYBOARD_DOES_NOT_EXIST)
         if (KeyboardsManager.getKeyboard(keyboard)!!.keyboardLocation == null)
-            return error(Error.KEYBOARD_ALREADY_DETACHED)
+            return Result.error(Error.KEYBOARD_ALREADY_DETACHED)
         return null
     }
 }
@@ -135,14 +145,17 @@ data class AddButtonRequest(
     override val schema: Schemas
         get() = Schemas.ADD_BUTTON_REQUEST
 
-    override fun validateRequest(): Result? {
+    override val successMessage: String
+        get() = "Button '${newButton.text}' successfully added to '$keyboard' keyboard"
+
+    override fun validateData(): Result? {
         validateNames(newButton.text, newButton.payload)
         if (!isKeyboardExist(keyboard))
-            return error(Error.KEYBOARD_DOES_NOT_EXIST, keyboard)
+            return Result.error(Error.KEYBOARD_DOES_NOT_EXIST, keyboard)
         if (isButtonExist(keyboard, newButton.text))
-            return error(Error.BUTTON_ALREADY_EXISTS, newButton.text)
+            return Result.error(Error.BUTTON_ALREADY_EXISTS, newButton.text)
         if (newButton.type == "keyboard" && (keyboard == newButton.keyboard))
-            return error(Error.LOOPED_BUTTON)
+            return Result.error(Error.LOOPED_BUTTON)
         return null
     }
 }
@@ -155,11 +168,14 @@ data class DeleteButtonRequest(
     override val schema: Schemas
         get() = Schemas.DELETE_BUTTON_REQUEST
 
-    override fun validateRequest(): Result? {
+    override val successMessage: String
+        get() = "Button '$buttonText' successfully deleted from '$keyboard' keyboard"
+
+    override fun validateData(): Result? {
         if (!isKeyboardExist(keyboard))
-            return error(Error.KEYBOARD_DOES_NOT_EXIST, keyboard)
+            return Result.error(Error.KEYBOARD_DOES_NOT_EXIST, keyboard)
         if (!isButtonExist(keyboard, buttonText))
-            return error(Error.BUTTON_DOES_NOT_EXIST, buttonText)
+            return Result.error(Error.BUTTON_DOES_NOT_EXIST, buttonText)
         return null
     }
 }

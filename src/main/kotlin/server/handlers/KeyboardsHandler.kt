@@ -2,10 +2,11 @@ package server.handlers
 
 import com.mongodb.BasicDBObject
 import database.MongoClient
-import io.ktor.http.*
 import keyboards.KeyboardsManager
+import keyboards.KeyboardsManager.getAllKeyboards
 import keyboards.KeyboardsManager.getButton
 import keyboards.KeyboardsManager.getKeyboard
+import keyboards.KeyboardsManager.keyboardStates
 import keyboards.models.Button
 import keyboards.models.Keyboard
 import keyboards.models.KeyboardLocation
@@ -16,23 +17,17 @@ import server.models.*
 
 class KeyboardsHandler(private val mongoKeyboards: String) {
 
-    // TODO:
-    //  - handle exceptions/errors inside methods interacted with mongo
-    //  - add logging
-    //  - add javadocs
-
-
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass.name)
 
     fun getKeyboards(filter: String): Result {
         val keyboards = when (filter) {
-            "all" -> KeyboardsManager.getKeyboards()
-            "detached" -> KeyboardsManager.getKeyboards()
+            "all" -> getAllKeyboards()
+            "detached" -> getAllKeyboards()
                 .filter { it.keyboardLocation == null }
                 .toList()
-            else -> return error(Error.UNKNOWN_PARAMETER)
+            else -> return Result.error(Error.UNKNOWN_PARAMETER)
         }
-        return Result(HttpStatusCode.OK, keyboards)
+        return Result.success(keyboards)
     }
 
     fun addKeyboard(request: AddKeyboardRequest): Result {
@@ -46,23 +41,23 @@ class KeyboardsHandler(private val mongoKeyboards: String) {
 
     fun deleteKeyboard(request: DeleteKeyboardRequest): Result {
         return handleRequest(request) {
-            val keyboard = KeyboardsManager.getKeyboard(request.keyboard)
+
+            val keyboard = getKeyboard(request.keyboard)
+
             // Drop from states
-            KeyboardsManager.keyboardStates.delete(keyboard!!.name)
+            keyboardStates.delete(keyboard!!.name)
+
             // Delete leads button on host keyboard
-            if (keyboard.keyboardLocation != null)
-                deleteButton(keyboard.keyboardLocation.hostKeyboard, keyboard.keyboardLocation.linkButton)
-            // Detach/delete nested keyboards and remove buttons
-            if (request.recursively) {
-                // TODO:
-            } else {
-                keyboard.buttons.forEach { button ->
-                    if (button.type == "keyboard")
-                        detachKeyboard(button.keyboard!!)
-                    if (button.type == "button")
-                        deleteButton(keyboard.name, button.text)
-                }
+            keyboard.keyboardLocation?.let {
+                deleteButton(it.hostKeyboard, it.linkButton)
             }
+
+            // Detach/delete nested keyboards and remove buttons
+            if (request.recursively)
+                deleteKeyboard(request.keyboard, true)
+            else
+                keyboard.buttons.filter { it.type == "keyboard" }.map { detachKeyboard(it.keyboard!!) }
+
             // Delete keyboard
             deleteKeyboard(keyboard.name, false)
         }
@@ -94,21 +89,18 @@ class KeyboardsHandler(private val mongoKeyboards: String) {
         return handleRequest(request) {
             val button = getButton(request.keyboard, request.buttonText)!!
             if (button.type == "keyboard")
-                setKeyboardLocation(request.keyboard, null)
+                setKeyboardLocation(button.keyboard!!, null)
             deleteButton(request.keyboard, request.buttonText)
         }
     }
 
-    // Service
-
     private fun handleRequest(request: Request, code: () -> Unit): Result {
         request.validateSchema()?.let { return it }
-        request.validateRequest()?.let { return it }
-        run { code } // TODO: should handle result
+        request.validateData()?.let { return it }
+        run { code }
         KeyboardsManager.reloadKeyboards()
-        return Result(HttpStatusCode.OK, "Keyboard successfully added")
+        return Result.success(request.successMessage)
     }
-
 
     private fun addKeyboard(keyboard: Keyboard) {
         MongoClient.create(mongoKeyboards, keyboard, Keyboard::class.java)
@@ -124,6 +116,11 @@ class KeyboardsHandler(private val mongoKeyboards: String) {
     }
 
     private fun deleteKeyboard(keyboardName: String, recursively: Boolean) {
+        if (recursively) {
+            getKeyboard(keyboardName)!!.buttons
+                .filter { it.type == "keyboard" }
+                .map { deleteKeyboard(it.keyboard!!, true) }
+        }
         MongoClient.delete(mongoKeyboards, BasicDBObject("name", keyboardName))
     }
 
@@ -131,7 +128,7 @@ class KeyboardsHandler(private val mongoKeyboards: String) {
         getKeyboard(keyboard)?.let {
             deleteButton(it.keyboardLocation!!.hostKeyboard, it.keyboardLocation.linkButton)
             setKeyboardLocation(it.name, null)
-            KeyboardsManager.keyboardStates.delete(keyboard)
+            keyboardStates.delete(keyboard)
         }
     }
 

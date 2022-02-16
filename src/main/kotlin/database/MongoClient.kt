@@ -33,12 +33,12 @@ object MongoClient {
         return database.getCollection(collection, entryType).find().toList()
     }
 
-    fun <T> update(collection: String, entryType: Class<T>, condition: BasicDBObject, query: Bson) {
-        database.getCollection(collection, entryType).updateOne(condition, query)
-    }
-
     fun <T> read(collection: String, entryType: Class<T>, condition: BasicDBObject): T {
         return database.getCollection(collection, entryType).find(condition).first()
+    }
+
+    fun <T> update(collection: String, entryType: Class<T>, condition: BasicDBObject, query: Bson) {
+        database.getCollection(collection, entryType).updateOne(condition, query)
     }
 
     fun delete(collection: String, condition: BasicDBObject) {

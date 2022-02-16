@@ -21,7 +21,7 @@ object KeyboardsManager {
         ).toHashSet()
     }
 
-    fun getKeyboards(): HashSet<Keyboard> =
+    fun getAllKeyboards(): HashSet<Keyboard> =
         keyboards
 
     fun getKeyboard(name: String): Keyboard? =
