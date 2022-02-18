@@ -4,6 +4,7 @@ import com.google.gson.annotations.SerializedName
 import common.ReservedNames
 import io.ktor.http.*
 import keyboards.KeyboardsManager
+import keyboards.KeyboardsManager.getKeyboard
 import keyboards.KeyboardsManager.isButtonExist
 import keyboards.KeyboardsManager.isKeyboardExist
 import keyboards.models.Button
@@ -83,7 +84,7 @@ data class DeleteKeyboardRequest(
     override fun validateData(): Result? {
         if (keyboard == ReservedNames.MAIN_KEYBOARD.text)
             return Result.error(Error.DELETE_MAIN_KEYBOARD)
-        if (isKeyboardExist(keyboard))
+        if (!isKeyboardExist(keyboard))
             return Result.error(Error.KEYBOARD_DOES_NOT_EXIST, keyboard)
         return null
     }
@@ -105,7 +106,7 @@ data class LinkKeyboardRequest(
             return Result.error(Error.LINK_DETACH_MAIN_KEYBOARD)
         if (!isKeyboardExist(keyboardName))
             return Result.error(Error.KEYBOARD_DOES_NOT_EXIST, keyboardName)
-        KeyboardsManager.getKeyboard(keyboardName)?.keyboardLocation?.let {
+        getKeyboard(keyboardName)?.keyboardLocation?.let {
             Result.error(Error.KEYBOARD_ALREADY_LINKED, keyboardName)
         }
         if (!isKeyboardExist(keyboardLocation.hostKeyboard))
@@ -138,7 +139,7 @@ data class DetachKeyboardRequest(
 }
 
 data class AddButtonRequest(
-    @SerializedName("keyboard") val keyboard: String,
+    @SerializedName("host_keyboard") val hostKeyboard: String,
     @SerializedName("new_button") val newButton: Button
 ) : Request() {
 
@@ -146,15 +147,15 @@ data class AddButtonRequest(
         get() = Schemas.ADD_BUTTON_REQUEST
 
     override val successMessage: String
-        get() = "Button '${newButton.text}' successfully added to '$keyboard' keyboard"
+        get() = "Button '${newButton.text}' successfully added to '$hostKeyboard' keyboard"
 
     override fun validateData(): Result? {
         validateNames(newButton.text, newButton.payload)
-        if (!isKeyboardExist(keyboard))
-            return Result.error(Error.KEYBOARD_DOES_NOT_EXIST, keyboard)
-        if (isButtonExist(keyboard, newButton.text))
+        if (!isKeyboardExist(hostKeyboard))
+            return Result.error(Error.KEYBOARD_DOES_NOT_EXIST, hostKeyboard)
+        if (isButtonExist(hostKeyboard, newButton.text))
             return Result.error(Error.BUTTON_ALREADY_EXISTS, newButton.text)
-        if (newButton.type == "keyboard" && (keyboard == newButton.keyboard))
+        if (newButton.type == "keyboard" && (hostKeyboard == newButton.keyboard))
             return Result.error(Error.LOOPED_BUTTON)
         return null
     }

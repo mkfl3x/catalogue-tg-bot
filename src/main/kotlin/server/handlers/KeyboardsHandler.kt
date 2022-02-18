@@ -81,7 +81,7 @@ class KeyboardsHandler(private val mongoKeyboards: String) {
 
     fun addButton(request: AddButtonRequest): Result {
         return handleRequest(request) {
-            addButton(request.keyboard, request.newButton)
+            addButton(request.hostKeyboard, request.newButton)
         }
     }
 
@@ -97,7 +97,7 @@ class KeyboardsHandler(private val mongoKeyboards: String) {
     private fun handleRequest(request: Request, code: () -> Unit): Result {
         request.validateSchema()?.let { return it }
         request.validateData()?.let { return it }
-        run { code }
+        code.invoke()
         KeyboardsManager.reloadKeyboards()
         return Result.success(request.successMessage)
     }
