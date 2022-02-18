@@ -62,11 +62,11 @@
 				{
 					"name": "/delete",
 					"request": {
-						"method": "POST",
+						"method": "DELETE",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"keyboard_name\": \"DetachedKeyboard\",\n    \"recursively\": false\n}",
+							"raw": "{\n    \"keyboard_name\": \"New keyboard\",\n    \"recursively\": false\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -89,7 +89,7 @@
 				{
 					"name": "/detach",
 					"request": {
-						"method": "POST",
+						"method": "PUT",
 						"header": [],
 						"body": {
 							"mode": "raw",
@@ -116,7 +116,7 @@
 				{
 					"name": "/link",
 					"request": {
-						"method": "POST",
+						"method": "PUT",
 						"header": [],
 						"body": {
 							"mode": "raw",
@@ -175,11 +175,11 @@
 				{
 					"name": "/delete",
 					"request": {
-						"method": "POST",
+						"method": "DELETE",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"keyboard\": \"MainKeyboard\",\n    \"button_text\": \"Some button\"\n}",
+							"raw": "{\n    \"keyboard\": \"New keyboard\",\n    \"button_text\": \"Hello 2\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"

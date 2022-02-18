@@ -24,15 +24,15 @@ object Routes {
             val result = keyboardsHandler.addKeyboard(call.receive())
             call.respond(result.responseCode, result.responseData)
         }
-        post("$section/detach") {
+        put("$section/detach") {
             val result = keyboardsHandler.detachKeyboard(call.receive())
             call.respond(result.responseCode, result.responseData)
         }
-        post("$section/link") {
+        put("$section/link") {
             val result = keyboardsHandler.linkKeyboard(call.receive())
             call.respond(result.responseCode, result.responseData)
         }
-        post("$section/delete") {
+        delete("$section/delete") {
             val result = keyboardsHandler.deleteKeyboard(call.receive())
             call.respond(result.responseCode, result.responseData)
         }
@@ -43,7 +43,7 @@ object Routes {
             val result = keyboardsHandler.addButton(call.receive())
             call.respond(result.responseCode, result.responseData)
         }
-        post("$section/delete") {
+        delete("$section/delete") {
             val result = keyboardsHandler.deleteButton(call.receive())
             call.respond(result.responseCode, result.responseData)
         }
