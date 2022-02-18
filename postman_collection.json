@@ -1,0 +1,268 @@
+{
+	"info": {
+		"_postman_id": "ba5977bb-88d0-405c-b507-b76542f8a90f",
+		"name": "catalogue-tg-bot",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "/keyboards",
+			"item": [
+				{
+					"name": "/get",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/keyboards/get?filter=all",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"keyboards",
+								"get"
+							],
+							"query": [
+								{
+									"key": "filter",
+									"value": "all"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/add",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"new_keyboard\": {\n    \"name\": \"New keyboard\",\n    \"keyboard_location\":{\n        \"host_keyboard\": \"MainKeyboard\",\n        \"link_button\": \"to new keyboard\"\n    },\n    \"buttons\": [\n        {\n            \"text\": \"Hello\",\n            \"type\": \"payload\",\n            \"payload\": \"hello!\"\n        },\n        {\n            \"text\": \"Ciao\",\n            \"type\": \"payload\",\n            \"payload\": \"ciao!\"\n        }\n    ]\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/keyboards/add",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"keyboards",
+								"add"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/delete",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"keyboard_name\": \"DetachedKeyboard\",\n    \"recursively\": false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/keyboards/delete",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"keyboards",
+								"delete"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/detach",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"keyboard_name\": \"New keyboard\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/keyboards/detach",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"keyboards",
+								"detach"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/link",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"keyboard_name\": \"Detached keyboard\",\n    \"keyboard_location\": {\n        \"host_keyboard\": \"MainKeyboard\",\n        \"link_button\": \"hello\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/keyboards/link",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"keyboards",
+								"link"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "/buttons",
+			"item": [
+				{
+					"name": "/add",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"host_keyboard\": \"MainKeyboard\",\n  \"new_button\": {\n    \"text\": \"Hello\",\n    \"type\": \"payload\",\n    \"payload\": \"Hello, it's content\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/buttons/add",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"buttons",
+								"add"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/delete",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"keyboard\": \"MainKeyboard\",\n    \"button_text\": \"Some button\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/buttons/delete",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"buttons",
+								"delete"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "/service",
+			"item": [
+				{
+					"name": "/ping",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/service/ping",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"service",
+								"ping"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
