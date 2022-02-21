@@ -25,7 +25,7 @@ class KeyboardsHandler(private val mongoKeyboards: String) {
             "detached" -> getAllKeyboards()
                 .filter { it.keyboardLocation == null }
                 .toList()
-            else -> return Result.error(Error.UNKNOWN_PARAMETER)
+            else -> return Result.error(Error.UNKNOWN_PARAMETER_VALUE, filter, "filter")
         }
         return Result.success(keyboards)
     }

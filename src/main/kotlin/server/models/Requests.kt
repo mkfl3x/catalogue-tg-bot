@@ -3,7 +3,6 @@ package server.models
 import com.google.gson.annotations.SerializedName
 import common.ReservedNames
 import io.ktor.http.*
-import keyboards.KeyboardsManager
 import keyboards.KeyboardsManager.getKeyboard
 import keyboards.KeyboardsManager.isButtonExist
 import keyboards.KeyboardsManager.isKeyboardExist
@@ -107,12 +106,12 @@ data class LinkKeyboardRequest(
         if (!isKeyboardExist(keyboardName))
             return Result.error(Error.KEYBOARD_DOES_NOT_EXIST, keyboardName)
         getKeyboard(keyboardName)?.keyboardLocation?.let {
-            Result.error(Error.KEYBOARD_ALREADY_LINKED, keyboardName)
+            return Result.error(Error.KEYBOARD_ALREADY_LINKED, keyboardName)
         }
         if (!isKeyboardExist(keyboardLocation.hostKeyboard))
-            Result.error(Error.KEYBOARD_DOES_NOT_EXIST, keyboardLocation.hostKeyboard)
+            return Result.error(Error.KEYBOARD_DOES_NOT_EXIST, keyboardLocation.hostKeyboard)
         if (isButtonExist(keyboardLocation.hostKeyboard, keyboardLocation.linkButton))
-            Result.error(Error.BUTTON_ALREADY_EXISTS, keyboardLocation.linkButton)
+            return Result.error(Error.BUTTON_ALREADY_EXISTS, keyboardLocation.linkButton)
         return null
     }
 }
@@ -132,7 +131,7 @@ data class DetachKeyboardRequest(
             return Result.error(Error.LINK_DETACH_MAIN_KEYBOARD)
         if (!isKeyboardExist(keyboard))
             return Result.error(Error.KEYBOARD_DOES_NOT_EXIST)
-        if (KeyboardsManager.getKeyboard(keyboard)!!.keyboardLocation == null)
+        if (getKeyboard(keyboard)!!.keyboardLocation == null)
             return Result.error(Error.KEYBOARD_ALREADY_DETACHED)
         return null
     }
