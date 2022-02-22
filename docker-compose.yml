@@ -2,8 +2,10 @@ version: '3'
 services:
   tg-bot:
     build: .
-    #image: tg-bot
     container_name: tg-bot
+    environment:
+      - BOT_TOKEN
+      - BOT_WEBHOOK_HOST
     ports:
       - "8082:8080"
     depends_on:

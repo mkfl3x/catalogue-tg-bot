@@ -11,7 +11,13 @@ object Properties {
     }
 
     fun get(propertyName: String): String {
-        val property = properties[propertyName] ?: throw Exception("$propertyName property doesn't exist")
-        return property.toString()
+        val property = getDockerEnv(propertyName) ?: properties[propertyName]
+        ?: throw Exception("$propertyName property doesn't exist")
+        return property.toString().ifEmpty { throw Exception("$propertyName property is empty") }
+    }
+
+    private fun getDockerEnv(propertyName: String): String? {
+        val property = System.getenv(propertyName.replace(".", "_").uppercase()) ?: null
+        return if (property != null && property.isNotEmpty()) property else null
     }
 }
