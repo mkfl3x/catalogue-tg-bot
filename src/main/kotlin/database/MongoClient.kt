@@ -3,6 +3,7 @@ package database
 import com.mongodb.BasicDBObject
 import com.mongodb.MongoClient
 import com.mongodb.MongoClientSettings
+import com.mongodb.MongoClientURI
 import org.bson.codecs.configuration.CodecRegistries
 import org.bson.codecs.pojo.PojoCodecProvider
 import org.bson.conversions.Bson
@@ -10,10 +11,8 @@ import utils.Properties
 
 object MongoClient {
 
-    private val client = MongoClient(
-        Properties.get("mongo.host"),
-        Properties.get("mongo.port").toInt()
-    )
+    private val connectionUrl = "mongodb+srv://${Properties.get("mongo.user")}:${Properties.get("mongo.password")}@${Properties.get("mongo.host")}/${Properties.get("mongo.database")}?authSource=admin&tls=true"
+    private val client = MongoClient(MongoClientURI(connectionUrl))
 
     private val codecs = CodecRegistries.fromRegistries(
         MongoClientSettings.getDefaultCodecRegistry(),
