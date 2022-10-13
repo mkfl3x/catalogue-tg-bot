@@ -8,6 +8,7 @@ version '0.1-BETA'
 
 repositories {
     mavenCentral()
+    jcenter() // for khttp
 }
 
 dependencies {
@@ -30,6 +31,9 @@ dependencies {
 
     // json-schema
     implementation("com.github.java-json-tools:json-schema-validator:2.2.14")
+
+    // khttp
+    implementation 'khttp:khttp:1.0.0'
 }
 
 shadowJar {

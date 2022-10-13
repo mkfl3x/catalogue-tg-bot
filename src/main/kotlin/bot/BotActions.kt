@@ -1,8 +1,8 @@
 package bot
 
 import com.pengrad.telegrambot.TelegramBot
-import com.pengrad.telegrambot.model.request.Keyboard
 import com.pengrad.telegrambot.request.SendMessage
+import keyboards.models.Keyboard
 
 class BotActions(private val bot: TelegramBot) {
 
@@ -11,6 +11,6 @@ class BotActions(private val bot: TelegramBot) {
     }
 
     fun sendReplyKeyboard(chatId: Long, keyboard: Keyboard) {
-        bot.execute(SendMessage(chatId, "Default text").replyMarkup(keyboard))
+        bot.execute(SendMessage(chatId, keyboard.name).replyMarkup(keyboard.toMarkup()))
     }
 }
