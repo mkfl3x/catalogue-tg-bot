@@ -72,6 +72,13 @@ jobs:
         file: ./Dockerfile
         push: true
         tags: ${{ env.IMAGE_NAME }}:latest
+
+    - name: Delete artifact
+      uses: geekyeggo/delete-artifact@v2
+      with:
+        name: ${{ env.JAR_ARTIFACT_NAME }}
+        path: ${{ env.JAR_ARTIFACT_PATH }}
+        failOnError: false
               
   deploy-to-dev:
     needs: publish-image
@@ -86,6 +93,7 @@ jobs:
         script: |
           docker stop ${{ env.CONTAINER_NAME }}
           docker rm ${{ env.CONTAINER_NAME }}
+          docker image rm ${{ env.IMAGE_NAME }}
           docker run -d -p 8085:8080 \
           -e BOT_TOKEN=${{ secrets.BOT_TOKEN }} \
           -e BOT_WEBHOOK_HOST=${{ secrets.DEV_BOT_DROPLET_HOST}} \
