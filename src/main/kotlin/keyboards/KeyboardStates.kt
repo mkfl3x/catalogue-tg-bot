@@ -1,5 +1,6 @@
 package keyboards
 
+import common.ReservedNames
 import keyboards.models.Keyboard
 
 // TODO: should be refactored
@@ -18,7 +19,7 @@ class KeyboardStates {
 
     // returns previous keyboard and remove last one
     fun getPreviousKeyboard(chatId: Long): Keyboard {
-        if (getCurrentKeyboard(chatId).name == "MainKeyboard")
+        if (getCurrentKeyboard(chatId).name == ReservedNames.MAIN_KEYBOARD.text)
             return getCurrentKeyboard(chatId)
         states[chatId]!!.removeLast()
         return getCurrentKeyboard(chatId)
