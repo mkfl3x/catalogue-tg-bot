@@ -4,21 +4,20 @@
   "type": "object",
   "properties": {
     "name": {
-      "description": "Keyboard name/identifier",
       "type": "string",
       "minLength": 1
     },
-    "keyboard_location": {
-      "description": "Keyboard location",
-      "type": "object",
-      "$ref": "../models/keyboard_location.json"
-    },
     "buttons": {
-      "description": "Keyboard buttons",
+      "description": "IDs of buttons",
       "type": "array",
       "items": {
-        "$ref": "../models/button.json"
+        "type": "string",
+        "minLength": 1
       }
+    },
+    "location": {
+      "type": "object",
+      "$ref": "location.json"
     }
   },
   "required": [

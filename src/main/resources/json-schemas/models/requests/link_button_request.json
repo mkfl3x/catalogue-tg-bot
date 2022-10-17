@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Link button request",
+  "type": "object",
+  "properties": {
+    "button_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "type": {
+      "description": "Type of link. Keyboard or payload",
+      "type": "string",
+      "minLength": 1
+    },
+    "link": {
+      "description": "ID of keyboard/payload",
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "required": [
+    "button_id",
+    "type",
+    "link"
+  ],
+  "additionalProperties": false
+}

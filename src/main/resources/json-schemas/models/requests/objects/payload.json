@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Payload",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "type": {
+      "type": "string",
+      "minLength": 1,
+      "enum": [
+        "tutorial"
+      ]
+    },
+    "data": {
+      "type": "string",
+      "minLength": 1
+    },
+    "location": {
+      "type": "object",
+      "$ref": "location.json"
+    }
+  },
+  "required": [
+    "name",
+    "type",
+    "data"
+  ],
+  "additionalProperties": false
+}

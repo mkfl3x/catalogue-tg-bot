@@ -11,7 +11,10 @@ import utils.Properties
 
 object MongoClient {
 
-    private val connectionUrl = "mongodb+srv://${Properties.get("mongo.user")}:${Properties.get("mongo.password")}@${Properties.get("mongo.host")}/${Properties.get("mongo.database")}?authSource=admin&tls=true"
+    private val connectionUrl =
+        "mongodb+srv://${Properties.get("mongo.user")}:${Properties.get("mongo.password")}@${Properties.get("mongo.host")}/${
+            Properties.get("mongo.database")
+        }?authSource=admin&tls=true"
     private val client = MongoClient(MongoClientURI(connectionUrl))
 
     private val codecs = CodecRegistries.fromRegistries(

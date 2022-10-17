@@ -18,11 +18,11 @@ object Ml {
                 GsonMapper.deserialize(response.text, MlResponse::class.java).msg
             } catch (e: Exception) {
                 logger.error(e.message)
-                "Что-то пошло не так \uD83E\uDD72"
+                "Что-то пошло не так \uD83E\uDD72" // TODO: move to constant
             }
         } else {
             logger.error("response_code from Ml is ${response.statusCode}")
-            "Что-то пошло не так \uD83E\uDD72"
+            "Что-то пошло не так \uD83E\uDD72" // TODO: move to constant
         }
     }
 }

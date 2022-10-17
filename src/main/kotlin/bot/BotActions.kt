@@ -2,7 +2,7 @@ package bot
 
 import com.pengrad.telegrambot.TelegramBot
 import com.pengrad.telegrambot.request.SendMessage
-import keyboards.models.Keyboard
+import database.models.Keyboard
 
 class BotActions(private val bot: TelegramBot) {
 

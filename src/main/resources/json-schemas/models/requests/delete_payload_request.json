@@ -1,15 +1,15 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Add keyboard request",
+  "title": "Delete payload request",
   "type": "object",
   "properties": {
-    "new_keyboard": {
-      "description": "New keyboard",
-      "$ref": "../models/keyboard.json"
+    "payload_id": {
+      "type": "string",
+      "minLength": 1
     }
   },
   "required": [
-    "new_keyboard"
+    "payload_id"
   ],
   "additionalProperties": false
 }

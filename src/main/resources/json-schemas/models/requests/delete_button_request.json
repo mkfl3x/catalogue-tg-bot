@@ -3,20 +3,13 @@
   "title": "Delete button request",
   "type": "object",
   "properties": {
-    "keyboard": {
-      "description": "Name of keyboard stores button",
-      "type": "string",
-      "minLength": 1
-    },
-    "button_text": {
-      "description": "Text of removing button",
+    "button_id": {
       "type": "string",
       "minLength": 1
     }
   },
   "required": [
-    "keyboard",
-    "button_text"
+    "button_id"
   ],
   "additionalProperties": false
 }

@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Location",
+  "type": "object",
+  "properties": {
+    "lead_button": {
+      "description": "Text using for button which lead to keyboard/payload",
+      "type": "string",
+      "minLength": 1
+    },
+    "host_keyboard": {
+      "description": "ID of keyboard which contains button with link to keyboard/payload",
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "required": [
+    "lead_button",
+    "host_keyboard"
+  ],
+  "additionalProperties": false
+}

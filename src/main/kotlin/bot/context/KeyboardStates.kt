@@ -1,10 +1,11 @@
-package keyboards
+package bot.context
 
 import common.ReservedNames
-import keyboards.models.Keyboard
+import database.models.Keyboard
+import org.bson.types.ObjectId
 
-// TODO: should be refactored
-class KeyboardStates {
+// TODO: should be moved to redis
+object KeyboardStates {
 
     // stores sent keyboards. key: chatId; value: list of keyboards
     private val states = mutableMapOf<Long, MutableList<Keyboard>>()
@@ -35,9 +36,7 @@ class KeyboardStates {
     }
 
     // delete removed keyboard from states of all users
-    fun delete(keyboard: String) {
-        states.values.forEach { list ->
-            list.removeIf { it.name == keyboard }
-        }
+    fun delete(keyboardId: ObjectId) {
+        states.values.forEach { list -> list.removeIf { it.id == keyboardId } }
     }
 }

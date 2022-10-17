@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Detach keyboard request",
+  "type": "object",
+  "properties": {
+    "keyboard_id": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "required": [
+    "keyboard_id"
+  ],
+  "additionalProperties": false
+}

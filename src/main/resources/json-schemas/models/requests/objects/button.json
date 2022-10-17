@@ -9,7 +9,6 @@
       "minLength": 1
     },
     "type": {
-      "description": "Button type",
       "type": "string",
       "minLength": 1,
       "enum": [
@@ -17,32 +16,20 @@
         "keyboard"
       ]
     },
-    "payload": {
-      "description": "Payload data of button",
+    "link": {
+      "description": "ID of keyboard/payload",
       "type": "string",
       "minLength": 1
     },
-    "keyboard": {
-      "description": "Link to another keyboard",
+    "host_keyboard": {
       "type": "string",
       "minLength": 1
     }
   },
-  "oneOf": [
-    {
-      "required": [
-        "text",
-        "type",
-        "payload"
-      ]
-    },
-    {
-      "required": [
-        "text",
-        "type",
-        "keyboard"
-      ]
-    }
+  "required": [
+    "text",
+    "type",
+    "link"
   ],
   "additionalProperties": false
 }

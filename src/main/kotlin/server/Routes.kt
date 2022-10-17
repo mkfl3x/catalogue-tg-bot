@@ -5,46 +5,66 @@ import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
-import server.handlers.KeyboardsHandler
+import server.handlers.ContentHandler
 import server.handlers.WebhookHandler
 import utils.Properties
 
 object Routes {
 
-    private val keyboardsHandler = KeyboardsHandler(Properties.get("mongo.collection.keyboards"))
+    private val contentHandler = ContentHandler()
     private val webhookHandler = WebhookHandler()
 
     fun Route.keyboardRoutes(section: String) {
         get("$section/get") {
             val filter = call.request.queryParameters["filter"] ?: "all"
-            val result = keyboardsHandler.getKeyboards(filter)
+            val result = contentHandler.getKeyboards(filter)
             call.respond(result.responseCode, result.responseData)
         }
         post("$section/add") {
-            val result = keyboardsHandler.addKeyboard(call.receive())
+            val result = contentHandler.addKeyboard(call.receive())
             call.respond(result.responseCode, result.responseData)
         }
         put("$section/detach") {
-            val result = keyboardsHandler.detachKeyboard(call.receive())
-            call.respond(result.responseCode, result.responseData)
-        }
-        put("$section/link") {
-            val result = keyboardsHandler.linkKeyboard(call.receive())
+            val result = contentHandler.detachKeyboard(call.receive())
             call.respond(result.responseCode, result.responseData)
         }
         delete("$section/delete") {
-            val result = keyboardsHandler.deleteKeyboard(call.receive())
+            val result = contentHandler.deleteKeyboard(call.receive())
             call.respond(result.responseCode, result.responseData)
         }
     }
 
     fun Route.buttonsRoute(section: String) {
+        get("$section/get") {
+            val filter = call.request.queryParameters["filter"] ?: "all"
+            val result = contentHandler.getButtons(filter)
+            call.respond(result.responseCode, result.responseData)
+        }
         post("$section/add") {
-            val result = keyboardsHandler.addButton(call.receive())
+            val result = contentHandler.addButton(call.receive())
             call.respond(result.responseCode, result.responseData)
         }
         delete("$section/delete") {
-            val result = keyboardsHandler.deleteButton(call.receive())
+            val result = contentHandler.deleteButton(call.receive())
+            call.respond(result.responseCode, result.responseData)
+        }
+        put("$section/link") {
+            val result = contentHandler.linkButton(call.receive())
+            call.respond(result.responseCode, result.responseData)
+        }
+    }
+
+    fun Route.payloadsRoute(section: String) {
+        get("$section/get") {
+            val result = contentHandler.getPayloads()
+            call.respond(result.responseCode, result.responseData)
+        }
+        post("$section/add") {
+            val result = contentHandler.addPayload(call.receive())
+            call.respond(result.responseCode, result.responseData)
+        }
+        delete("$section/delete") {
+            val result = contentHandler.deletePayload(call.receive())
             call.respond(result.responseCode, result.responseData)
         }
     }
@@ -60,11 +80,9 @@ object Routes {
             try {
                 webhookHandler.handleUpdate(call.receive())
             } catch (e: Exception) {
-                // TODO: print log
                 e.printStackTrace()
             } finally {
-                // in each case following response should be sent for complete interaction with telegram server
-                call.respond(HttpStatusCode.OK, "ok")
+                call.respond(HttpStatusCode.OK, "ok") // sent for complete interaction with telegram server
             }
         }
     }
