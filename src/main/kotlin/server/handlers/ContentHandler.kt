@@ -1,5 +1,6 @@
 package server.handlers
 
+import bot.context.KeyboardStates
 import com.mongodb.BasicDBObject
 import database.DataManager
 import database.MongoClient
@@ -7,7 +8,6 @@ import database.MongoCollections
 import database.models.Button
 import database.models.Keyboard
 import database.models.Payload
-import bot.context.KeyboardStates
 import org.bson.BsonNull
 import org.bson.types.ObjectId
 import org.slf4j.Logger
@@ -28,7 +28,7 @@ class ContentHandler {
                 .toList()
             else -> return Result.error(Error.UNKNOWN_PARAMETER_VALUE, filter, "filter")
         }
-        return Result.success(keyboards)
+        return Result.success(keyboards.map { it.asJson() }.toList())
     }
 
     fun addKeyboard(keyboard: AddKeyboardRequest): Result {
@@ -90,7 +90,7 @@ class ContentHandler {
             "all" -> DataManager.getButtons()
             else -> return Result.error(Error.UNKNOWN_PARAMETER_VALUE, filter, "filter")
         }
-        return Result.success(buttons)
+        return Result.success(buttons.map { it.asJson() }.toList())
     }
 
     fun addButton(button: AddButtonRequest): Result {
@@ -135,6 +135,10 @@ class ContentHandler {
         }
     }
 
+    fun getPayloads(): Result {
+        return Result.success(DataManager.getPayloads().map { it.asJson() }.toList())
+    }
+
     fun addPayload(payload: AddPayloadRequest): Result {
         return handleRequest(payload) {
             // 1. Create payload
@@ -170,11 +174,6 @@ class ContentHandler {
             }
         }
     }
-
-    fun getPayloads(): Result {
-        return Result.success(DataManager.getPayloads())
-    }
-
 
     private fun handleRequest(request: Request, code: () -> Unit): Result {
         request.validateSchema()?.let { return it }

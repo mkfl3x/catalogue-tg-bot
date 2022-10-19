@@ -1,5 +1,7 @@
 package database.models
 
+import com.google.gson.JsonArray
+import com.google.gson.JsonObject
 import com.pengrad.telegrambot.model.request.KeyboardButton
 import com.pengrad.telegrambot.model.request.ReplyKeyboardMarkup
 import common.ReservedNames
@@ -13,8 +15,19 @@ data class Keyboard @BsonCreator constructor(
     @BsonId val id: ObjectId,
     @BsonProperty("name") val name: String,
     @BsonProperty("buttons") val buttons: List<ObjectId>,
-    @BsonProperty("lead_buttons") val leadButton: ObjectId?
-) {
+    @BsonProperty("lead_button") val leadButton: ObjectId?
+) : MongoModel {
+
+    override fun asJson(): JsonObject {
+        val buttons = JsonArray()
+        this.buttons.forEach { buttons.add(it.toHexString()) }
+        val json = JsonObject()
+        json.addProperty("id", id.toHexString())
+        json.addProperty("name", name)
+        json.addProperty("lead_button", leadButton?.toHexString())
+        json.add("buttons", buttons)
+        return json
+    }
 
     fun toMarkup(): ReplyKeyboardMarkup {
         val buttons = buttonsToMarkup()
