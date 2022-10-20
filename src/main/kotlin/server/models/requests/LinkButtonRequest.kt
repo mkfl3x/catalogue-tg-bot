@@ -16,7 +16,7 @@ data class LinkButtonRequest(
         get() = Schemas.LINK_KEYBOARD_REQUEST
 
     override val successMessage: String
-        get() = "Button '$buttonId' successfully linked to '$link' $type"
+        get() = "Button with ID \"$buttonId\" successfully linked to $type with ID \"$link\""
 
     override fun validateData(): Result? {
         DataManager.getButton(ObjectId(buttonId))?.let {

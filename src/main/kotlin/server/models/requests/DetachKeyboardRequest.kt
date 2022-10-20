@@ -7,7 +7,6 @@ import org.bson.types.ObjectId
 import server.models.Error
 import server.models.Result
 
-
 data class DetachKeyboardRequest(
     @SerializedName("keyboard_id") val keyboardId: String
 ) : Request() {
@@ -16,7 +15,7 @@ data class DetachKeyboardRequest(
         get() = Schemas.DETACH_KEYBOARD_REQUEST
 
     override val successMessage: String
-        get() = "Keyboard '$keyboardId' successfully detached"
+        get() = "Keyboard with ID \"$keyboardId\" successfully detached"
 
     override fun validateData(): Result? {
         DataManager.getKeyboard(ObjectId(keyboardId))?.let {

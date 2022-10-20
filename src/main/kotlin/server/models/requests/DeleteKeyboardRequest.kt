@@ -15,7 +15,7 @@ data class DeleteKeyboardRequest(
         get() = Schemas.DELETE_KEYBOARD_REQUEST
 
     override val successMessage: String
-        get() = "Keyboard \"$keyboardId\" successfully deleted"
+        get() = "Keyboard with ID \"$keyboardId\" successfully deleted"
 
     override fun validateData(): Result? {
         DataManager.getKeyboard(ObjectId(keyboardId))?.let {

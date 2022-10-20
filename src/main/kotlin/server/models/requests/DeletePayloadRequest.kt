@@ -15,7 +15,7 @@ data class DeletePayloadRequest(
         get() = Schemas.DELETE_PAYLOAD_REQUEST
 
     override val successMessage: String
-        get() = "Payload '$payloadId' successfully deleted"
+        get() = "Payload with ID \"$payloadId\" successfully deleted"
 
     override fun validateData(): Result? {
         if (DataManager.getPayload(ObjectId(payloadId)) == null)

@@ -6,14 +6,15 @@ import io.ktor.gson.*
 import io.ktor.routing.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
-import server.Routes.buttonsRoute
-import server.Routes.keyboardRoutes
-import server.Routes.payloadsRoute
-import server.Routes.serviceRoute
-import server.Routes.telegramRoute
+import server.handlers.ContentHandler
+import server.handlers.WebhookHandler
+import server.routes.*
 import utils.Properties
 
 class Server {
+
+    private val webhookHandler = WebhookHandler()
+    private val contentHandler = ContentHandler()
 
     private val server = embeddedServer(
         Netty,
@@ -23,11 +24,11 @@ class Server {
             gson()
         }
         routing {
-            serviceRoute("/service")
-            keyboardRoutes("/keyboards")
-            buttonsRoute("/buttons")
-            payloadsRoute("/payloads")
-            telegramRoute()
+            service("/service")
+            buttons("/buttons", contentHandler)
+            payloads("/payloads", contentHandler)
+            keyboards("/keyboards", contentHandler)
+            telegram(Properties.get("bot.webhook.endpoint"), webhookHandler)
         }
     }
 

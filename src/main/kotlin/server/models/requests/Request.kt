@@ -26,18 +26,18 @@ abstract class Request {
 
     abstract fun validateData(): Result?
 
+    fun validateSchema(): Result? {
+        val schemaReport = SchemaValidator.validate(GsonMapper.serialize(this), schema)
+        return if (!schemaReport.isSuccess)
+            Result.error(Error.NOT_VALID_JSON_SCHEMA)
+        else null
+    }
+
     protected fun validateReservedNames(vararg names: String?): Result? {
         names.forEach { name ->
             if (ReservedNames.values().any { it.text == name })
                 return Result(HttpStatusCode.BadRequest, "'$name' is reserved and can't be used")
         }
         return null
-    }
-
-    fun validateSchema(): Result? {
-        val schemaReport = SchemaValidator.validate(GsonMapper.serialize(this), schema)
-        return if (!schemaReport.isSuccess)
-            Result.error(Error.NOT_VALID_JSON_SCHEMA)
-        else null
     }
 }

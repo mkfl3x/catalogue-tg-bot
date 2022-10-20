@@ -15,7 +15,7 @@ data class DeleteButtonRequest(
         get() = Schemas.DELETE_BUTTON_REQUEST
 
     override val successMessage: String
-        get() = "Button '$buttonId' successfully deleted"
+        get() = "Button with ID \"$buttonId\" successfully deleted"
 
     override fun validateData(): Result? {
         if (DataManager.getButton(ObjectId(buttonId)) == null)
