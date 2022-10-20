@@ -18,6 +18,7 @@ data class DetachKeyboardRequest(
         get() = "Keyboard with ID \"$keyboardId\" successfully detached"
 
     override fun validateData(): Result? {
+        RequestValidator.validateIds(keyboardId)?.let { return it }
         DataManager.getKeyboard(ObjectId(keyboardId))?.let {
             if (it.name == ReservedNames.MAIN_KEYBOARD.text)
                 return Result.error(Error.LINK_DETACH_MAIN_KEYBOARD)

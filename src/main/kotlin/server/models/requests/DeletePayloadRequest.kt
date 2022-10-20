@@ -18,8 +18,8 @@ data class DeletePayloadRequest(
         get() = "Payload with ID \"$payloadId\" successfully deleted"
 
     override fun validateData(): Result? {
-        if (DataManager.getPayload(ObjectId(payloadId)) == null)
-            return Result.error(Error.BUTTON_DOES_NOT_EXIST, payloadId)
-        return null
+        RequestValidator.validateIds(payloadId)?.let { return it }
+        return if (DataManager.getPayload(ObjectId(payloadId)) == null)
+            Result.error(Error.BUTTON_DOES_NOT_EXIST, payloadId) else null
     }
 }

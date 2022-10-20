@@ -1,14 +1,15 @@
 package server.handlers
 
 import bot.Bot
+import bot.context.KeyboardStates
 import com.pengrad.telegrambot.model.Update
 import common.FeaturesList
 import common.ReservedNames
 import database.DataManager.getKeyboard
+import database.DataManager.getKeyboards
 import database.DataManager.getPayload
 import database.models.Button
 import integrations.Ml
-import bot.context.KeyboardStates
 
 class WebhookHandler {
 
@@ -18,7 +19,7 @@ class WebhookHandler {
         val chatId = update.message().chat().id()
         when (val message = update.message().text()) {
             ReservedNames.START.text -> {
-                val startKeyboard = getKeyboard(ReservedNames.MAIN_KEYBOARD.text)
+                val startKeyboard = getKeyboards().find { it.name == ReservedNames.MAIN_KEYBOARD.text }
                 KeyboardStates.dropState(chatId)
                 bot.actions.sendReplyKeyboard(chatId, startKeyboard!!)
                 KeyboardStates.addKeyboard(chatId, startKeyboard)

@@ -18,8 +18,8 @@ data class DeleteButtonRequest(
         get() = "Button with ID \"$buttonId\" successfully deleted"
 
     override fun validateData(): Result? {
-        if (DataManager.getButton(ObjectId(buttonId)) == null)
-            return Result.error(Error.BUTTON_DOES_NOT_EXIST, buttonId)
-        return null
+        RequestValidator.validateIds(buttonId)?.let { return it }
+        return if (DataManager.getButton(ObjectId(buttonId)) == null)
+            Result.error(Error.BUTTON_DOES_NOT_EXIST, buttonId) else null
     }
 }

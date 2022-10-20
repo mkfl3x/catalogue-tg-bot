@@ -2,8 +2,6 @@ package server.models.requests
 
 import com.google.gson.annotations.SerializedName
 import database.DataManager
-import database.DataManager.isKeyboardExist
-import org.bson.types.ObjectId
 import server.models.Error
 import server.models.Result
 import server.models.objects.Location
@@ -22,24 +20,11 @@ data class AddPayloadRequest(
         get() = "Payload \"${name}\" successfully added"
 
     override fun validateData(): Result? {
-
-        // 1. validate payload name
-        validateReservedNames(name)
-
-        // 2. validate is payload with same name exists
+        RequestValidator.validateIds(location?.hostKeyboard)?.let { return it }
+        RequestValidator.validateReservedNames(name)?.let { return it }
         if (DataManager.getPayloads().any { it.name == name })
             return Result.error(Error.PAYLOAD_ALREADY_EXISTS, name)
-
-        // 3. check location
-        location?.let {
-
-            // validate lead button text
-            validateReservedNames(it.leadButtonText)
-
-            // check is host keyboard exists
-            if (!isKeyboardExist(ObjectId(it.hostKeyboard)))
-                return Result.error(Error.KEYBOARD_DOES_NOT_EXIST, it.hostKeyboard)
-        }
+        location?.let { location -> RequestValidator.validateLocation(location)?.let { return it } }
         return null
     }
 }

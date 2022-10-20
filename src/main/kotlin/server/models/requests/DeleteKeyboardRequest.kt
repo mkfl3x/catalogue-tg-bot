@@ -18,6 +18,7 @@ data class DeleteKeyboardRequest(
         get() = "Keyboard with ID \"$keyboardId\" successfully deleted"
 
     override fun validateData(): Result? {
+        RequestValidator.validateIds(keyboardId)?.let { return it }
         DataManager.getKeyboard(ObjectId(keyboardId))?.let {
             if (it.name == ReservedNames.MAIN_KEYBOARD.text)
                 return Result.error(Error.DELETE_MAIN_KEYBOARD)

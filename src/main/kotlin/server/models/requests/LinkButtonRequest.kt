@@ -19,17 +19,12 @@ data class LinkButtonRequest(
         get() = "Button with ID \"$buttonId\" successfully linked to $type with ID \"$link\""
 
     override fun validateData(): Result? {
-        DataManager.getButton(ObjectId(buttonId))?.let {
-            val exists = when (type) {
-                "keyboard" -> DataManager.getKeyboards().any { it.id == ObjectId(link) }
-                "payload" -> DataManager.getPayloads().any { it.id == ObjectId(link) }
-                else -> throw Exception("unknown button type")
-            }
-            if (exists.not())
-                return Result.error(Error.LINK_OBJECT_DOES_NOT_EXISTS, link)
-            if (type == "keyboard" && DataManager.getKeyboard(ObjectId(link))!!.leadButton != null)
-                return Result.error(Error.KEYBOARD_ALREADY_LINKED, link)
-        } ?: return Result.error(Error.BUTTON_DOES_NOT_EXIST, buttonId)
+        RequestValidator.validateIds(buttonId, link)?.let { return it }
+        if (DataManager.getButton(ObjectId(buttonId)) == null)
+            return Result.error(Error.BUTTON_DOES_NOT_EXIST, buttonId)
+        RequestValidator.validateResourceExistence(type, link)?.let { return it }
+        if (type == "keyboard" && DataManager.getKeyboard(ObjectId(link))!!.leadButton != null)
+            return Result.error(Error.KEYBOARD_ALREADY_LINKED, link)
         return null
     }
 }

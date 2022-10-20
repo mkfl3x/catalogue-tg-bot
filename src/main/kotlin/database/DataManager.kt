@@ -34,11 +34,11 @@ object DataManager {
 
     fun getKeyboards() = keyboards
 
-    fun getKeyboard(name: String): Keyboard? = keyboards.firstOrNull { it.name == name }
+    //fun getKeyboard(name: String): Keyboard? = keyboards.firstOrNull { it.name == name }
 
     fun getKeyboard(id: ObjectId): Keyboard? = keyboards.firstOrNull { it.id == id }
 
-    fun isKeyboardExist(name: String) = keyboards.any { it.name == name }
+    //fun isKeyboardExist(name: String) = keyboards.any { it.name == name }
 
     fun isKeyboardExist(id: ObjectId) = keyboards.any { it.id == id }
 
