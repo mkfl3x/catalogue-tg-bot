@@ -38,7 +38,8 @@ object Ml {
         )
         return if (response.statusCode == HttpStatusCode.OK.value) {
             try {
-                GsonMapper.deserialize(response.text, MlResponse::class.java).message
+                val responseMessage = GsonMapper.deserialize(response.text, MlResponse::class.java).message
+                if (responseMessage.isNullOrEmpty()) response.text else responseMessage // TODO: while debugging
             } catch (e: Exception) {
                 logger.error(e.message)
                 "Что-то пошло не так \uD83E\uDD72" // TODO: move to constant
