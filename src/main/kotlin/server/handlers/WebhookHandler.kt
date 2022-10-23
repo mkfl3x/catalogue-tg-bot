@@ -17,30 +17,40 @@ class WebhookHandler {
 
     fun handleUpdate(update: Update) {
         val chatId = update.message().chat().id()
-        when (val message = update.message().text()) {
-            ReservedNames.START.text -> {
-                val startKeyboard = getKeyboards().find { it.name == ReservedNames.MAIN_KEYBOARD.text }
-                KeyboardStates.dropState(chatId)
-                bot.actions.sendReplyKeyboard(chatId, startKeyboard!!)
-                KeyboardStates.addKeyboard(chatId, startKeyboard)
-                return
-            }
-            ReservedNames.BACK.text -> {
-                bot.actions.sendReplyKeyboard(chatId, KeyboardStates.getPreviousKeyboard(chatId))
-                return
-            }
-            else -> {
-                KeyboardStates.getCurrentKeyboard(chatId).fetchButtons()
-                    .firstOrNull { it!!.text == message }?.let {
-                        handleButtonClick(it, chatId)
-                        return
-                    }
+        val message = update.message()
+        if (message.voice() != null && FeaturesList.ML.enabled) {
+            val link = bot.actions.getVoiceLink(message.voice().fileId())
+            bot.actions.sendMessage(chatId, Ml.getAnswer(link, "voice", update.message().chat().id()))
+            return
+        } else {
+            when (message.text()) {
+                ReservedNames.START.text -> {
+                    val startKeyboard = getKeyboards().find { it.name == ReservedNames.MAIN_KEYBOARD.text }
+                    KeyboardStates.dropState(chatId)
+                    bot.actions.sendReplyKeyboard(chatId, startKeyboard!!)
+                    KeyboardStates.addKeyboard(chatId, startKeyboard)
+                    return
+                }
+                ReservedNames.BACK.text -> {
+                    bot.actions.sendReplyKeyboard(chatId, KeyboardStates.getPreviousKeyboard(chatId))
+                    return
+                }
+                else -> {
+                    KeyboardStates.getCurrentKeyboard(chatId).fetchButtons()
+                        .firstOrNull { it!!.text == message.text() }?.let {
+                            handleButtonClick(it, chatId)
+                            return
+                        }
 
-                if (FeaturesList.ML.enabled)
-                    bot.actions.sendMessage(chatId, Ml.getAnswer(message))
-                else
-                    bot.actions.sendMessage(chatId, "Что то пошло не так \uD83E\uDD72")
-                return
+                    if (FeaturesList.ML.enabled)
+                        bot.actions.sendMessage(
+                            chatId,
+                            Ml.getAnswer(message.text(), "text", update.message().chat().id())
+                        )
+                    else
+                        bot.actions.sendMessage(chatId, "Что то пошло не так \uD83E\uDD72")
+                    return
+                }
             }
         }
     }
