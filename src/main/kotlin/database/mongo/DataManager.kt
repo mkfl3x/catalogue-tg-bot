@@ -1,8 +1,9 @@
-package database
+package database.mongo
 
-import database.models.Button
-import database.models.Keyboard
-import database.models.Payload
+import common.ReservedNames
+import database.mongo.models.Button
+import database.mongo.models.Keyboard
+import database.mongo.models.Payload
 import org.bson.types.ObjectId
 
 object DataManager {
@@ -30,15 +31,11 @@ object DataManager {
         }
     }
 
-    // Keyboards
-
     fun getKeyboards() = keyboards
 
-    //fun getKeyboard(name: String): Keyboard? = keyboards.firstOrNull { it.name == name }
+    fun getMainKeyboard() = keyboards.find { it.name == ReservedNames.MAIN_KEYBOARD.text }
 
     fun getKeyboard(id: ObjectId): Keyboard? = keyboards.firstOrNull { it.id == id }
-
-    //fun isKeyboardExist(name: String) = keyboards.any { it.name == name }
 
     fun isKeyboardExist(id: ObjectId) = keyboards.any { it.id == id }
 
@@ -47,14 +44,10 @@ object DataManager {
             .map { getButton(it) }
             .any { it!!.text == buttonText }
 
-
-    // Buttons
     fun getButtons() = buttons
 
     fun getButton(id: ObjectId): Button? = buttons.firstOrNull { it.id == id }
 
-
-    // Payloads
     fun getPayloads() = payloads
 
     fun getPayload(id: ObjectId): Payload? = payloads.firstOrNull { it.id == id }

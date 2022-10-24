@@ -1,7 +1,7 @@
 package server.models.requests
 
 import com.google.gson.annotations.SerializedName
-import database.DataManager
+import database.mongo.DataManager
 import server.models.Error
 import server.models.Result
 import server.models.objects.Location

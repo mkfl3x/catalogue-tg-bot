@@ -1,21 +1,33 @@
-package database.models
+package database.mongo.models
 
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.pengrad.telegrambot.model.request.KeyboardButton
 import com.pengrad.telegrambot.model.request.ReplyKeyboardMarkup
 import common.ReservedNames
-import database.DataManager.getButton
+import database.mongo.DataManager.getButton
 import org.bson.codecs.pojo.annotations.BsonCreator
 import org.bson.codecs.pojo.annotations.BsonId
 import org.bson.codecs.pojo.annotations.BsonProperty
 import org.bson.types.ObjectId
 
 data class Keyboard @BsonCreator constructor(
-    @BsonId val id: ObjectId,
-    @BsonProperty("name") val name: String,
-    @BsonProperty("buttons") val buttons: List<ObjectId>,
-    @BsonProperty("lead_button") val leadButton: ObjectId?
+
+    @BsonId
+    val id: ObjectId,
+
+    @param:BsonProperty("name")
+    @field:BsonProperty("name")
+    val name: String,
+
+    @param:BsonProperty("buttons")
+    @field:BsonProperty("buttons")
+    val buttons: List<ObjectId>,
+
+    @param:BsonProperty("lead_button")
+    @field:BsonProperty("lead_button")
+    val leadButton: ObjectId?
+
 ) : MongoModel {
 
     override fun asJson(): JsonObject {

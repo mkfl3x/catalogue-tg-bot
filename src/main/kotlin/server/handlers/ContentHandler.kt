@@ -2,12 +2,12 @@ package server.handlers
 
 import bot.context.KeyboardStates
 import com.mongodb.BasicDBObject
-import database.DataManager
-import database.MongoClient
-import database.MongoCollections
-import database.models.Button
-import database.models.Keyboard
-import database.models.Payload
+import database.mongo.DataManager
+import database.mongo.MongoClient
+import database.mongo.MongoCollections
+import database.mongo.models.Button
+import database.mongo.models.Keyboard
+import database.mongo.models.Payload
 import org.bson.BsonNull
 import org.bson.types.ObjectId
 import org.slf4j.Logger
@@ -52,7 +52,7 @@ class ContentHandler {
         return handleRequest(request) {
             DataManager.getKeyboard(ObjectId(request.keyboardId))?.let {
                 // 1. Drop keyboard from states
-                KeyboardStates.delete(ObjectId(request.keyboardId))
+                KeyboardStates.deleteKeyboard(request.keyboardId)
                 // 2. Delete keyboard from collection
                 deleteKeyboard(it.id)
                 // 3. Delete lead button (if it's exist)

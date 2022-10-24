@@ -2,7 +2,7 @@ package server.models.requests
 
 import com.google.gson.annotations.SerializedName
 import common.ReservedNames
-import database.DataManager
+import database.mongo.DataManager
 import org.bson.types.ObjectId
 import server.models.Error
 import server.models.Result

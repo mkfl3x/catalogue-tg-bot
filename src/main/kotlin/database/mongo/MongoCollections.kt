@@ -1,4 +1,4 @@
-package database
+package database.mongo
 
 enum class MongoCollections(val collectionName: String) {
     KEYBOARDS("keyboards"),

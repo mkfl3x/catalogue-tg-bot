@@ -5,19 +5,20 @@ import bot.context.KeyboardStates
 import com.pengrad.telegrambot.model.Update
 import common.FeaturesList
 import common.ReservedNames
-import database.DataManager.getKeyboard
-import database.DataManager.getKeyboards
-import database.DataManager.getPayload
-import database.models.Button
+import database.mongo.DataManager.getKeyboard
+import database.mongo.DataManager.getMainKeyboard
+import database.mongo.DataManager.getPayload
+import database.mongo.models.Button
 import integrations.Ml
+import org.bson.types.ObjectId
 
 class WebhookHandler {
 
     private val bot = Bot()
 
     fun handleUpdate(update: Update) {
-        val chatId = update.message().chat().id()
         val message = update.message()
+        val chatId = message.chat().id()
         if (message.voice() != null && FeaturesList.ML.enabled) {
             val link = bot.actions.getVoiceLink(message.voice().fileId())
             bot.actions.sendMessage(chatId, Ml.getAnswer(link, "voice", update.message().chat().id()))
@@ -25,23 +26,33 @@ class WebhookHandler {
         } else {
             when (message.text()) {
                 ReservedNames.START.text -> {
-                    val startKeyboard = getKeyboards().find { it.name == ReservedNames.MAIN_KEYBOARD.text }
                     KeyboardStates.dropState(chatId)
-                    bot.actions.sendReplyKeyboard(chatId, startKeyboard!!)
-                    KeyboardStates.addKeyboard(chatId, startKeyboard)
+                    getMainKeyboard()?.let {
+                        bot.actions.sendReplyKeyboard(chatId, it)
+                        KeyboardStates.pushKeyboard(chatId, it.id)
+                    }
                     return
                 }
                 ReservedNames.BACK.text -> {
-                    bot.actions.sendReplyKeyboard(chatId, KeyboardStates.getPreviousKeyboard(chatId))
+                    KeyboardStates.getCurrentKeyboard(chatId)?.let {
+                        if (getKeyboard(ObjectId(it))?.name == ReservedNames.MAIN_KEYBOARD.text)
+                            return
+                        else {
+                            KeyboardStates.popKeyboard(chatId)
+                            bot.actions.sendReplyKeyboard(
+                                chatId,
+                                getKeyboard(ObjectId(KeyboardStates.getCurrentKeyboard(chatId)))!!
+                            )
+                        }
+                    }
                     return
                 }
                 else -> {
-                    KeyboardStates.getCurrentKeyboard(chatId).fetchButtons()
+                    getKeyboard(ObjectId(KeyboardStates.getCurrentKeyboard(chatId)))!!.fetchButtons()
                         .firstOrNull { it!!.text == message.text() }?.let {
                             handleButtonClick(it, chatId)
                             return
                         }
-
                     if (FeaturesList.ML.enabled)
                         bot.actions.sendMessage(
                             chatId,
@@ -61,7 +72,7 @@ class WebhookHandler {
             "keyboard" -> {
                 val keyboard = getKeyboard(button.linkTo) ?: throw Exception("Keyboard was not found")
                 bot.actions.sendReplyKeyboard(chatId, keyboard)
-                KeyboardStates.addKeyboard(chatId, keyboard)
+                KeyboardStates.pushKeyboard(chatId, keyboard.id)
             }
         }
     }

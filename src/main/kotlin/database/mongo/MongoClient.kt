@@ -1,4 +1,4 @@
-package database
+package database.mongo
 
 import com.mongodb.BasicDBObject
 import com.mongodb.MongoClient

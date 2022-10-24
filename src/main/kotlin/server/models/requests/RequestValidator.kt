@@ -1,7 +1,7 @@
 package server.models.requests
 
 import common.ReservedNames
-import database.DataManager
+import database.mongo.DataManager
 import io.ktor.http.*
 import org.bson.types.ObjectId
 import server.models.Error

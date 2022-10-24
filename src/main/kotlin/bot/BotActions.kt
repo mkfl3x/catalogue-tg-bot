@@ -3,7 +3,7 @@ package bot
 import com.pengrad.telegrambot.TelegramBot
 import com.pengrad.telegrambot.request.GetFile
 import com.pengrad.telegrambot.request.SendMessage
-import database.models.Keyboard
+import database.mongo.models.Keyboard
 
 class BotActions(private val bot: TelegramBot) {
 
