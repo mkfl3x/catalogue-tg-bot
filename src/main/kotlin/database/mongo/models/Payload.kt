@@ -25,12 +25,10 @@ data class Payload @BsonCreator constructor(
 
 ) : MongoModel {
 
-    override fun asJson(): JsonObject {
-        val json = JsonObject()
-        json.addProperty("id", id.toHexString())
-        json.addProperty("name", name)
-        json.addProperty("type", type)
-        json.addProperty("data", data)
-        return json
+    override fun toJson() = JsonObject().apply {
+        addProperty("id", id.toHexString())
+        addProperty("name", name)
+        addProperty("type", type)
+        addProperty("data", data)
     }
 }

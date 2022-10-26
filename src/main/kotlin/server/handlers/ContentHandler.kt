@@ -28,7 +28,7 @@ class ContentHandler {
                 .toList()
             else -> return Result.error(Error.UNKNOWN_PARAMETER_VALUE, filter, "filter")
         }
-        return Result.success(keyboards.map { it.asJson() }.toList())
+        return Result.success(keyboards.map { it.toJson() }.toList())
     }
 
     fun addKeyboard(keyboard: AddKeyboardRequest): Result {
@@ -90,7 +90,7 @@ class ContentHandler {
             "all" -> DataManager.getButtons()
             else -> return Result.error(Error.UNKNOWN_PARAMETER_VALUE, filter, "filter")
         }
-        return Result.success(buttons.map { it.asJson() }.toList())
+        return Result.success(buttons.map { it.toJson() }.toList())
     }
 
     fun addButton(button: AddButtonRequest): Result {
@@ -136,7 +136,7 @@ class ContentHandler {
     }
 
     fun getPayloads(): Result {
-        return Result.success(DataManager.getPayloads().map { it.asJson() }.toList())
+        return Result.success(DataManager.getPayloads().map { it.toJson() }.toList())
     }
 
     fun addPayload(payload: AddPayloadRequest): Result {

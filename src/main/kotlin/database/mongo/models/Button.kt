@@ -25,12 +25,10 @@ data class Button @BsonCreator constructor(
 
 ) : MongoModel {
 
-    override fun asJson(): JsonObject {
-        val json = JsonObject()
-        json.addProperty("id", id.toHexString())
-        json.addProperty("text", text)
-        json.addProperty("type", type)
-        json.addProperty("link_to", linkTo.toHexString())
-        return json
+    override fun toJson() = JsonObject().apply {
+        addProperty("id", id.toHexString())
+        addProperty("text", text)
+        addProperty("type", type)
+        addProperty("link_to", linkTo.toHexString())
     }
 }

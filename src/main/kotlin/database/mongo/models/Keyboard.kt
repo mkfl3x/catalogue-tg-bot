@@ -30,15 +30,11 @@ data class Keyboard @BsonCreator constructor(
 
 ) : MongoModel {
 
-    override fun asJson(): JsonObject {
-        val buttons = JsonArray()
-        this.buttons.forEach { buttons.add(it.toHexString()) }
-        val json = JsonObject()
-        json.addProperty("id", id.toHexString())
-        json.addProperty("name", name)
-        json.addProperty("lead_button", leadButton?.toHexString())
-        json.add("buttons", buttons)
-        return json
+    override fun toJson() = JsonObject().apply {
+        addProperty("id", id.toHexString())
+        addProperty("name", name)
+        addProperty("lead_button", leadButton?.toHexString())
+        add("buttons", JsonArray().apply { buttons.forEach { add(it.toHexString()) } })
     }
 
     fun toMarkup(): ReplyKeyboardMarkup {
