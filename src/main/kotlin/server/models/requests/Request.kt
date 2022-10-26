@@ -14,9 +14,9 @@ abstract class Request {
     abstract fun validateData(): Result?
 
     fun validateSchema(): Result? {
-        val schemaReport = SchemaValidator.validate(GsonMapper.serialize(this), schema)
-        return if (!schemaReport.isSuccess)
-            Result.error(Error.NOT_VALID_JSON_SCHEMA)
+        val report = SchemaValidator.validate(GsonMapper.serialize(this), schema)
+        return if (!report.isSuccess)
+            Result.error(Error.NOT_VALID_JSON_SCHEMA, report.toString().split("\n").first { it.startsWith("error:") })
         else null
     }
 }

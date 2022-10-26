@@ -18,7 +18,7 @@ data class Result(
 
 enum class Error(val message: String, val code: HttpStatusCode = HttpStatusCode.OK) {
     UNKNOWN_PARAMETER_VALUE("Unknown \"%s\" value for \"%s\" parameter"),
-    NOT_VALID_JSON_SCHEMA("Request body is not valid", HttpStatusCode.BadRequest),
+    NOT_VALID_JSON_SCHEMA("Request body is not valid: %s", HttpStatusCode.BadRequest),
     KEYBOARD_ALREADY_EXISTS("Keyboard \"%s\" already exists"),
     KEYBOARD_DOES_NOT_EXIST("Keyboard \"%s\" doesn't exists"),
     BUTTON_DOES_NOT_EXIST("Button \"%s\" doesn't exist"),
