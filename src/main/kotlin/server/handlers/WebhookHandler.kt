@@ -3,77 +3,106 @@ package server.handlers
 import bot.Bot
 import bot.context.KeyboardStates
 import com.pengrad.telegrambot.model.Update
+import com.pengrad.telegrambot.model.Voice
 import common.FeaturesList
 import common.ReservedNames
 import database.mongo.DataManager.getKeyboard
 import database.mongo.DataManager.getMainKeyboard
 import database.mongo.DataManager.getPayload
 import database.mongo.models.Button
+import database.mongo.models.InlineKeyboard
 import integrations.Ml
-import org.bson.types.ObjectId
+import utils.GsonMapper
 
 class WebhookHandler {
 
-    private val bot = Bot()
+    companion object {
+        private const val commonError = "Что то пошло не так \uD83E\uDD72"
+        private val bot = Bot()
+    }
 
     fun handleUpdate(update: Update) {
+        update.callbackQuery()?.let {
+            bot.actions.sendMessage(it.message().chat().id(), "echo callback_data: ${it.data()}")
+            return
+        }
+
         val message = update.message()
         val chatId = message.chat().id()
-        if (message.voice() != null && FeaturesList.ML.enabled) {
-            val link = bot.actions.getVoiceLink(message.voice().fileId())
-            bot.actions.sendMessage(chatId, Ml.getAnswer(link, "voice", update.message().chat().id()))
+        message.voice()?.let {
+            if (FeaturesList.ML.enabled)
+                handleVoiceMessage(chatId, it)
             return
-        } else {
-            when (message.text()) {
-                ReservedNames.START.text -> {
-                    KeyboardStates.dropState(chatId)
-                    getMainKeyboard()?.let {
-                        bot.actions.sendReplyKeyboard(chatId, it)
-                        KeyboardStates.pushKeyboard(chatId, it.id)
-                    }
-                    return
-                }
-                ReservedNames.BACK.text -> {
-                    KeyboardStates.getCurrentKeyboard(chatId)?.let {
-                        if (getKeyboard(ObjectId(it))?.name == ReservedNames.MAIN_KEYBOARD.text)
-                            return
-                        else {
-                            KeyboardStates.popKeyboard(chatId)
-                            bot.actions.sendReplyKeyboard(
-                                chatId,
-                                getKeyboard(ObjectId(KeyboardStates.getCurrentKeyboard(chatId)))!!
-                            )
-                        }
-                    }
-                    return
-                }
-                else -> {
-                    getKeyboard(ObjectId(KeyboardStates.getCurrentKeyboard(chatId)))!!.fetchButtons()
-                        .firstOrNull { it!!.text == message.text() }?.let {
-                            handleButtonClick(it, chatId)
-                            return
-                        }
-                    if (FeaturesList.ML.enabled)
-                        bot.actions.sendMessage(
-                            chatId,
-                            Ml.getAnswer(message.text(), "text", update.message().chat().id())
-                        )
-                    else
-                        bot.actions.sendMessage(chatId, "Что то пошло не так \uD83E\uDD72")
-                    return
-                }
+        }
+        message.text()?.let {
+            when (it) {
+                ReservedNames.START.text -> handleStart(chatId)
+                ReservedNames.BACK.text -> handleBack(chatId)
+                else -> handleMessage(chatId, message.text())
+            }
+            return
+        }
+    }
+
+    private fun handleStart(chatId: Long) {
+        KeyboardStates.dropState(chatId)
+        getMainKeyboard()?.let {
+            bot.actions.sendReplyKeyboard(chatId, it)
+            KeyboardStates.pushKeyboard(chatId, it.id)
+        }
+    }
+
+    private fun handleBack(chatId: Long) {
+        KeyboardStates.getCurrentKeyboard(chatId)?.let {
+            if (getKeyboard(it)?.name != ReservedNames.MAIN_KEYBOARD.text) {
+                KeyboardStates.popKeyboard(chatId)
+                bot.actions.sendReplyKeyboard(
+                    chatId,
+                    getKeyboard(KeyboardStates.getCurrentKeyboard(chatId))!!
+                )
             }
         }
     }
 
-    private fun handleButtonClick(button: Button, chatId: Long) {
-        when (button.type) {
-            "payload" -> bot.actions.sendMessage(chatId, getPayload(button.linkTo)!!.data)
-            "keyboard" -> {
-                val keyboard = getKeyboard(button.linkTo) ?: throw Exception("Keyboard was not found")
-                bot.actions.sendReplyKeyboard(chatId, keyboard)
-                KeyboardStates.pushKeyboard(chatId, keyboard.id)
+    private fun handleVoiceMessage(chatId: Long, voice: Voice) {
+        val link = bot.actions.getVoiceLink(voice.fileId())
+        bot.actions.sendMessage(chatId, Ml.getAnswer(link, "voice", chatId))
+    }
+
+    private fun handleMessage(chatId: Long, message: String) {
+        getKeyboard(KeyboardStates.getCurrentKeyboard(chatId))?.let {
+            it.fetchButtons().firstOrNull { button -> button!!.text == message }?.apply {
+                handleButtonClick(chatId, this)
             }
+        } ?: if (FeaturesList.ML.enabled)
+            bot.actions.sendMessage(chatId, Ml.getAnswer(message, "text", chatId))
+        else
+            bot.actions.sendMessage(chatId, commonError)
+    }
+
+    private fun handleButtonClick(chatId: Long, button: Button) {
+        when (button.type) {
+            "payload" -> handlePayloadLink(chatId, button.linkTo.toHexString())
+            "keyboard" -> handleKeyboardLink(chatId, button.linkTo.toHexString())
+        }
+    }
+
+    private fun handlePayloadLink(chatId: Long, link: String) {
+        getPayload(link)?.let {
+            when (it.type) {
+                "inline_keyboard" -> bot.actions.sendInlineKeyboard(
+                    chatId,
+                    GsonMapper.deserialize(it.data, InlineKeyboard::class.java)
+                )
+                "tutorial" -> bot.actions.sendMessage(chatId, it.data)
+            }
+        }
+    }
+
+    private fun handleKeyboardLink(chatId: Long, link: String) {
+        getKeyboard(link)?.let {
+            bot.actions.sendReplyKeyboard(chatId, it)
+            KeyboardStates.pushKeyboard(chatId, it.id)
         }
     }
 }

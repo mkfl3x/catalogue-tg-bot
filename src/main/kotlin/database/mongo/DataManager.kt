@@ -4,7 +4,6 @@ import common.ReservedNames
 import database.mongo.models.Button
 import database.mongo.models.Keyboard
 import database.mongo.models.Payload
-import org.bson.types.ObjectId
 
 object DataManager {
 
@@ -35,21 +34,21 @@ object DataManager {
 
     fun getMainKeyboard() = keyboards.find { it.name == ReservedNames.MAIN_KEYBOARD.text }
 
-    fun getKeyboard(id: ObjectId): Keyboard? = keyboards.firstOrNull { it.id == id }
+    fun getKeyboard(keyboardId: String): Keyboard? = keyboards.firstOrNull { it.id.toHexString() == keyboardId }
 
-    fun isKeyboardExist(id: ObjectId) = keyboards.any { it.id == id }
+    fun isKeyboardExist(keyboardId: String) = keyboards.any { it.id.toHexString() == keyboardId }
 
-    fun keyboardHasButton(keyboard: ObjectId, buttonText: String) =
-        getKeyboard(keyboard)!!.buttons
-            .map { getButton(it) }
+    fun keyboardHasButton(keyboardId: String, buttonText: String) =
+        getKeyboard(keyboardId)!!.buttons
+            .map { getButton(it.toHexString()) }
             .any { it!!.text == buttonText }
 
     fun getButtons() = buttons
 
-    fun getButton(id: ObjectId): Button? = buttons.firstOrNull { it.id == id }
+    fun getButton(buttonId: String): Button? = buttons.firstOrNull { it.id.toHexString() == buttonId }
 
     fun getPayloads() = payloads
 
-    fun getPayload(id: ObjectId): Payload? = payloads.firstOrNull { it.id == id }
+    fun getPayload(payloadId: String): Payload? = payloads.firstOrNull { it.id.toHexString() == payloadId }
 }
 

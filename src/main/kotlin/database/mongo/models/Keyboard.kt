@@ -50,7 +50,7 @@ data class Keyboard @BsonCreator constructor(
             .resizeKeyboard(true)
     }
 
-    fun fetchButtons() = buttons.map { getButton(it) }.toList()
+    fun fetchButtons() = buttons.map { getButton(it.toHexString()) }.toList()
 
     private fun buttonsToMarkup() = fetchButtons().map { KeyboardButton(it!!.text) }.toMutableSet()
 }

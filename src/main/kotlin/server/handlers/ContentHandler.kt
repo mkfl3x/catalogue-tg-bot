@@ -50,7 +50,7 @@ class ContentHandler {
 
     fun deleteKeyboard(request: DeleteKeyboardRequest): Result {
         return handleRequest(request) {
-            DataManager.getKeyboard(ObjectId(request.keyboardId))?.let {
+            DataManager.getKeyboard(request.keyboardId)?.let {
                 // 1. Drop keyboard from states
                 KeyboardStates.deleteKeyboard(request.keyboardId)
                 // 2. Delete keyboard from collection
@@ -70,7 +70,7 @@ class ContentHandler {
 
     fun detachKeyboard(request: DetachKeyboardRequest): Result {
         return handleRequest(request) {
-            DataManager.getKeyboard(ObjectId(request.keyboardId))?.let {
+            DataManager.getKeyboard(request.keyboardId)?.let {
                 it.leadButton?.let { button ->
                     // 1. Delete lead button from buttons collection
                     deleteButton(button)
@@ -104,7 +104,7 @@ class ContentHandler {
 
     fun deleteButton(request: DeleteButtonRequest): Result {
         return handleRequest(request) {
-            val button = DataManager.getButton(ObjectId(request.buttonId))!!
+            val button = DataManager.getButton(request.buttonId)!!
             // 1. Detach keyboard, if it's lead button
             DataManager.getKeyboards()
                 .find { keyboard -> keyboard.leadButton == button.id }
@@ -154,7 +154,7 @@ class ContentHandler {
 
     fun deletePayload(request: DeletePayloadRequest): Result {
         return handleRequest(request) {
-            DataManager.getPayload(ObjectId(request.payloadId))?.let {
+            DataManager.getPayload(request.payloadId)?.let {
                 // 1. Delete payload from collection
                 deletePayload(it.id)
 
@@ -176,8 +176,8 @@ class ContentHandler {
     }
 
     private fun handleRequest(request: Request, code: () -> Unit): Result {
-        request.validateSchema()?.let { return it }
-        request.validateData()?.let { return it }
+        // request.validateSchema()?.let { return it }
+        // request.validateData()?.let { return it }
         code.invoke()
         DataManager.reloadCollections()
         return Result.success(request.successMessage)

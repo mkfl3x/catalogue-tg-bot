@@ -20,10 +20,10 @@ data class LinkButtonRequest(
 
     override fun validateData(): Result? {
         RequestValidator.validateIds(buttonId, link)?.let { return it }
-        if (DataManager.getButton(ObjectId(buttonId)) == null)
+        if (DataManager.getButton(buttonId) == null)
             return Result.error(Error.BUTTON_DOES_NOT_EXIST, buttonId)
         RequestValidator.validateResourceExistence(type, link)?.let { return it }
-        if (type == "keyboard" && DataManager.getKeyboard(ObjectId(link))!!.leadButton != null)
+        if (type == "keyboard" && DataManager.getKeyboard(link)!!.leadButton != null)
             return Result.error(Error.KEYBOARD_ALREADY_LINKED, link)
         return null
     }

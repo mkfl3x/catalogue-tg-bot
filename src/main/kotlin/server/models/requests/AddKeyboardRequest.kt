@@ -26,7 +26,7 @@ data class AddKeyboardRequest(
         if (DataManager.getKeyboards().any { it.name == name })
             return Result.error(Error.KEYBOARD_ALREADY_EXISTS, name)
         buttons.forEach {
-            if (DataManager.getButton(ObjectId(it)) == null)
+            if (DataManager.getButton(it) == null)
                 return Result.error(Error.BUTTON_DOES_NOT_EXIST, it)
         }
         location?.let { location ->

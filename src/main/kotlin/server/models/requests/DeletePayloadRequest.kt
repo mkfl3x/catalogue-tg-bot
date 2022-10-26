@@ -19,7 +19,7 @@ data class DeletePayloadRequest(
 
     override fun validateData(): Result? {
         RequestValidator.validateIds(payloadId)?.let { return it }
-        return if (DataManager.getPayload(ObjectId(payloadId)) == null)
+        return if (DataManager.getPayload(payloadId) == null)
             Result.error(Error.BUTTON_DOES_NOT_EXIST, payloadId) else null
     }
 }

@@ -11,7 +11,8 @@
       "type": "string",
       "minLength": 1,
       "enum": [
-        "tutorial"
+        "tutorial",
+        "inline_keyboard"
       ]
     },
     "data": {

@@ -28,9 +28,9 @@ object RequestValidator {
 
     fun validateLocation(location: Location): Result? {
         validateReservedNames(location.leadButtonText)?.let { return it }
-        if (!DataManager.isKeyboardExist(ObjectId(location.hostKeyboard)))
+        if (!DataManager.isKeyboardExist(location.hostKeyboard))
             return Result.error(Error.KEYBOARD_DOES_NOT_EXIST, location.hostKeyboard)
-        if (DataManager.keyboardHasButton(ObjectId(location.hostKeyboard), location.leadButtonText))
+        if (DataManager.keyboardHasButton(location.hostKeyboard, location.leadButtonText))
             return Result.error(Error.BUTTON_ALREADY_EXISTS, location.leadButtonText, location.hostKeyboard)
         return null
     }

@@ -19,7 +19,7 @@ data class DeleteKeyboardRequest(
 
     override fun validateData(): Result? {
         RequestValidator.validateIds(keyboardId)?.let { return it }
-        DataManager.getKeyboard(ObjectId(keyboardId))?.let {
+        DataManager.getKeyboard(keyboardId)?.let {
             if (it.name == ReservedNames.MAIN_KEYBOARD.text)
                 return Result.error(Error.DELETE_MAIN_KEYBOARD)
         } ?: return Result.error(Error.KEYBOARD_DOES_NOT_EXIST, keyboardId)
