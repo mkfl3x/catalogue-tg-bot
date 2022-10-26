@@ -1,9 +1,5 @@
 name: Build Publish Deploy
 
-# TODO:
-# - deploy to PROD with manual confirmation
-# - change DockerHub to DigitalOcean registry 
-
 on:
   workflow_dispatch
 
@@ -23,48 +19,48 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v3
-    
+
     - name: Setup Java ${{ env.JAVA_VERSION }}
       uses: actions/setup-java@v3
       with:
         distribution: 'adopt-openj9'
         java-version: '${{ env.JAVA_VERSION }}'
-  
+
     - name: Build ShadowJar with Gradle
       uses: gradle/gradle-build-action@v2
       with:
         arguments: shadowJar
-        
+
     - name: Save jar artifact
       uses: actions/upload-artifact@v3
       with:
         name: ${{ env.JAR_ARTIFACT_NAME }}
         path: ${{ env.JAR_ARTIFACT_PATH }}*.jar
         retention-days: 1
-    
+
   publish-image:
     needs: build-jar
     runs-on: ubuntu-latest
     steps:
-    
+
     - name: checkout
       uses: actions/checkout@v3
-    
+
     - name: Download artifact
       uses: actions/download-artifact@v3
       with:
         name: ${{ env.JAR_ARTIFACT_NAME }}
         path: ${{ env.JAR_ARTIFACT_PATH }}
-        
+
     - name: Login to DockerHub
       uses: docker/login-action@v2
       with:
         username: ${{ secrets.DOCKER_HUB_USER }}
         password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
-          
+
     - name: Setup docker-buildx
       uses: docker/setup-buildx-action@v2
-      
+
     - name: Build and push docker image
       uses: docker/build-push-action@v3
       with:
@@ -79,7 +75,7 @@ jobs:
         name: ${{ env.JAR_ARTIFACT_NAME }}
         path: ${{ env.JAR_ARTIFACT_PATH }}
         failOnError: false
-              
+
   deploy-to-dev:
     needs: publish-image
     runs-on: ubuntu-latest
@@ -96,9 +92,14 @@ jobs:
           docker image rm ${{ env.IMAGE_NAME }}
           docker run -d -p 8085:8080 \
           -e BOT_TOKEN=${{ secrets.BOT_TOKEN }} \
-          -e BOT_WEBHOOK_HOST=${{ secrets.DEV_BOT_DROPLET_HOST}} \
-          -e MONGO_HOST=${{ secrets.MONGO_HOST}} \
-          -e MONGO_USER=${{ secrets.MONGO_USER}} \
-          -e MONGO_PASSWORD=${{ secrets.MONGO_PASS}} \
-          -e MONGO_DATABASE=${{ secrets.MONGO_DATABASE}} \
+          -e BOT_WEBHOOK_HOST=${{ secrets.DEV_BOT_DROPLET_HOST }} \
+          -e MONGO_HOST=${{ secrets.MONGO_HOST }} \
+          -e MONGO_USER=${{ secrets.MONGO_USER }} \
+          -e MONGO_PASSWORD=${{ secrets.MONGO_PASS }} \
+          -e MONGO_DATABASE=${{ secrets.MONGO_DATABASE }} \
+          -e REDIS_HOST=${{ secrets.REDIS_HOST }} \
+          -e REDIS_PORT=${{ secrets.REDIS_PORT }} \
+          -e REDIS_USER=${{ secrets.REDIS_USER }} \
+          -e REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }} \
+          -e REDIS_PREFIX=${{ secrets.REDIS_PREFIX }} \
           --name ${{ env.CONTAINER_NAME }} ${{ env.IMAGE_NAME }}
