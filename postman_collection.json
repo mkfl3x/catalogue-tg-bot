@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "ba5977bb-88d0-405c-b507-b76542f8a90f",
+		"_postman_id": "178446be-6844-4291-8c76-12cd45700e2d",
 		"name": "catalogue-tg-bot",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -14,7 +14,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{host}}/keyboards/get?filter=all",
+							"raw": "{{host}}/keyboards/get",
 							"host": [
 								"{{host}}"
 							],
@@ -25,7 +25,13 @@
 							"query": [
 								{
 									"key": "filter",
-									"value": "all"
+									"value": "all",
+									"disabled": true
+								},
+								{
+									"key": "filter",
+									"value": "detached",
+									"disabled": true
 								}
 							]
 						}
@@ -39,7 +45,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"new_keyboard\": {\n    \"name\": \"New keyboard\",\n    \"keyboard_location\":{\n        \"host_keyboard\": \"MainKeyboard\",\n        \"link_button\": \"to new keyboard\"\n    },\n    \"buttons\": [\n        {\n            \"text\": \"Hello\",\n            \"type\": \"payload\",\n            \"payload\": \"hello!\"\n        },\n        {\n            \"text\": \"Ciao\",\n            \"type\": \"payload\",\n            \"payload\": \"ciao!\"\n        }\n    ]\n  }\n}",
+							"raw": "{\n    \"name\": \"New awesome keyboard\",\n    \"buttons\": [\n        \"6355aafbb524064abc64b2f9\",\n        \"bco23dd47ge323cavg72dc28\"\n    ],\n    \"location\": {\n        \"host_keyboard\": \"729wghebh29fhc2h89c29j92\",\n        \"lead_button\": \"to Awesome keyboard\"\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -66,7 +72,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"keyboard_name\": \"New keyboard\",\n    \"recursively\": false\n}",
+							"raw": "{\n    \"keyboard_id\": \"729wghebh29fhc2h89c29j92\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -93,7 +99,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"keyboard_name\": \"New keyboard\"\n}",
+							"raw": "{\n    \"keyboard_id\": \"729wghebh29fhc2h89c29j92\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -112,33 +118,6 @@
 						}
 					},
 					"response": []
-				},
-				{
-					"name": "/link",
-					"request": {
-						"method": "PUT",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"keyboard_name\": \"Detached keyboard\",\n    \"keyboard_location\": {\n        \"host_keyboard\": \"MainKeyboard\",\n        \"link_button\": \"hello\"\n    }\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{host}}/keyboards/link",
-							"host": [
-								"{{host}}"
-							],
-							"path": [
-								"keyboards",
-								"link"
-							]
-						}
-					},
-					"response": []
 				}
 			]
 		},
@@ -146,13 +125,31 @@
 			"name": "/buttons",
 			"item": [
 				{
+					"name": "/get",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/buttons/get",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"buttons",
+								"get"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "/add",
 					"request": {
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"host_keyboard\": \"MainKeyboard\",\n  \"new_button\": {\n    \"text\": \"Hello\",\n    \"type\": \"payload\",\n    \"payload\": \"Hello, it's content\"\n  }\n}",
+							"raw": "{\n    \"text\": \"New button\",\n    \"type\": \"payload\",\n    \"link\": \"6355aafbb524064abc64b2f9\",\n    \"host_keyboard\": \"bco23dd47ge323cavg72dc28\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -179,7 +176,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"keyboard\": \"New keyboard\",\n    \"button_text\": \"Hello 2\"\n}",
+							"raw": "{\n    \"button_id\": \"6355aafbb524064abc64b2f9\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -194,6 +191,33 @@
 							"path": [
 								"buttons",
 								"delete"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/link",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"button_id\": \"6355aafbb524064abc64b2f9\",\n    \"type\": \"keyboard\",\n    \"link\": \"729wghebh29fhc2h89c29j92\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/buttons/link",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"buttons",
+								"link"
 							]
 						}
 					},
@@ -218,6 +242,83 @@
 							""
 						]
 					}
+				}
+			]
+		},
+		{
+			"name": "/payloads",
+			"item": [
+				{
+					"name": "/get",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/payloads/get",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"payloads",
+								"get"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/add",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"How to something\",\n    \"type\": \"tutorial\",\n    \"data\": \"1. Get a plan\\n2. Do it\",\n    \"location\": {\n        \"host_keyboard\": \"729wghebh29fhc2h89c29j92\",\n        \"lead_button\": \"to new tutorial\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/payloads/add",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"payloads",
+								"add"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"payload_id\": \"6355aafbb524064abc64b2f9\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/payloads/delete",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"payloads",
+								"delete"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},

@@ -10,7 +10,11 @@
     "type": {
       "description": "Type of link. Keyboard or payload",
       "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "enum": [
+        "payload",
+        "keyboard"
+      ]
     },
     "link": {
       "description": "ID of keyboard/payload",
