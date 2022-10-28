@@ -8,7 +8,6 @@ import io.ktor.routing.*
 import server.handlers.WebhookHandler
 
 fun Application.telegram(endpoint: String, handler: WebhookHandler) {
-
     routing {
         post(endpoint) {
             try {

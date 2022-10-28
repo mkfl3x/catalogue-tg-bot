@@ -2,7 +2,6 @@ package server.models.requests
 
 import com.google.gson.annotations.SerializedName
 import database.mongo.DataManager
-import org.bson.types.ObjectId
 import server.models.Error
 import server.models.Result
 import server.models.objects.Location
@@ -12,9 +11,6 @@ data class AddKeyboardRequest(
     @SerializedName("buttons") val buttons: List<String>,
     @SerializedName("location") val location: Location?
 ) : Request() {
-
-    override val schema: Schemas
-        get() = Schemas.ADD_KEYBOARD_REQUEST
 
     override val successMessage: String
         get() = "Keyboard \"${name}\" successfully added"

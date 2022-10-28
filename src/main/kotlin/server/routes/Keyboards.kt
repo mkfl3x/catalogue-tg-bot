@@ -5,6 +5,7 @@ import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import server.handlers.ContentHandler
+import server.models.requests.Requests
 
 fun Application.keyboards(section: String, handler: ContentHandler) {
     routing {
@@ -14,15 +15,15 @@ fun Application.keyboards(section: String, handler: ContentHandler) {
             call.respond(result.responseCode, result.responseData)
         }
         post("$section/add") {
-            val result = handler.addKeyboard(call.receive())
+            val result = handler.handleRequest(call.receive(), Requests.ADD_KEYBOARD_REQUEST)
             call.respond(result.responseCode, result.responseData)
         }
         put("$section/detach") {
-            val result = handler.detachKeyboard(call.receive())
+            val result = handler.handleRequest(call.receive(), Requests.DETACH_KEYBOARD_REQUEST)
             call.respond(result.responseCode, result.responseData)
         }
         delete("$section/delete") {
-            val result = handler.deleteKeyboard(call.receive())
+            val result = handler.handleRequest(call.receive(), Requests.DELETE_KEYBOARD_REQUEST)
             call.respond(result.responseCode, result.responseData)
         }
     }

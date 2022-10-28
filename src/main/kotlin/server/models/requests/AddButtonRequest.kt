@@ -11,9 +11,6 @@ data class AddButtonRequest(
     @SerializedName("host_keyboard") val hostKeyboard: String?
 ) : Request() {
 
-    override val schema: Schemas
-        get() = Schemas.ADD_BUTTON_REQUEST
-
     override val successMessage: String
         get() = "Button \"${text}\" successfully added"
 

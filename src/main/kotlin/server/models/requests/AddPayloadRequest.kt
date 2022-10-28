@@ -13,9 +13,6 @@ data class AddPayloadRequest(
     @SerializedName("location") val location: Location?
 ) : Request() {
 
-    override val schema: Schemas
-        get() = Schemas.ADD_PAYLOAD_REQUEST
-
     override val successMessage: String
         get() = "Payload \"${name}\" successfully added"
 

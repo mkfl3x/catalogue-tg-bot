@@ -3,16 +3,12 @@ package server.models.requests
 import com.google.gson.annotations.SerializedName
 import common.ReservedNames
 import database.mongo.DataManager
-import org.bson.types.ObjectId
 import server.models.Error
 import server.models.Result
 
 data class DetachKeyboardRequest(
     @SerializedName("keyboard_id") val keyboardId: String
 ) : Request() {
-
-    override val schema: Schemas
-        get() = Schemas.DETACH_KEYBOARD_REQUEST
 
     override val successMessage: String
         get() = "Keyboard with ID \"$keyboardId\" successfully detached"

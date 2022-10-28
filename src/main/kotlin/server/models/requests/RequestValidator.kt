@@ -7,8 +7,18 @@ import org.bson.types.ObjectId
 import server.models.Error
 import server.models.Result
 import server.models.objects.Location
+import utils.SchemaValidator
 
 object RequestValidator {
+
+    fun validateSchema(request: String, schemaPath: String): Result? {
+        SchemaValidator.validate(request, schemaPath).apply {
+            return if (isSuccess.not()) {
+                val error = this.toString().split("\n").first { it.startsWith("error:") }.replace("error: ", "")
+                Result.error(Error.NOT_VALID_JSON_SCHEMA, error)
+            } else null
+        }
+    }
 
     fun validateIds(vararg ids: String?): Result? {
         ids.filterNotNull().forEach {
