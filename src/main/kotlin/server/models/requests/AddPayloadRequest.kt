@@ -1,8 +1,6 @@
 package server.models.requests
 
 import com.google.gson.annotations.SerializedName
-import database.mongo.DataManager
-import server.models.Error
 import server.models.Result
 import server.models.objects.Location
 
@@ -19,8 +17,7 @@ data class AddPayloadRequest(
     override fun validateData(): Result? {
         RequestValidator.validateIds(location?.hostKeyboard)?.let { return it }
         RequestValidator.validateReservedNames(name)?.let { return it }
-        if (DataManager.getPayloads().any { it.name == name })
-            return Result.error(Error.PAYLOAD_ALREADY_EXISTS, name)
+        RequestValidator.validatePayloadAbsence(name)?.let { return it }
         location?.let { location -> RequestValidator.validateLocation(location)?.let { return it } }
         return null
     }

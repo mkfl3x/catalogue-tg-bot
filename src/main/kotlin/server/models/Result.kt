@@ -24,11 +24,11 @@ enum class Error(val message: String, val code: HttpStatusCode = HttpStatusCode.
     BUTTON_DOES_NOT_EXIST("Button \"%s\" doesn't exist"),
     BUTTON_ALREADY_EXISTS("Button \"%s\" already exists on \"%s\" keyboard"),
     PAYLOAD_ALREADY_EXISTS("Payload \"%s\" already exists"),
+    PAYLOAD_DOES_NOT_EXISTS("Payload \"%s\" doesn't exist"),
     LOOPED_BUTTON("Button can't leads to it's host keyboard"),
     DELETE_MAIN_KEYBOARD("\"${ReservedNames.MAIN_KEYBOARD.text}\" can't be deleted"),
     LINK_DETACH_MAIN_KEYBOARD("\"${ReservedNames.MAIN_KEYBOARD.text}\" can't be linked/detached"),
-    KEYBOARD_ALREADY_LINKED("Keyboard \"%s\" already linked"),
     KEYBOARD_ALREADY_DETACHED("Keyboard \"%s\" already detached"),
     RESOURCE_DOES_NOT_EXISTS("Keyboard/payload \"%s\" doesn't exist"),
-    NOT_VALID_ID_USED("ID \"%s\" format is not applicable")
+    NOT_VALID_ID("ID \"%s\" format is not applicable")
 }

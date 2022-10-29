@@ -23,7 +23,7 @@ data class Payload @BsonCreator constructor(
     @field:BsonProperty("data")
     val data: String
 
-) : MongoModel {
+) : MongoEntity {
 
     override fun toJson() = JsonObject().apply {
         addProperty("id", id.toHexString())

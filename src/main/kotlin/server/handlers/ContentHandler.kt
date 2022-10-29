@@ -8,7 +8,6 @@ import database.mongo.MongoCollections
 import database.mongo.models.Button
 import database.mongo.models.Keyboard
 import database.mongo.models.Payload
-import org.bson.BsonNull
 import org.bson.types.ObjectId
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -23,7 +22,7 @@ class ContentHandler {
 
     fun handleRequest(data: String, request: Requests): Result {
         RequestValidator.validateSchema(data, request.schemaPath)?.let { return it }
-        (GsonMapper.deserialize(data, request.type) as Request).apply {
+        (GsonMapper.deserialize(data, request.type)).apply {
             validateData()?.let { return it }
             when (this) {
                 is AddKeyboardRequest -> addKeyboard(this)
@@ -45,7 +44,7 @@ class ContentHandler {
         val keyboards = when (filter) {
             "all" -> DataManager.getKeyboards()
             "detached" -> DataManager.getKeyboards()
-                .filter { it.leadButton == null }
+                .filter { it.leadButtons.isEmpty() }
                 .toList()
             else -> return Result.error(Error.UNKNOWN_PARAMETER_VALUE, filter, "filter")
         }
@@ -66,50 +65,25 @@ class ContentHandler {
 
     private fun addKeyboard(keyboard: AddKeyboardRequest) {
         // 1. Create keyboard
-        val newKeyboardId = createKeyboard(Keyboard(ObjectId(), keyboard.name, emptyList(), null))
+        val newKeyboardId = createKeyboard(Keyboard(ObjectId(), keyboard.name, emptyList(), emptyList()))
         // 3. Add leading keyboard button (if it's exist)
         keyboard.location?.let {
             val buttonId = createButton(Button(ObjectId(), it.leadButtonText, "keyboard", newKeyboardId))
             // 3.1 Add button on host keyboard
             addButtonToKeyboard(buttonId, ObjectId(it.hostKeyboard))
             // 3.2 Add leading button to new keyboard
-            addButtonToKeyboard(buttonId, newKeyboardId, leadButton = true)
+            addButtonToKeyboard(buttonId, newKeyboardId, leadButtons = true)
         }
         // 4. Update keyboard's  content buttons
         keyboard.buttons.forEach { addButtonToKeyboard(ObjectId(it), newKeyboardId) }
     }
 
     private fun deleteKeyboard(request: DeleteKeyboardRequest) {
-        DataManager.getKeyboard(request.keyboardId)?.let {
-            // 1. Drop keyboard from states
-            KeyboardStates.deleteKeyboard(request.keyboardId)
-            // 2. Delete keyboard from collection
-            deleteKeyboard(it.id)
-            // 3. Delete lead button (if it's exist)
-            it.leadButton?.let { leadButton ->
-                // 3.1 Delete keyboard's lead button
-                deleteButton(leadButton)
-                // 3.2 Delete lead button from all keyboards which contains it
-                DataManager.getKeyboards()
-                    .filter { keyboard -> keyboard.buttons.contains(leadButton) }
-                    .forEach { keyboard -> deleteButtonFromKeyboard(leadButton, keyboard.id) }
-            }
-        }
+        deleteKeyboard(request.keyboardId, detachOnly = false)
     }
 
     private fun detachKeyboard(request: DetachKeyboardRequest) {
-        DataManager.getKeyboard(request.keyboardId)?.let {
-            it.leadButton?.let { button ->
-                // 1. Delete lead button from buttons collection
-                deleteButton(button)
-                // 2. Update keyboard lead button field
-                deleteButtonFromKeyboard(button, it.id, leadButton = true)
-                // 3. Delete lead button from all keyboards which contains it
-                DataManager.getKeyboards()
-                    .filter { keyboard -> keyboard.buttons.contains(button) }
-                    .forEach { keyboard -> deleteButtonFromKeyboard(button, keyboard.id) }
-            }
-        }
+        deleteKeyboard(request.keyboardId, detachOnly = true)
     }
 
     private fun addButton(button: AddButtonRequest) {
@@ -117,14 +91,18 @@ class ContentHandler {
         val newButton = createButton(Button(ObjectId(), button.text, button.type, ObjectId(button.link)))
         // 2. Put button to some keyboard is needed
         button.hostKeyboard?.let { addButtonToKeyboard(newButton, ObjectId(it)) }
+        // 3. If button leads to keyboard
+        if (button.type == "keyboard") {
+            addButtonToKeyboard(newButton, ObjectId(button.link), leadButtons = true)
+        }
     }
 
     private fun deleteButton(request: DeleteButtonRequest) {
         val button = DataManager.getButton(request.buttonId)!!
         // 1. Detach keyboard, if it's lead button
         DataManager.getKeyboards()
-            .find { keyboard -> keyboard.leadButton == button.id }
-            ?.let { deleteButtonFromKeyboard(button.id, it.id, leadButton = true) }
+            .find { keyboard -> keyboard.leadButtons.contains(button.id) }
+            ?.let { deleteButtonFromKeyboard(button.id, it.id, leadButtons = true) }
         // 2. Delete button from collection
         deleteButton(button.id)
         // 3. Delete button from all keyboards
@@ -134,6 +112,17 @@ class ContentHandler {
     }
 
     private fun linkButton(request: LinkButtonRequest) {
+        // 1. if it was keyboard - remove this button from lead_buttons
+        DataManager.getButton(request.buttonId)?.let {
+            if (it.type == "keyboard")
+                DataManager.getKeyboards()
+                    .filter { keyboard -> keyboard.leadButtons.contains(it.id) }
+                    .forEach { keyboard -> deleteButtonFromKeyboard(it.id, keyboard.id, leadButtons = true) }
+        }
+        // 2. add relinked button to lead_buttons of leads keyboard
+        if (request.type == "keyboard")
+            addButtonToKeyboard(ObjectId(request.buttonId), ObjectId(request.link), leadButtons = true)
+        // 3. update lead_buttons
         MongoClient.update(
             MongoCollections.BUTTONS.collectionName,
             Button::class.java,
@@ -198,27 +187,21 @@ class ContentHandler {
         MongoClient.delete(MongoCollections.BUTTONS.collectionName, BasicDBObject("_id", buttonId))
     }
 
-    private fun addButtonToKeyboard(button: ObjectId, keyboard: ObjectId, leadButton: Boolean = false) {
+    private fun addButtonToKeyboard(button: ObjectId, keyboard: ObjectId, leadButtons: Boolean = false) {
         MongoClient.update(
             MongoCollections.KEYBOARDS.collectionName,
             Keyboard::class.java,
             BasicDBObject("_id", keyboard),
-            if (leadButton)
-                BasicDBObject("\$set", BasicDBObject("lead_button", button))
-            else
-                BasicDBObject("\$push", BasicDBObject("buttons", button))
+            BasicDBObject("\$push", BasicDBObject(if (leadButtons) "lead_buttons" else "buttons", button))
         )
     }
 
-    private fun deleteButtonFromKeyboard(button: ObjectId, keyboard: ObjectId, leadButton: Boolean = false) {
+    private fun deleteButtonFromKeyboard(button: ObjectId, keyboard: ObjectId, leadButtons: Boolean = false) {
         MongoClient.update(
             MongoCollections.KEYBOARDS.collectionName,
             Keyboard::class.java,
             BasicDBObject("_id", keyboard),
-            if (leadButton)
-                BasicDBObject("\$unset", BasicDBObject("lead_button", BsonNull()))
-            else
-                BasicDBObject("\$pull", BasicDBObject("buttons", button))
+            BasicDBObject("\$pull", BasicDBObject(if (leadButtons) "lead_buttons" else "buttons", button))
         )
     }
 
@@ -229,5 +212,25 @@ class ContentHandler {
 
     private fun deletePayload(payloadId: ObjectId) {
         MongoClient.delete(MongoCollections.PAYLOADS.collectionName, BasicDBObject("_id", payloadId))
+    }
+
+    private fun deleteKeyboard(keyboardId: String, detachOnly: Boolean) {
+        DataManager.getKeyboard(keyboardId)?.let {
+            // 1. Drop keyboard from states
+            KeyboardStates.deleteKeyboard(keyboardId)
+            // 2. Delete lead buttons (if it's exist)
+            it.leadButtons.forEach { leadButton ->
+                // 2.1 Delete lead button from all keyboards which contains it
+                DataManager.getKeyboards()
+                    .filter { keyboard -> keyboard.buttons.contains(leadButton) }
+                    .forEach { keyboard -> deleteButtonFromKeyboard(leadButton, keyboard.id) }
+                // 2.2 Delete keyboard's lead button
+                deleteButton(leadButton)
+                // 2.3 Clear lead buttons
+                deleteButtonFromKeyboard(leadButton, it.id, leadButtons = true)
+            }
+            // 3. Delete keyboard from collection
+            if (detachOnly.not()) deleteKeyboard(it.id)
+        }
     }
 }

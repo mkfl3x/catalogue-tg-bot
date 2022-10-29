@@ -23,7 +23,7 @@ data class Button @BsonCreator constructor(
     @field:BsonProperty("link_to")
     val linkTo: ObjectId
 
-) : MongoModel {
+) : MongoEntity {
 
     override fun toJson() = JsonObject().apply {
         addProperty("id", id.toHexString())

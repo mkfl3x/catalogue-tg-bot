@@ -24,16 +24,16 @@ data class Keyboard @BsonCreator constructor(
     @field:BsonProperty("buttons")
     val buttons: List<ObjectId>,
 
-    @param:BsonProperty("lead_button")
-    @field:BsonProperty("lead_button")
-    val leadButton: ObjectId?
+    @param:BsonProperty("lead_buttons")
+    @field:BsonProperty("lead_buttons")
+    val leadButtons: List<ObjectId>
 
-) : MongoModel {
+) : MongoEntity {
 
     override fun toJson() = JsonObject().apply {
         addProperty("id", id.toHexString())
         addProperty("name", name)
-        addProperty("lead_button", leadButton?.toHexString())
+        add("lead_buttons", JsonArray().apply { leadButtons.forEach { add(it.toHexString()) } })
         add("buttons", JsonArray().apply { buttons.forEach { add(it.toHexString()) } })
     }
 

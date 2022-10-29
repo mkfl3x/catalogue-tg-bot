@@ -18,7 +18,7 @@ data class DetachKeyboardRequest(
         DataManager.getKeyboard(keyboardId)?.let {
             if (it.name == ReservedNames.MAIN_KEYBOARD.text)
                 return Result.error(Error.LINK_DETACH_MAIN_KEYBOARD)
-            if (it.leadButton == null)
+            if (it.leadButtons.isEmpty())
                 return Result.error(Error.KEYBOARD_ALREADY_DETACHED)
         } ?: return Result.error(Error.KEYBOARD_DOES_NOT_EXIST)
         return null

@@ -2,7 +2,7 @@ package database.mongo.models
 
 import com.google.gson.JsonObject
 
-interface MongoModel {
+interface MongoEntity {
 
     fun toJson(): JsonObject
 }

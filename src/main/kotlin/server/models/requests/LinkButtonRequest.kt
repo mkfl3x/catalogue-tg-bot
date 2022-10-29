@@ -2,7 +2,7 @@ package server.models.requests
 
 import com.google.gson.annotations.SerializedName
 import database.mongo.DataManager
-import server.models.Error
+import org.bson.types.ObjectId
 import server.models.Result
 
 data class LinkButtonRequest(
@@ -16,11 +16,13 @@ data class LinkButtonRequest(
 
     override fun validateData(): Result? {
         RequestValidator.validateIds(buttonId, link)?.let { return it }
-        if (DataManager.getButton(buttonId) == null)
-            return Result.error(Error.BUTTON_DOES_NOT_EXIST, buttonId)
+        RequestValidator.validateButtonExistence(buttonId)?.let { return it }
         RequestValidator.validateResourceExistence(type, link)?.let { return it }
-        if (type == "keyboard" && DataManager.getKeyboard(link)!!.leadButton != null)
-            return Result.error(Error.KEYBOARD_ALREADY_LINKED, link)
+        if (type == "keyboard") {
+            DataManager.getKeyboards()
+                .filter { it.buttons.contains(ObjectId(buttonId)) }
+                .forEach { keyboard -> RequestValidator.validateLoopLinking(link, keyboard.id.toHexString())?.let { return it } }
+        }
         return null
     }
 }
