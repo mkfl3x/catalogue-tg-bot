@@ -1,9 +1,9 @@
 package bot
 
 import com.pengrad.telegrambot.TelegramBot
+import com.pengrad.telegrambot.request.AbstractSendRequest
 import com.pengrad.telegrambot.request.GetFile
 import com.pengrad.telegrambot.request.SendMessage
-import database.mongo.models.InlineKeyboard
 import database.mongo.models.Keyboard
 
 class BotActions(private val bot: TelegramBot) {
@@ -16,9 +16,9 @@ class BotActions(private val bot: TelegramBot) {
         bot.execute(SendMessage(chatId, keyboard.name).replyMarkup(keyboard.toMarkup()))
     }
 
-    fun sendInlineKeyboard(chatId: Long, keyboard: InlineKeyboard) {
-        bot.execute(SendMessage(chatId, keyboard.message).replyMarkup(keyboard.toMarkup()))
+    fun sendPayload(message: AbstractSendRequest<*>) {
+        bot.execute(message)
     }
 
-    fun getVoiceLink(fileId: String) = bot.getFullFilePath(bot.execute(GetFile(fileId)).file())
+    fun getVoiceLink(fileId: String): String = bot.getFullFilePath(bot.execute(GetFile(fileId)).file())
 }

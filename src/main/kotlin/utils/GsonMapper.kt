@@ -1,6 +1,7 @@
 package utils
 
 import com.google.gson.Gson
+import com.google.gson.JsonParser
 
 object GsonMapper {
 
@@ -9,4 +10,6 @@ object GsonMapper {
     fun <T> deserialize(json: String, type: Class<T>): T = gson.fromJson(json, type)
 
     fun serialize(data: Any): String = gson.toJson(data)
+
+    fun parse(json: String) = JsonParser.parseString(json).asJsonObject
 }

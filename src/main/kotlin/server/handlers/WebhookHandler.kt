@@ -10,9 +10,7 @@ import database.mongo.DataManager.getKeyboard
 import database.mongo.DataManager.getMainKeyboard
 import database.mongo.DataManager.getPayload
 import database.mongo.models.Button
-import database.mongo.models.InlineKeyboard
 import integrations.Ml
-import utils.GsonMapper
 
 class WebhookHandler {
 
@@ -88,15 +86,7 @@ class WebhookHandler {
     }
 
     private fun handlePayloadLink(chatId: Long, link: String) {
-        getPayload(link)?.let {
-            when (it.type) {
-                "inline_keyboard" -> bot.actions.sendInlineKeyboard(
-                    chatId,
-                    GsonMapper.deserialize(it.data, InlineKeyboard::class.java)
-                )
-                "tutorial" -> bot.actions.sendMessage(chatId, it.data)
-            }
-        }
+        getPayload(link)?.let { bot.actions.sendPayload(it.getMessage(chatId)) }
     }
 
     private fun handleKeyboardLink(chatId: Long, link: String) {

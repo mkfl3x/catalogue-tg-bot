@@ -1,4 +1,4 @@
-package database.mongo.models
+package database.mongo.models.payload.inline
 
 import com.google.gson.annotations.SerializedName
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton

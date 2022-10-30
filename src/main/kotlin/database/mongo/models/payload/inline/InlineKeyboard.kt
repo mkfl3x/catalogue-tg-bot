@@ -1,10 +1,9 @@
-package database.mongo.models
+package database.mongo.models.payload.inline
 
 import com.google.gson.annotations.SerializedName
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup
 
 data class InlineKeyboard(
-    @SerializedName("message") val message: String,
     @SerializedName("rows") val rows: List<List<InlineButton>>
 ) {
 
