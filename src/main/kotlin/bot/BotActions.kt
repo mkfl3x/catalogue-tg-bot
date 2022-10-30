@@ -20,5 +20,9 @@ class BotActions(private val bot: TelegramBot) {
         bot.execute(message)
     }
 
+    fun updateMessage() {
+        // TODO
+    }
+
     fun getVoiceLink(fileId: String): String = bot.getFullFilePath(bot.execute(GetFile(fileId)).file())
 }

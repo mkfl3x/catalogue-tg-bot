@@ -49,16 +49,14 @@ data class Payload @BsonCreator constructor(
     }
 
     private fun generateTextMessage(chatId: Long, text: Text): AbstractSendRequest<*> {
-        // return SendMessage(chatId, text.text).apply {
-        //     text.inlineKeyboard?.let { this.replyMarkup(it.toMarkup()) }
-        // }
-        return SendMessage(chatId, text.text).replyMarkup(text.inlineKeyboard!!.toMarkup())
-        //}
+        return SendMessage(chatId, text.text).apply {
+            text.inlineKeyboard?.let { this.replyMarkup(it.toMarkup()) }
+        }
     }
 
     private fun generateImagesMessage(chatId: Long, image: Image): AbstractSendRequest<*> {
         return SendPhoto(chatId, downloadImage(image.link)).apply {
-            //image.caption?.let { this.caption(it) }
+            image.caption?.let { this.caption(it) }
             image.inlineKeyboard?.let { this.replyMarkup(it.toMarkup()) }
         }
     }
