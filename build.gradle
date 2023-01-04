@@ -1,5 +1,5 @@
 plugins {
-    id 'org.jetbrains.kotlin.jvm' version '1.5.10'
+    id 'org.jetbrains.kotlin.jvm' version '1.7.20'
     id 'com.github.johnrengelman.shadow' version '7.0.0'
 }
 
@@ -11,32 +11,44 @@ repositories {
     jcenter() // for khttp
 }
 
+def kotlinVersion = "1.8.0"
+def ktorVersion = "2.2.1"
+def logbackVersion = "1.4.5"
+def telegramApiVersion = "6.2.0"
+def mongoVersion = "3.12.10"
+def redisVersion = "4.3.1"
+def schemaValidatorVersion = "2.2.14"
+def khttpVersion = "1.0.0"
+
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
 
     // ktor server
-    implementation 'io.ktor:ktor-server-core:1.6.3'
-    implementation 'io.ktor:ktor-server-netty:1.6.3'
-    implementation 'io.ktor:ktor-gson:1.6.3'
+    implementation "io.ktor:ktor-server-core:$ktorVersion"
+    implementation "io.ktor:ktor-server-content-negotiation:$ktorVersion"
+    implementation "io.ktor:ktor-server-netty:$ktorVersion"
+    implementation "io.ktor:ktor-serialization-gson:$ktorVersion"
+    implementation "io.ktor:ktor-server-swagger:$ktorVersion"
+    implementation "io.ktor:ktor-server-cors-jvm:$ktorVersion"
 
     // logging
-    implementation 'ch.qos.logback:logback-classic:1.2.6'
-    implementation 'ch.qos.logback:logback-core:1.2.6'
+    implementation "ch.qos.logback:logback-classic:$logbackVersion"
+    implementation "ch.qos.logback:logback-core:$logbackVersion"
 
     // telegram api
-    implementation 'com.github.pengrad:java-telegram-bot-api:6.2.0'
+    implementation "com.github.pengrad:java-telegram-bot-api:$telegramApiVersion"
 
     // mongo
-    implementation("org.mongodb:mongo-java-driver:3.12.10")
+    implementation "org.mongodb:mongo-java-driver:$mongoVersion"
 
     // redis
-    implementation ("redis.clients:jedis:4.3.1")
+    implementation "redis.clients:jedis:$redisVersion"
 
     // json-schema
-    implementation("com.github.java-json-tools:json-schema-validator:2.2.14")
+    implementation "com.github.java-json-tools:json-schema-validator:$schemaValidatorVersion"
 
     // khttp
-    implementation 'khttp:khttp:1.0.0'
+    implementation "khttp:khttp:$khttpVersion"
 }
 
 shadowJar {
