@@ -1,11 +1,11 @@
 package server
 
-import io.ktor.application.*
-import io.ktor.features.*
-import io.ktor.gson.*
-import io.ktor.routing.*
+import io.ktor.serialization.gson.*
+import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
+import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.routing.*
 import server.handlers.ContentHandler
 import server.handlers.WebhookHandler
 import server.routes.*
@@ -24,11 +24,11 @@ class Server {
             gson()
         }
         routing {
-            service("/service")
-            buttons("/buttons", contentHandler)
-            payloads("/payloads", contentHandler)
-            keyboards("/keyboards", contentHandler)
-            telegram(Properties.get("bot.webhook.endpoint"), webhookHandler)
+            this@embeddedServer.service("/service")
+            this@embeddedServer.buttons("/buttons", contentHandler)
+            this@embeddedServer.payloads("/payloads", contentHandler)
+            this@embeddedServer.keyboards("/keyboards", contentHandler)
+            this@embeddedServer.telegram(Properties.get("bot.webhook.endpoint"), webhookHandler)
         }
     }
 
