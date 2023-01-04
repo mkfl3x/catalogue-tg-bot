@@ -33,7 +33,8 @@ data class Keyboard @BsonCreator constructor(
     override fun toJson() = JsonObject().apply {
         addProperty("id", id.toHexString())
         addProperty("name", name)
-        add("lead_buttons", JsonArray().apply { leadButtons.forEach { add(it.toHexString()) } })
+        if (name != ReservedNames.MAIN_KEYBOARD.text)
+            add("lead_buttons", JsonArray().apply { leadButtons.forEach { add(it.toHexString()) } })
         add("buttons", JsonArray().apply { buttons.forEach { add(it.toHexString()) } })
     }
 

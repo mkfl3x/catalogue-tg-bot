@@ -19,6 +19,4 @@ class BotActions(private val bot: TelegramBot) {
     fun sendInlineKeyboard(chatId: Long, keyboard: InlineKeyboard) {
         bot.execute(SendMessage(chatId, keyboard.message).replyMarkup(keyboard.toMarkup()))
     }
-
-    fun getVoiceLink(fileId: String) = bot.getFullFilePath(bot.execute(GetFile(fileId)).file())
 }

@@ -16,8 +16,8 @@ object Properties {
         return property.toString().ifEmpty { throw Exception("$propertyName property is empty") }
     }
 
-    private fun getDockerEnv(propertyName: String): String? {
-        val property = System.getenv(propertyName.replace(".", "_").uppercase()) ?: null
-        return if (property != null && property.isNotEmpty()) property else null
-    }
+    private fun getDockerEnv(propertyName: String) =
+        System.getenv(propertyName.replace(".", "_").uppercase()).let {
+            if (!it.isNullOrEmpty()) it else null
+        }
 }

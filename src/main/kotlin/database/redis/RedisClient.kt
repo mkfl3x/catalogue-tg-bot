@@ -1,7 +1,6 @@
 package database.redis
 
 import redis.clients.jedis.Jedis
-import redis.clients.jedis.exceptions.JedisConnectionException
 import utils.Properties
 
 

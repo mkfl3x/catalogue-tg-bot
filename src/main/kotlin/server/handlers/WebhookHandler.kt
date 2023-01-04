@@ -3,15 +3,12 @@ package server.handlers
 import bot.Bot
 import bot.context.KeyboardStates
 import com.pengrad.telegrambot.model.Update
-import com.pengrad.telegrambot.model.Voice
-import common.FeaturesList
 import common.ReservedNames
 import database.mongo.DataManager.getKeyboard
 import database.mongo.DataManager.getMainKeyboard
 import database.mongo.DataManager.getPayload
 import database.mongo.models.Button
 import database.mongo.models.InlineKeyboard
-import integrations.Ml
 import utils.GsonMapper
 
 class WebhookHandler {
@@ -29,11 +26,6 @@ class WebhookHandler {
 
         val message = update.message()
         val chatId = message.chat().id()
-        message.voice()?.let {
-            if (FeaturesList.ML.enabled)
-                handleVoiceMessage(chatId, it)
-            return
-        }
         message.text()?.let {
             when (it) {
                 ReservedNames.START.text -> handleStart(chatId)
@@ -64,20 +56,12 @@ class WebhookHandler {
         }
     }
 
-    private fun handleVoiceMessage(chatId: Long, voice: Voice) {
-        val link = bot.actions.getVoiceLink(voice.fileId())
-        bot.actions.sendMessage(chatId, Ml.getAnswer(link, "voice", chatId))
-    }
-
     private fun handleMessage(chatId: Long, message: String) {
         getKeyboard(KeyboardStates.getCurrentKeyboard(chatId))?.let {
             it.fetchButtons().firstOrNull { button -> button!!.text == message }?.apply {
                 handleButtonClick(chatId, this)
             }
-        } ?: if (FeaturesList.ML.enabled)
-            bot.actions.sendMessage(chatId, Ml.getAnswer(message, "text", chatId))
-        else
-            bot.actions.sendMessage(chatId, commonError)
+        } ?: bot.actions.sendMessage(chatId, commonError)
     }
 
     private fun handleButtonClick(chatId: Long, button: Button) {
@@ -94,6 +78,7 @@ class WebhookHandler {
                     chatId,
                     GsonMapper.deserialize(it.data, InlineKeyboard::class.java)
                 )
+
                 "tutorial" -> bot.actions.sendMessage(chatId, it.data)
             }
         }
