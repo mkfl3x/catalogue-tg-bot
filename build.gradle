@@ -52,6 +52,7 @@ dependencies {
 }
 
 shadowJar {
+    archiveClassifier.set('')
     manifest {
         attributes 'Main-Class': 'MainKt'
     }
