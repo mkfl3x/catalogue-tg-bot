@@ -10,8 +10,8 @@ env:
   JAVA_VERSION: 15
   JAR_ARTIFACT_PATH: build/libs/
   JAR_ARTIFACT_NAME: app-artifact
-  CONTAINER_NAME: cyprus-bot
-  IMAGE_NAME: mkfl3x/cyprus-bot
+  CONTAINER_NAME: cybot
+  IMAGE_NAME: mkfl3x/cybot
 
 jobs:
   build-jar:
@@ -76,23 +76,23 @@ jobs:
         path: ${{ env.JAR_ARTIFACT_PATH }}
         failOnError: false
 
-  deploy-to-dev:
+  deploy:
     needs: publish-image
     runs-on: ubuntu-latest
     steps:
     - name: deploy to DigitalOcean droplet
       uses: appleboy/ssh-action@v0.1.3
       with:
-        host: ${{ secrets.DEV_BOT_DROPLET_HOST }}
-        username: ${{ secrets.DEV_BOT_DROPLET_USER }}
-        password: ${{ secrets.DEV_BOT_DROPLET_PASS }}
+        host: ${{ secrets.BOT_DROPLET_HOST }}
+        username: ${{ secrets.BOT_DROPLET_USER }}
+        password: ${{ secrets.BOT_DROPLET_PASS }}
         script: |
           docker stop ${{ env.CONTAINER_NAME }}
           docker rm ${{ env.CONTAINER_NAME }}
           docker image rm ${{ env.IMAGE_NAME }}
           docker run -d -p 8085:8080 \
           -e BOT_TOKEN=${{ secrets.BOT_TOKEN }} \
-          -e BOT_WEBHOOK_HOST=${{ secrets.DEV_BOT_DROPLET_HOST }} \
+          -e BOT_WEBHOOK_HOST=${{ secrets.BOT_WEBHOOK_HOST }} \
           -e MONGO_HOST=${{ secrets.MONGO_HOST }} \
           -e MONGO_USER=${{ secrets.MONGO_USER }} \
           -e MONGO_PASSWORD=${{ secrets.MONGO_PASS }} \
