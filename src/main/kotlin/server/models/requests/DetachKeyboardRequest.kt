@@ -3,15 +3,15 @@ package server.models.requests
 import com.google.gson.annotations.SerializedName
 import common.ReservedNames
 import database.mongo.DataManager
+import server.Request
+import server.RequestValidator
 import server.models.Error
 import server.models.Result
+import server.RequestActions.deleteKeyboard
 
 data class DetachKeyboardRequest(
     @SerializedName("keyboard_id") val keyboardId: String
 ) : Request() {
-
-    override val successMessage: String
-        get() = "Keyboard with ID \"$keyboardId\" successfully detached"
 
     override fun validateData(): Result? {
         RequestValidator.validateIds(keyboardId)?.let { return it }
@@ -23,4 +23,6 @@ data class DetachKeyboardRequest(
         } ?: return Result.error(Error.KEYBOARD_DOES_NOT_EXIST)
         return null
     }
+
+    override fun relatedAction() = deleteKeyboard(DataManager.getKeyboard(keyboardId)!!, true)
 }

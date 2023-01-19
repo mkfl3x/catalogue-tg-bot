@@ -1,4 +1,4 @@
-package server.models.requests
+package server
 
 import common.ReservedNames
 import database.mongo.DataManager

@@ -1,8 +1,11 @@
 package server.models.requests
 
 import com.google.gson.annotations.SerializedName
+import server.Request
+import server.RequestValidator
 import server.models.Result
 import server.models.objects.Location
+import server.RequestActions.addButton
 
 data class AddButtonRequest(
     @SerializedName("text") val text: String,
@@ -10,9 +13,6 @@ data class AddButtonRequest(
     @SerializedName("link") val link: String,
     @SerializedName("host_keyboard") val hostKeyboard: String?
 ) : Request() {
-
-    override val successMessage: String
-        get() = "Button \"${text}\" successfully added"
 
     override fun validateData(): Result? {
         RequestValidator.validateIds(link, hostKeyboard)?.let { return it }
@@ -24,4 +24,6 @@ data class AddButtonRequest(
         }
         return null
     }
+
+    override fun relatedAction() = addButton(this)
 }

@@ -1,6 +1,8 @@
-package server.models.requests
+package server
 
+import server.models.Response
 import server.models.Result
+import server.models.requests.*
 
 
 enum class Requests(
@@ -43,7 +45,7 @@ enum class Requests(
 
 abstract class Request {
 
-    abstract val successMessage: String
-
     abstract fun validateData(): Result?
+
+    abstract fun relatedAction(): Response
 }

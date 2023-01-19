@@ -5,7 +5,7 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import server.handlers.ContentHandler
-import server.models.requests.Requests
+import server.Requests
 
 fun Application.keyboards(section: String, handler: ContentHandler) {
     routing {

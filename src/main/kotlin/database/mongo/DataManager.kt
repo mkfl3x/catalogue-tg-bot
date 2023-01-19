@@ -15,19 +15,8 @@ object DataManager {
         reloadCollections()
     }
 
-    fun reloadCollections() {
-        MongoCollections.values().forEach { reloadCollection(it) }
-    }
-
-    private fun reloadCollection(collection: MongoCollections) {
-        when (collection) {
-            MongoCollections.KEYBOARDS -> keyboards =
-                MongoClient.readAllEntries(collection.collectionName, Keyboard::class.java).toHashSet()
-            MongoCollections.BUTTONS -> buttons =
-                MongoClient.readAllEntries(collection.collectionName, Button::class.java).toHashSet()
-            MongoCollections.PAYLOADS -> payloads =
-                MongoClient.readAllEntries(collection.collectionName, Payload::class.java).toHashSet()
-        }
+    fun reloadCollections(vararg collections: MongoCollections = MongoCollections.values()) {
+        collections.forEach { MongoClient.readAllEntries(it.collectionName, it.type).toHashSet() }
     }
 
     fun getKeyboards() = keyboards
