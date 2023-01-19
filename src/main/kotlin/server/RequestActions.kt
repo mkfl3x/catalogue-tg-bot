@@ -9,7 +9,6 @@ import database.mongo.models.Button
 import database.mongo.models.Keyboard
 import database.mongo.models.Payload
 import org.bson.types.ObjectId
-import server.models.RequestAction
 import server.models.Response
 import server.models.ResponseStatus
 import server.models.requests.*
@@ -31,7 +30,7 @@ object RequestActions {
                 // Add button to new keyboard lead_buttons
                 addButtonToKeyboard(button.id, keyboard.id, leadButtons = true)
             }
-            return Response(ResponseStatus.SUCCESS, RequestAction.CREATE, keyboard.id)
+            return Response(ResponseStatus.SUCCESS, keyboard.id)
         }
     }
 
@@ -46,7 +45,7 @@ object RequestActions {
             // If button leads to keyboard then add button to host keyboard's lead_buttons
             if (button.type == "keyboard")
                 addButtonToKeyboard(button.id, ObjectId(link), leadButtons = true)
-            return Response(ResponseStatus.SUCCESS, RequestAction.CREATE, button.id)
+            return Response(ResponseStatus.SUCCESS, button.id)
         }
     }
 
@@ -63,7 +62,7 @@ object RequestActions {
                 // Add button to host keyboard
                 addButtonToKeyboard(button.id, ObjectId(it.hostKeyboard))
             }
-            return Response(ResponseStatus.SUCCESS, RequestAction.CREATE, payload.id)
+            return Response(ResponseStatus.SUCCESS, payload.id)
         }
     }
 
@@ -87,9 +86,9 @@ object RequestActions {
             // Delete keyboard from collection
             if (detachOnly.not()) {
                 MongoClient.delete(MongoCollections.KEYBOARDS.collectionName, BasicDBObject("_id", id))
-                return Response(ResponseStatus.SUCCESS, RequestAction.DELETE, id)
+                return Response(ResponseStatus.SUCCESS, id)
             }
-            return Response(ResponseStatus.SUCCESS, RequestAction.DETACH, id)
+            return Response(ResponseStatus.SUCCESS, id)
         }
     }
 
@@ -108,7 +107,7 @@ object RequestActions {
             DataManager.getKeyboards()
                 .filter { keyboard -> keyboard.buttons.contains(button.id) }
                 .forEach { keyboard -> deleteButtonFromKeyboard(button.id, keyboard.id) }
-            return Response(ResponseStatus.SUCCESS, RequestAction.DELETE, button.id)
+            return Response(ResponseStatus.SUCCESS, button.id)
         }
     }
 
@@ -131,7 +130,7 @@ object RequestActions {
                     // Delete buttons
                     MongoClient.delete(MongoCollections.BUTTONS.collectionName, BasicDBObject("_id", button.id))
                 }
-            return Response(ResponseStatus.SUCCESS, RequestAction.DELETE, payload.id)
+            return Response(ResponseStatus.SUCCESS, payload.id)
         }
     }
 
@@ -159,7 +158,7 @@ object RequestActions {
                 BasicDBObject("_id", ObjectId(request.buttonId)),
                 BasicDBObject("\$set", BasicDBObject("type", request.type))
             )
-            return Response(ResponseStatus.SUCCESS, RequestAction.LINK, button.id)
+            return Response(ResponseStatus.SUCCESS, button.id)
         }
     }
 

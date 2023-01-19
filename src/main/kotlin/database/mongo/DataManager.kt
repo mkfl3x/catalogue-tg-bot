@@ -16,7 +16,16 @@ object DataManager {
     }
 
     fun reloadCollections(vararg collections: MongoCollections = MongoCollections.values()) {
-        collections.forEach { MongoClient.readAllEntries(it.collectionName, it.type).toHashSet() }
+        collections.forEach {
+            when (it) {
+                MongoCollections.KEYBOARDS -> keyboards =
+                    MongoClient.readAllEntries(it.collectionName, Keyboard::class.java).toHashSet()
+                MongoCollections.BUTTONS -> buttons =
+                    MongoClient.readAllEntries(it.collectionName, Button::class.java).toHashSet()
+                MongoCollections.PAYLOADS -> payloads =
+                    MongoClient.readAllEntries(it.collectionName, Payload::class.java).toHashSet()
+            }
+        }
     }
 
     fun getKeyboards() = keyboards
