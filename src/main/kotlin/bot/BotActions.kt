@@ -1,7 +1,6 @@
 package bot
 
 import com.pengrad.telegrambot.TelegramBot
-import com.pengrad.telegrambot.request.GetFile
 import com.pengrad.telegrambot.request.SendMessage
 import database.mongo.models.InlineKeyboard
 import database.mongo.models.Keyboard

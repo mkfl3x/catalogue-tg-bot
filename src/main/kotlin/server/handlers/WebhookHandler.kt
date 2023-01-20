@@ -50,14 +50,14 @@ class WebhookHandler {
                 KeyboardStates.popKeyboard(chatId)
                 bot.actions.sendReplyKeyboard(
                     chatId,
-                    getKeyboard(KeyboardStates.getCurrentKeyboard(chatId))!!
+                    getKeyboard(KeyboardStates.getCurrentKeyboard(chatId)!!)!!
                 )
             }
         }
     }
 
     private fun handleMessage(chatId: Long, message: String) {
-        getKeyboard(KeyboardStates.getCurrentKeyboard(chatId))?.let {
+        getKeyboard(KeyboardStates.getCurrentKeyboard(chatId)!!)?.let {
             it.fetchButtons().firstOrNull { button -> button!!.text == message }?.apply {
                 handleButtonClick(chatId, this)
             }
