@@ -1,16 +1,15 @@
 package server.models
 
 import com.google.gson.JsonObject
-import org.bson.types.ObjectId
 
 data class Response(
     val status: ResponseStatus,
-    val id: ObjectId,
+    val id: String,
     val message: String = ""
 ) {
     fun toJson() = JsonObject().apply {
         addProperty("status", status.text)
-        addProperty("id", id.toHexString())
+        addProperty("id", id)
         if (message.isNotEmpty())
             addProperty("message", message)
     }

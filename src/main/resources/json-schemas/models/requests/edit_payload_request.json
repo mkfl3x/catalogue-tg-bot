@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Edit payload request",
+  "type": "object",
+  "properties": {
+    "payload_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "fields": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "$ref": "objects/updating_field.json"
+      }
+    }
+  },
+  "required": [
+    "payload_id",
+    "fields"
+  ],
+  "additionalProperties": false
+}

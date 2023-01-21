@@ -30,7 +30,7 @@ object RequestActions {
                 // Add button to new keyboard lead_buttons
                 addButtonToKeyboard(button.id, keyboard.id, leadButtons = true)
             }
-            return Response(ResponseStatus.SUCCESS, keyboard.id)
+            return Response(ResponseStatus.SUCCESS, keyboard.id.toHexString())
         }
     }
 
@@ -45,15 +45,12 @@ object RequestActions {
             // If button leads to keyboard then add button to host keyboard's lead_buttons
             if (button.type == "keyboard")
                 addButtonToKeyboard(button.id, ObjectId(link), leadButtons = true)
-            return Response(ResponseStatus.SUCCESS, button.id)
+            return Response(ResponseStatus.SUCCESS, button.id.toHexString())
         }
     }
 
     fun editButton(request: EditButtonRequest): Response {
         with(request) {
-            // Get button
-            val button = DataManager.getButton(buttonId)!!
-            // Update fields
             request.fields.forEach {
                 MongoClient.update(
                     MongoCollections.BUTTONS.collectionName,
@@ -62,7 +59,7 @@ object RequestActions {
                     BasicDBObject("\$set", BasicDBObject(it.name, it.value))
                 )
             }
-            return Response(ResponseStatus.SUCCESS, button.id)
+            return Response(ResponseStatus.SUCCESS, request.buttonId)
         }
     }
 
@@ -79,7 +76,24 @@ object RequestActions {
                 // Add button to host keyboard
                 addButtonToKeyboard(button.id, ObjectId(it.hostKeyboard))
             }
-            return Response(ResponseStatus.SUCCESS, payload.id)
+            return Response(ResponseStatus.SUCCESS, payload.id.toHexString())
+        }
+    }
+
+    fun editPayload(request: EditPayloadRequest): Response {
+        with(request) {
+            // Get payload
+            val payload = DataManager.getPayload(payloadId)!!
+            // Update fields
+            request.fields.forEach {
+                MongoClient.update(
+                    MongoCollections.PAYLOADS.collectionName,
+                    Button::class.java,
+                    BasicDBObject("_id", ObjectId(payloadId)), // TODO: not explicitly that ObjectId required
+                    BasicDBObject("\$set", BasicDBObject(it.name, it.value))
+                )
+            }
+            return Response(ResponseStatus.SUCCESS, payload.id.toHexString())
         }
     }
 
@@ -103,9 +117,9 @@ object RequestActions {
             // Delete keyboard from collection
             if (detachOnly.not()) {
                 MongoClient.delete(MongoCollections.KEYBOARDS.collectionName, BasicDBObject("_id", id))
-                return Response(ResponseStatus.SUCCESS, id)
+                return Response(ResponseStatus.SUCCESS, id.toHexString())
             }
-            return Response(ResponseStatus.SUCCESS, id)
+            return Response(ResponseStatus.SUCCESS, id.toHexString())
         }
     }
 
@@ -124,7 +138,7 @@ object RequestActions {
             DataManager.getKeyboards()
                 .filter { keyboard -> keyboard.buttons.contains(button.id) }
                 .forEach { keyboard -> deleteButtonFromKeyboard(button.id, keyboard.id) }
-            return Response(ResponseStatus.SUCCESS, button.id)
+            return Response(ResponseStatus.SUCCESS, button.id.toHexString())
         }
     }
 
@@ -147,7 +161,7 @@ object RequestActions {
                     // Delete buttons
                     MongoClient.delete(MongoCollections.BUTTONS.collectionName, BasicDBObject("_id", button.id))
                 }
-            return Response(ResponseStatus.SUCCESS, payload.id)
+            return Response(ResponseStatus.SUCCESS, payload.id.toHexString())
         }
     }
 
@@ -175,7 +189,7 @@ object RequestActions {
                 BasicDBObject("_id", ObjectId(request.buttonId)),
                 BasicDBObject("\$set", BasicDBObject("type", request.type))
             )
-            return Response(ResponseStatus.SUCCESS, button.id)
+            return Response(ResponseStatus.SUCCESS, button.id.toHexString())
         }
     }
 

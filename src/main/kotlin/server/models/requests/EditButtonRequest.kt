@@ -17,6 +17,7 @@ data class EditButtonRequest(
 
     override fun validateData(): Result? {
         RequestValidator.validateIds(buttonId)?.let { return it }
+        RequestValidator.validateButtonExistence(buttonId)
         fields.forEach { field ->
             RequestValidator.validateIsInList(field.name, listOf("text"))?.let { return it }
             RequestValidator.validateReservedNames(field.value)?.let { return it }
