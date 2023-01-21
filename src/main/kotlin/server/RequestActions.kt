@@ -49,6 +49,23 @@ object RequestActions {
         }
     }
 
+    fun editButton(request: EditButtonRequest): Response {
+        with(request) {
+            // Get button
+            val button = DataManager.getButton(buttonId)!!
+            // Update fields
+            request.fields.forEach {
+                MongoClient.update(
+                    MongoCollections.BUTTONS.collectionName,
+                    Button::class.java,
+                    BasicDBObject("_id", ObjectId(buttonId)), // TODO: not explicitly that ObjectId required
+                    BasicDBObject("\$set", BasicDBObject(it.name, it.value))
+                )
+            }
+            return Response(ResponseStatus.SUCCESS, button.id)
+        }
+    }
+
     fun addPayload(request: AddPayloadRequest): Response {
         with(request) {
             // Create payload

@@ -30,8 +30,10 @@ object DataManager {
 
     fun getKeyboards() = keyboards
 
+    // TODO: handle null
     fun getMainKeyboard() = keyboards.find { it.name == ReservedNames.MAIN_KEYBOARD.text }
 
+    // TODO: handle null
     fun getKeyboard(keyboardId: String): Keyboard? = keyboards.firstOrNull { it.id.toHexString() == keyboardId }
 
     fun isKeyboardExist(keyboardId: String) = keyboards.any { it.id.toHexString() == keyboardId }
@@ -43,10 +45,12 @@ object DataManager {
 
     fun getButtons() = buttons
 
+    // TODO: handle null
     fun getButton(buttonId: String): Button? = buttons.firstOrNull { it.id.toHexString() == buttonId }
 
     fun getPayloads() = payloads
 
+    // TODO: handle null
     fun getPayload(payloadId: String): Payload? = payloads.firstOrNull { it.id.toHexString() == payloadId }
 }
 

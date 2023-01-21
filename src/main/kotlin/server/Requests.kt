@@ -21,6 +21,10 @@ enum class Requests(
         "json-schemas/models/requests/objects/payload.json",
         AddPayloadRequest::class.java
     ),
+    EDIT_BUTTON_REQUEST(
+        "json-schemas/models/requests/edit_button_request.json",
+        EditButtonRequest::class.java
+    ),
     DELETE_KEYBOARD_REQUEST(
         "json-schemas/models/requests/delete_keyboard_request.json",
         DeleteKeyboardRequest::class.java

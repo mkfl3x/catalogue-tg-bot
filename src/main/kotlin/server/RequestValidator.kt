@@ -36,6 +36,14 @@ object RequestValidator {
         return null
     }
 
+    fun validateIsInList(value: String, availableValues: List<String>): Result? {
+        return if (value !in availableValues)
+            return Result(
+                HttpStatusCode.BadRequest,
+                "'$value' is not allowed. Might be only [${availableValues.joinToString(", ")}]"
+            ) else null
+    }
+
     fun validateLocation(location: Location): Result? {
         validateReservedNames(location.leadButtonText)?.let { return it }
         if (!DataManager.isKeyboardExist(location.hostKeyboard))

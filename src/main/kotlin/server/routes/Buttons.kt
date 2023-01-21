@@ -4,8 +4,8 @@ import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import server.handlers.ContentHandler
 import server.Requests
+import server.handlers.ContentHandler
 
 fun Application.buttons(section: String, handler: ContentHandler) {
     routing {
@@ -20,6 +20,10 @@ fun Application.buttons(section: String, handler: ContentHandler) {
         }
         delete("$section/delete") {
             val result = handler.handleRequest(call.receive(), Requests.DELETE_BUTTON_REQUEST)
+            call.respond(result.responseCode, result.responseData)
+        }
+        put("$section/edit") {
+            val result = handler.handleRequest(call.receive(), Requests.EDIT_BUTTON_REQUEST)
             call.respond(result.responseCode, result.responseData)
         }
         put("$section/link") {
