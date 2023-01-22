@@ -1,11 +1,15 @@
-package database.mongo
+package database.mongo.managers
 
 import common.ReservedNames
-import database.mongo.models.Button
-import database.mongo.models.Keyboard
-import database.mongo.models.Payload
+import database.mongo.MongoClient
+import database.mongo.MongoCollections
+import database.mongo.models.data.Button
+import database.mongo.models.data.Keyboard
+import database.mongo.models.data.Payload
 
 object DataManager {
+
+    // TODO: handle exceptions
 
     private lateinit var keyboards: HashSet<Keyboard>
     private lateinit var buttons: HashSet<Button>

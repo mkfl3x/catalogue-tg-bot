@@ -4,12 +4,10 @@ import bot.Bot
 import bot.context.KeyboardStates
 import com.pengrad.telegrambot.model.Update
 import common.ReservedNames
-import database.mongo.DataManager.getKeyboard
-import database.mongo.DataManager.getMainKeyboard
-import database.mongo.DataManager.getPayload
-import database.mongo.models.Button
-import database.mongo.models.InlineKeyboard
-import utils.GsonMapper
+import database.mongo.managers.DataManager.getKeyboard
+import database.mongo.managers.DataManager.getMainKeyboard
+import database.mongo.managers.DataManager.getPayload
+import database.mongo.models.data.Button
 
 class WebhookHandler {
 
@@ -74,11 +72,6 @@ class WebhookHandler {
     private fun handlePayloadLink(chatId: Long, link: String) {
         getPayload(link)?.let {
             when (it.type) {
-                "inline_keyboard" -> bot.actions.sendInlineKeyboard(
-                    chatId,
-                    GsonMapper.deserialize(it.data, InlineKeyboard::class.java)
-                )
-
                 "tutorial" -> bot.actions.sendMessage(chatId, it.data)
             }
         }

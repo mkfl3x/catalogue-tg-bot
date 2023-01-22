@@ -1,11 +1,12 @@
-package database.mongo.models
+package database.mongo.models.data
 
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.pengrad.telegrambot.model.request.KeyboardButton
 import com.pengrad.telegrambot.model.request.ReplyKeyboardMarkup
 import common.ReservedNames
-import database.mongo.DataManager.getButton
+import database.mongo.managers.DataManager.getButton
+import database.mongo.models.MongoEntity
 import org.bson.codecs.pojo.annotations.BsonCreator
 import org.bson.codecs.pojo.annotations.BsonId
 import org.bson.codecs.pojo.annotations.BsonProperty

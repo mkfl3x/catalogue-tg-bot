@@ -2,18 +2,20 @@ package server
 
 import bot.context.KeyboardStates
 import com.mongodb.BasicDBObject
-import database.mongo.DataManager
 import database.mongo.MongoClient
 import database.mongo.MongoCollections
-import database.mongo.models.Button
-import database.mongo.models.Keyboard
-import database.mongo.models.Payload
+import database.mongo.managers.DataManager
+import database.mongo.models.data.Button
+import database.mongo.models.data.Keyboard
+import database.mongo.models.data.Payload
+import io.ktor.http.*
 import org.bson.types.ObjectId
-import server.models.Response
-import server.models.ResponseStatus
-import server.models.requests.*
+import server.models.requests.data.*
+import server.models.responses.Response
 
 object RequestActions {
+
+    // TODO: add safety execution
 
     fun addKeyboard(request: AddKeyboardRequest): Response {
         with(request) {
@@ -30,7 +32,7 @@ object RequestActions {
                 // Add button to new keyboard lead_buttons
                 addButtonToKeyboard(button.id, keyboard.id, leadButtons = true)
             }
-            return Response(ResponseStatus.SUCCESS, keyboard.id.toHexString())
+            return Response(HttpStatusCode.OK, "Keyboard ${keyboard.id.toHexString()} added")
         }
     }
 
@@ -45,7 +47,8 @@ object RequestActions {
             // If button leads to keyboard then add button to host keyboard's lead_buttons
             if (button.type == "keyboard")
                 addButtonToKeyboard(button.id, ObjectId(link), leadButtons = true)
-            return Response(ResponseStatus.SUCCESS, button.id.toHexString())
+            return Response(HttpStatusCode.OK, "Button ${button.id.toHexString()} added")
+
         }
     }
 
@@ -59,7 +62,7 @@ object RequestActions {
                     BasicDBObject("\$set", BasicDBObject(it.name, it.value))
                 )
             }
-            return Response(ResponseStatus.SUCCESS, request.buttonId)
+            return Response(HttpStatusCode.OK, request.buttonId)
         }
     }
 
@@ -76,7 +79,7 @@ object RequestActions {
                 // Add button to host keyboard
                 addButtonToKeyboard(button.id, ObjectId(it.hostKeyboard))
             }
-            return Response(ResponseStatus.SUCCESS, payload.id.toHexString())
+            return Response(HttpStatusCode.OK, "Payload ${payload.id.toHexString()} added")
         }
     }
 
@@ -89,11 +92,11 @@ object RequestActions {
                 MongoClient.update(
                     MongoCollections.PAYLOADS.collectionName,
                     Button::class.java,
-                    BasicDBObject("_id", ObjectId(payloadId)), // TODO: not explicitly that ObjectId required
+                    BasicDBObject("_id", payload.id), // TODO: not explicitly that ObjectId required
                     BasicDBObject("\$set", BasicDBObject(it.name, it.value))
                 )
             }
-            return Response(ResponseStatus.SUCCESS, payload.id.toHexString())
+            return Response(HttpStatusCode.OK, "Payload ${payload.id.toHexString()} edited")
         }
     }
 
@@ -117,9 +120,9 @@ object RequestActions {
             // Delete keyboard from collection
             if (detachOnly.not()) {
                 MongoClient.delete(MongoCollections.KEYBOARDS.collectionName, BasicDBObject("_id", id))
-                return Response(ResponseStatus.SUCCESS, id.toHexString())
+                return Response(HttpStatusCode.OK, "Keyboard ${id.toHexString()} deleted" )
             }
-            return Response(ResponseStatus.SUCCESS, id.toHexString())
+            return Response(HttpStatusCode.OK, "Keyboard ${id.toHexString()} detached")
         }
     }
 
@@ -138,7 +141,7 @@ object RequestActions {
             DataManager.getKeyboards()
                 .filter { keyboard -> keyboard.buttons.contains(button.id) }
                 .forEach { keyboard -> deleteButtonFromKeyboard(button.id, keyboard.id) }
-            return Response(ResponseStatus.SUCCESS, button.id.toHexString())
+            return Response(HttpStatusCode.OK, "Button ${button.id.toHexString()} deleted")
         }
     }
 
@@ -161,7 +164,7 @@ object RequestActions {
                     // Delete buttons
                     MongoClient.delete(MongoCollections.BUTTONS.collectionName, BasicDBObject("_id", button.id))
                 }
-            return Response(ResponseStatus.SUCCESS, payload.id.toHexString())
+            return Response(HttpStatusCode.OK, "Payload ${payload.id.toHexString()} deleted")
         }
     }
 
@@ -189,7 +192,7 @@ object RequestActions {
                 BasicDBObject("_id", ObjectId(request.buttonId)),
                 BasicDBObject("\$set", BasicDBObject("type", request.type))
             )
-            return Response(ResponseStatus.SUCCESS, button.id.toHexString())
+            return Response(HttpStatusCode.OK, "Button ${button.id.toHexString()} linked")
         }
     }
 
