@@ -9,6 +9,9 @@ import server.handlers.WebhookHandler
 
 fun Application.telegram(endpoint: String, handler: WebhookHandler) {
     routing {
+
+        // TODO: add telegram secret
+
         post(endpoint) {
             try {
                 handler.handleUpdate(call.receive())

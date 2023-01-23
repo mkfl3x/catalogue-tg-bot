@@ -8,8 +8,8 @@ object UsersManager {
 
     private val users = MongoCollection(MongoCollections.USERS, User::class.java)
 
-    fun getUser(): HashSet<User> {
+    fun getUser(name: String): User? {
         users.reload()
-        return users.entities
+        return users.entities.firstOrNull { it.username == name }
     }
 }

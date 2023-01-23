@@ -102,4 +102,7 @@ jobs:
           -e REDIS_USER=${{ secrets.REDIS_USER }} \
           -e REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }} \
           -e REDIS_PREFIX=${{ secrets.REDIS_PREFIX }} \
+          -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
+          -e JWT_ISSUER=${{ secrets.JWT_ISSUER }} \
+          -e JWT_REALM=${{ secrets.JWT_REALM }} \
           --name ${{ env.CONTAINER_NAME }} ${{ env.IMAGE_NAME }}

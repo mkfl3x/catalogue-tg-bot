@@ -37,7 +37,7 @@ object MongoClient {
         return database.getCollection(collection, entryType).find().toList()
     }
 
-    fun <T> read(collection: String, entryType: Class<T>, condition: BasicDBObject): T {
+    fun <T> read(collection: String, entryType: Class<T>, condition: BasicDBObject): T? {
         return database.getCollection(collection, entryType).find(condition).first()
     }
 

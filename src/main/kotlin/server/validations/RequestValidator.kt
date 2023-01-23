@@ -2,6 +2,7 @@ package server.validations
 
 import common.ReservedNames
 import database.mongo.managers.DataManager
+import database.mongo.managers.UsersManager
 import org.bson.types.ObjectId
 import server.models.objects.Location
 
@@ -87,5 +88,10 @@ object RequestValidator {
             if (this.buttons.map { DataManager.getButton(it.toHexString()) }.any { it!!.text == buttonName })
                 throw RequestValidationException("Button \"${buttonName}\" already exists on \"${this.name}\" keyboard")
         }
+    }
+
+    fun validateUserExistence(username: String) {
+        if (UsersManager.getUser(username) == null)
+            throw RequestValidationException("User \"$username\" doesn't exist")
     }
 }

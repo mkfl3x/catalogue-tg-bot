@@ -30,6 +30,9 @@ dependencies {
     implementation "io.ktor:ktor-serialization-gson:$ktorVersion"
     implementation "io.ktor:ktor-server-swagger:$ktorVersion"
     implementation "io.ktor:ktor-server-cors-jvm:$ktorVersion"
+    implementation "io.ktor:ktor-server-auth-jvm:$ktorVersion"
+    implementation "io.ktor:ktor-server-core-jvm:$ktorVersion"
+    implementation "io.ktor:ktor-server-auth-jwt-jvm:$ktorVersion"
 
     // logging
     implementation "ch.qos.logback:logback-classic:$logbackVersion"
@@ -49,6 +52,7 @@ dependencies {
 
     // khttp
     implementation "khttp:khttp:$khttpVersion"
+
 }
 
 shadowJar {
