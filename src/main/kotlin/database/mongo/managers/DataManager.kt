@@ -1,8 +1,9 @@
 package database.mongo.managers
 
 import common.ReservedNames
-import database.mongo.MongoClient
 import database.mongo.MongoCollections
+import database.mongo.collections.MongoCollection
+import database.mongo.models.MongoEntity
 import database.mongo.models.data.Button
 import database.mongo.models.data.Keyboard
 import database.mongo.models.data.Payload
@@ -10,51 +11,49 @@ import database.mongo.models.data.Payload
 object DataManager {
 
     // TODO: handle exceptions
+    // TODO: think about collections storage approach
 
-    private lateinit var keyboards: HashSet<Keyboard>
-    private lateinit var buttons: HashSet<Button>
-    private lateinit var payloads: HashSet<Payload>
+    private val keyboards = MongoCollection(MongoCollections.KEYBOARDS, Keyboard::class.java)
+    private val buttons = MongoCollection(MongoCollections.BUTTONS, Button::class.java)
+    private val payloads = MongoCollection(MongoCollections.PAYLOADS, Payload::class.java)
 
     init {
         reloadCollections()
     }
 
-    fun reloadCollections(vararg collections: MongoCollections = MongoCollections.values()) {
-        collections.forEach {
-            when (it) {
-                MongoCollections.KEYBOARDS -> keyboards =
-                    MongoClient.readAllEntries(it.collectionName, Keyboard::class.java).toHashSet()
-                MongoCollections.BUTTONS -> buttons =
-                    MongoClient.readAllEntries(it.collectionName, Button::class.java).toHashSet()
-                MongoCollections.PAYLOADS -> payloads =
-                    MongoClient.readAllEntries(it.collectionName, Payload::class.java).toHashSet()
-            }
-        }
+    fun reloadCollections() {
+        reloadCollection(keyboards)
+        reloadCollection(buttons)
+        reloadCollection(payloads)
     }
 
-    fun getKeyboards() = keyboards
+    fun getKeyboards() = keyboards.entities
 
     // TODO: handle null
-    fun getMainKeyboard() = keyboards.find { it.name == ReservedNames.MAIN_KEYBOARD.text }
+    fun getMainKeyboard() = keyboards.entities.find { it.name == ReservedNames.MAIN_KEYBOARD.text }
 
     // TODO: handle null
-    fun getKeyboard(keyboardId: String): Keyboard? = keyboards.firstOrNull { it.id.toHexString() == keyboardId }
+    fun getKeyboard(keyboardId: String): Keyboard? = keyboards.entities.firstOrNull { it.id.toHexString() == keyboardId }
 
-    fun isKeyboardExist(keyboardId: String) = keyboards.any { it.id.toHexString() == keyboardId }
+    fun isKeyboardExist(keyboardId: String) = keyboards.entities.any { it.id.toHexString() == keyboardId }
 
     fun keyboardHasButton(keyboardId: String, buttonText: String) =
         getKeyboard(keyboardId)!!.buttons
             .map { getButton(it.toHexString()) }
             .any { it!!.text == buttonText }
 
-    fun getButtons() = buttons
+    fun getButtons() = buttons.entities
 
     // TODO: handle null
-    fun getButton(buttonId: String): Button? = buttons.firstOrNull { it.id.toHexString() == buttonId }
+    fun getButton(buttonId: String): Button? = buttons.entities.firstOrNull { it.id.toHexString() == buttonId }
 
-    fun getPayloads() = payloads
+    fun getPayloads() = payloads.entities
 
     // TODO: handle null
-    fun getPayload(payloadId: String): Payload? = payloads.firstOrNull { it.id.toHexString() == payloadId }
+    fun getPayload(payloadId: String): Payload? = payloads.entities.firstOrNull { it.id.toHexString() == payloadId }
+
+    private fun <T : MongoEntity> reloadCollection(collection: MongoCollection<T>) {
+        collection.reload()
+    }
 }
 
