@@ -1,12 +1,12 @@
 package server.models.requests.data
 
 import com.google.gson.annotations.SerializedName
-import server.RequestActions.addButton
+import server.RequestActions.createButton
 import server.models.objects.Location
 import server.models.requests.Request
 import server.validations.RequestValidator
 
-data class AddButtonRequest(
+data class CreateButtonRequest(
     @SerializedName("text") val text: String,
     @SerializedName("type") val type: String,
     @SerializedName("link") val link: String,
@@ -26,5 +26,5 @@ data class AddButtonRequest(
         }
     }
 
-    override fun relatedAction() = addButton(this)
+    override fun relatedAction() = createButton(this)
 }

@@ -21,8 +21,7 @@
     }
   },
   "required": [
-    "name",
-    "buttons"
+    "name"
   ],
   "additionalProperties": false
 }

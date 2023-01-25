@@ -76,6 +76,11 @@ object RequestValidator {
             throw RequestValidationException("Button can't leads to it's host keyboard")
     }
 
+    fun validateLoopButton(keyboardId: String, buttonId: String) {
+        if (DataManager.getKeyboard(keyboardId)!!.leadButtons.contains(ObjectId(buttonId)))
+            throw RequestValidationException("Button leading to keyboard can't be placed on it's one")
+    }
+
     fun validateKeyboardDeletion(keyboardId: String) {
         DataManager.getKeyboard(keyboardId)?.let {
             if (it.name == ReservedNames.MAIN_KEYBOARD.text)
@@ -83,11 +88,18 @@ object RequestValidator {
         }
     }
 
-    fun validateKeyboardsButtonConflicts(buttonId: String, buttonName: String) {
+    fun validateButtonNameDuplication(buttonId: String, buttonName: String) {
         DataManager.getKeyboards().first { it.buttons.contains(ObjectId(buttonId)) }.apply {
             if (this.buttons.map { DataManager.getButton(it.toHexString()) }.any { it!!.text == buttonName })
                 throw RequestValidationException("Button \"${buttonName}\" already exists on \"${this.name}\" keyboard")
         }
+    }
+
+    fun validateKeyboardButtonsDuplication(keyboardId: String, buttonId: String) {
+        DataManager.getKeyboard(keyboardId)?.let {
+            if (it.buttons.contains(ObjectId(buttonId)))
+                throw RequestValidationException("Button \"${buttonId}\" already exists on \"$keyboardId\" keyboard")
+        } ?: throw RequestValidationException("Keyboard \"$keyboardId\" doesn't exist")
     }
 
     fun validateUserExistence(username: String) {

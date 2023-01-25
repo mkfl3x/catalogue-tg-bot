@@ -17,7 +17,7 @@ object RequestActions {
 
     // TODO: add safety execution
 
-    fun addKeyboard(request: AddKeyboardRequest): Response {
+    fun createKeyboard(request: CreateKeyboardRequest): Response {
         with(request) {
             // Create keyboard
             val keyboard = Keyboard(ObjectId(), name, emptyList(), emptyList())
@@ -36,7 +36,7 @@ object RequestActions {
         }
     }
 
-    fun addButton(request: AddButtonRequest): Response {
+    fun createButton(request: CreateButtonRequest): Response {
         with(request) {
             // Create button
             val button = Button(ObjectId(), text, type, ObjectId(link))
@@ -66,7 +66,7 @@ object RequestActions {
         }
     }
 
-    fun addPayload(request: AddPayloadRequest): Response {
+    fun createPayload(request: CreatePayloadRequest): Response {
         with(request) {
             // Create payload
             val payload = Payload(ObjectId(), name, type, data)
@@ -120,10 +120,16 @@ object RequestActions {
             // Delete keyboard from collection
             if (detachOnly.not()) {
                 MongoClient.delete(MongoCollections.KEYBOARDS.collectionName, BasicDBObject("_id", id))
-                return Response(HttpStatusCode.OK, "Keyboard ${id.toHexString()} deleted" )
+                return Response(HttpStatusCode.OK, "Keyboard ${id.toHexString()} deleted")
             }
             return Response(HttpStatusCode.OK, "Keyboard ${id.toHexString()} detached")
         }
+    }
+
+    fun updateKeyboardButton(request: UpdateKeyboardButtonRequest, action: String) = when (action) {
+        "add" -> addKeyboardButton(request.keyboardId, request.buttonId)
+        "delete" -> deleteKeyboardButton(request.keyboardId, request.buttonId)
+        else -> throw Exception("Unknown \"$action\" parameter")
     }
 
     fun deleteButton(request: DeleteButtonRequest): Response {
@@ -194,6 +200,16 @@ object RequestActions {
             )
             return Response(HttpStatusCode.OK, "Button ${button.id.toHexString()} linked")
         }
+    }
+
+    private fun addKeyboardButton(keyboardId: String, buttonId: String): Response {
+        addButtonToKeyboard(ObjectId(buttonId), ObjectId(keyboardId))
+        return Response(HttpStatusCode.OK, "Button \"$buttonId\" added to keyboard \"$keyboardId\"")
+    }
+
+    private fun deleteKeyboardButton(keyboardId: String, buttonId: String): Response {
+        deleteButtonFromKeyboard(ObjectId(buttonId), ObjectId(keyboardId))
+        return Response(HttpStatusCode.OK, "Button \"$buttonId\" deleted from keyboard \"$keyboardId\"")
     }
 
     private fun addButtonToKeyboard(button: ObjectId, keyboard: ObjectId, leadButtons: Boolean = false) {

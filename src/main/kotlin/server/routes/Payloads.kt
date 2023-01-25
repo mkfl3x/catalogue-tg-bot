@@ -6,20 +6,25 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import server.handlers.ContentHandler
-import server.models.requests.data.AddPayloadRequest
+import server.models.requests.data.CreatePayloadRequest
 import server.models.requests.data.DeletePayloadRequest
 import server.models.requests.data.EditPayloadRequest
 
 fun Application.payloads(section: String, handler: ContentHandler) {
     routing {
         authenticate {
+            get("$section/get/{payload_id}") {
+                handler.getPayload(call.parameters["payload_id"].toString()).apply {
+                    call.respond(this.httpCode, this.content)
+                }
+            }
             get("$section/get") {
                 handler.getPayloads().apply {
                     call.respond(this.httpCode, this.content)
                 }
             }
-            post("$section/add") {
-                handler.handleRequest(call.receive<AddPayloadRequest>()).apply {
+            post("$section/create") {
+                handler.handleRequest(call.receive<CreatePayloadRequest>()).apply {
                     call.respond(this.httpCode, this.content)
                 }
             }

@@ -1,12 +1,12 @@
 package server.models.requests.data
 
 import com.google.gson.annotations.SerializedName
-import server.RequestActions.addPayload
+import server.RequestActions.createPayload
 import server.models.objects.Location
 import server.models.requests.Request
 import server.validations.RequestValidator
 
-data class AddPayloadRequest(
+data class CreatePayloadRequest(
     @SerializedName("name") val name: String,
     @SerializedName("type") val type: String,
     @SerializedName("data") val data: String,
@@ -23,5 +23,5 @@ data class AddPayloadRequest(
         location?.let { location -> RequestValidator.validateLocation(location) }
     }
 
-    override fun relatedAction() = addPayload(this)
+    override fun relatedAction() = createPayload(this)
 }

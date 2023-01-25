@@ -5,7 +5,7 @@ import server.RequestActions.editButton
 import server.models.objects.Field
 import server.models.requests.Request
 import server.validations.RequestValidator
-import server.validations.RequestValidator.validateKeyboardsButtonConflicts
+import server.validations.RequestValidator.validateButtonNameDuplication
 
 data class EditButtonRequest(
     @SerializedName("button_id") val buttonId: String,
@@ -22,7 +22,7 @@ data class EditButtonRequest(
             RequestValidator.validateIsInList(field.name, listOf("text"))
             RequestValidator.validateReservedNames(field.value)
             when (field.name) {
-                "text" -> validateKeyboardsButtonConflicts(buttonId, field.value)
+                "text" -> validateButtonNameDuplication(buttonId, field.value)
             }
         }
     }
