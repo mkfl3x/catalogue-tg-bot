@@ -6,15 +6,14 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import server.handlers.WebhookHandler
+import utils.Properties
 
 fun Application.telegram(endpoint: String, handler: WebhookHandler) {
     routing {
-
-        // TODO: add telegram secret
-
         post(endpoint) {
             try {
-                handler.handleUpdate(call.receive())
+                if (Properties.get("bot.webhook.secret") == call.request.headers["X-Telegram-Bot-Api-Secret-Token"])
+                    handler.handleUpdate(call.receive())
             } catch (e: Exception) {
                 e.printStackTrace()
             } finally {

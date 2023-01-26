@@ -10,6 +10,10 @@ class Bot {
     val actions = BotActions(this.bot)
 
     init {
-        bot.execute(SetWebhook().url(Properties.get("bot.webhook.host") + Properties.get("bot.webhook.endpoint")))
+        bot.execute(
+            SetWebhook()
+                .url(Properties.get("bot.webhook.host") + Properties.get("bot.webhook.endpoint"))
+                .secretToken(Properties.get("bot.webhook.secret"))
+        )
     }
 }

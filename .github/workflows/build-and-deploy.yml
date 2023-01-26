@@ -93,6 +93,7 @@ jobs:
           docker run -d -p 8085:8080 \
           -e BOT_TOKEN=${{ secrets.BOT_TOKEN }} \
           -e BOT_WEBHOOK_HOST=${{ secrets.BOT_WEBHOOK_HOST }} \
+          -e BOT_WEBHOOK_SECRET=${{ secrets.BOT_WEBHOOK_SECRET }} \
           -e MONGO_HOST=${{ secrets.MONGO_HOST }} \
           -e MONGO_USER=${{ secrets.MONGO_USER }} \
           -e MONGO_PASSWORD=${{ secrets.MONGO_PASS }} \
