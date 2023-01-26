@@ -14,14 +14,16 @@ import server.models.requests.data.LinkButtonRequest
 fun Application.buttons(section: String, handler: ContentHandler) {
     routing {
         authenticate {
-            get("$section/get/{button_id}") {
-                handler.getButton(call.parameters["button_id"].toString()).apply {
-                    call.respond(this.httpCode, this.content)
+            route("$section/get") {
+                get {
+                    handler.getButtons(call.request.queryParameters["filter"] ?: "all").apply {
+                        call.respond(this.httpCode, this.content)
+                    }
                 }
-            }
-            get("$section/get") {
-                handler.getButtons(call.request.queryParameters["filter"] ?: "all").apply {
-                    call.respond(this.httpCode, this.content)
+                get("/{button_id}") {
+                    handler.getButton(call.parameters["button_id"].toString()).apply {
+                        call.respond(this.httpCode, this.content)
+                    }
                 }
             }
             post("$section/create") {

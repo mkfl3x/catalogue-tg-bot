@@ -15,14 +15,16 @@ import server.models.requests.data.UpdateKeyboardButtonRequest
 fun Application.keyboards(section: String, handler: ContentHandler) {
     routing {
         authenticate {
-            get("$section/get/{keyboard_id}") {
-                handler.getKeyboard(call.parameters["keyboard_id"].toString()).apply {
-                    call.respond(this.httpCode, this.content)
+            route("$section/get") {
+                get {
+                    handler.getKeyboards(call.request.queryParameters["filter"] ?: "all").apply {
+                        call.respond(this.httpCode, this.content)
+                    }
                 }
-            }
-            get("$section/get") {
-                handler.getKeyboards(call.request.queryParameters["filter"] ?: "all").apply {
-                    call.respond(this.httpCode, this.content)
+                get("/{keyboard_id}") {
+                    handler.getKeyboard(call.parameters["keyboard_id"].toString()).apply {
+                        call.respond(this.httpCode, this.content)
+                    }
                 }
             }
             post("$section/create") {

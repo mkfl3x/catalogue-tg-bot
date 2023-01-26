@@ -13,14 +13,16 @@ import server.models.requests.data.EditPayloadRequest
 fun Application.payloads(section: String, handler: ContentHandler) {
     routing {
         authenticate {
-            get("$section/get/{payload_id}") {
-                handler.getPayload(call.parameters["payload_id"].toString()).apply {
-                    call.respond(this.httpCode, this.content)
+            route("/get") {
+                get {
+                    handler.getPayloads().apply {
+                        call.respond(this.httpCode, this.content)
+                    }
                 }
-            }
-            get("$section/get") {
-                handler.getPayloads().apply {
-                    call.respond(this.httpCode, this.content)
+                get("/{payload_id}") {
+                    handler.getPayload(call.parameters["payload_id"].toString()).apply {
+                        call.respond(this.httpCode, this.content)
+                    }
                 }
             }
             post("$section/create") {
