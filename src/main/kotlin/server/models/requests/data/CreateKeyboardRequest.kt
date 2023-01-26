@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName
 import server.RequestActions.createKeyboard
 import server.models.objects.Location
 import server.models.requests.Request
-import server.validations.RequestValidator
+import server.validations.RequestDataValidators
 
 data class CreateKeyboardRequest(
     @SerializedName("name") val name: String,
@@ -16,15 +16,11 @@ data class CreateKeyboardRequest(
         get() = "json-schemas/models/requests/objects/keyboard.json"
 
     override fun validateData() {
-        RequestValidator.validateIds(*buttons?.toTypedArray() ?: emptyArray(), location?.hostKeyboard)
-        RequestValidator.validateReservedNames(name)
-        RequestValidator.validateKeyboardAbsence(name)
-        if (!buttons.isNullOrEmpty()) {
-            buttons.forEach { id ->
-                RequestValidator.validateButtonExistence(id)
-                location?.let { location -> RequestValidator.validateLocation(location) }
-            }
-        }
+        RequestDataValidators.validateIds(*buttons?.toTypedArray() ?: emptyArray(), location?.hostKeyboard)
+        RequestDataValidators.validateReservedNames(name)
+        RequestDataValidators.validateKeyboardDoesNotExist(name)
+        buttons?.onEach { RequestDataValidators.validateButtonExists(it) }
+        location?.apply { RequestDataValidators.validateLocation(this) }
     }
 
     override fun relatedAction() = createKeyboard(this)

@@ -9,57 +9,54 @@ import database.mongo.managers.DataManager.getMainKeyboard
 import database.mongo.managers.DataManager.getPayload
 import database.mongo.models.data.Button
 
-class WebhookHandler {
+class WebhookHandler : RequestHandler {
 
-    companion object {
-        private const val commonError = "Что то пошло не так \uD83E\uDD72"
-        private val bot = Bot()
-    }
+    private val bot = Bot()
 
     fun handleUpdate(update: Update) {
-        update.callbackQuery()?.let {
-            bot.actions.sendMessage(it.message().chat().id(), "echo callback_data: ${it.data()}")
-            return
-        }
-
         val message = update.message()
         val chatId = message.chat().id()
-        message.text()?.let {
-            when (it) {
-                ReservedNames.START.text -> handleStart(chatId)
-                ReservedNames.BACK.text -> handleBack(chatId)
-                else -> handleMessage(chatId, message.text())
+        try {
+            message.text()?.let {
+                when (it) {
+                    ReservedNames.START.text -> handleStart(chatId)
+                    ReservedNames.BACK.text -> handleBack(chatId)
+                    else -> handleMessage(chatId, message.text())
+                }
             }
-            return
+        } catch (e: Exception) {
+            // TODO: add exception log
+        } finally {
+            bot.actions.sendMessage(chatId, commonError)
         }
     }
 
     private fun handleStart(chatId: Long) {
         KeyboardStates.dropState(chatId)
-        getMainKeyboard()?.let {
-            bot.actions.sendReplyKeyboard(chatId, it)
-            KeyboardStates.pushKeyboard(chatId, it.id)
+        getMainKeyboard().apply {
+            bot.actions.sendReplyKeyboard(chatId, this)
+            KeyboardStates.pushKeyboard(chatId, this.id)
         }
     }
 
     private fun handleBack(chatId: Long) {
-        KeyboardStates.getCurrentKeyboard(chatId)?.let {
-            if (getKeyboard(it)?.name != ReservedNames.MAIN_KEYBOARD.text) {
+        KeyboardStates.getCurrentKeyboard(chatId)?.apply {
+            if (getKeyboard(this).name != ReservedNames.MAIN_KEYBOARD.text) {
                 KeyboardStates.popKeyboard(chatId)
                 bot.actions.sendReplyKeyboard(
                     chatId,
-                    getKeyboard(KeyboardStates.getCurrentKeyboard(chatId)!!)!!
+                    getKeyboard(KeyboardStates.getCurrentKeyboard(chatId)!!)
                 )
             }
         }
     }
 
     private fun handleMessage(chatId: Long, message: String) {
-        getKeyboard(KeyboardStates.getCurrentKeyboard(chatId)!!)?.let {
-            it.fetchButtons().firstOrNull { button -> button!!.text == message }?.apply {
+        getKeyboard(KeyboardStates.getCurrentKeyboard(chatId)!!).apply {
+            fetchButtons().firstOrNull { button -> button.text == message }?.apply {
                 handleButtonClick(chatId, this)
             }
-        } ?: bot.actions.sendMessage(chatId, commonError)
+        }
     }
 
     private fun handleButtonClick(chatId: Long, button: Button) {
@@ -70,17 +67,17 @@ class WebhookHandler {
     }
 
     private fun handlePayloadLink(chatId: Long, link: String) {
-        getPayload(link)?.let {
-            when (it.type) {
-                "tutorial" -> bot.actions.sendMessage(chatId, it.data)
+        getPayload(link).apply {
+            when (type) {
+                "tutorial" -> bot.actions.sendMessage(chatId, data)
             }
         }
     }
 
     private fun handleKeyboardLink(chatId: Long, link: String) {
-        getKeyboard(link)?.let {
-            bot.actions.sendReplyKeyboard(chatId, it)
-            KeyboardStates.pushKeyboard(chatId, it.id)
+        getKeyboard(link).apply {
+            bot.actions.sendReplyKeyboard(chatId, this)
+            KeyboardStates.pushKeyboard(chatId, this.id)
         }
     }
 }

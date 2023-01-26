@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName
 import server.RequestActions.createPayload
 import server.models.objects.Location
 import server.models.requests.Request
-import server.validations.RequestValidator
+import server.validations.RequestDataValidators
 
 data class CreatePayloadRequest(
     @SerializedName("name") val name: String,
@@ -17,10 +17,10 @@ data class CreatePayloadRequest(
         get() = "json-schemas/models/requests/objects/payload.json"
 
     override fun validateData() {
-        RequestValidator.validateIds(location?.hostKeyboard)
-        RequestValidator.validateReservedNames(name)
-        RequestValidator.validatePayloadAbsence(name)
-        location?.let { location -> RequestValidator.validateLocation(location) }
+        RequestDataValidators.validateIds(location?.hostKeyboard)
+        RequestDataValidators.validateReservedNames(name)
+        RequestDataValidators.validateButtonDoesNotExist(name)
+        location?.apply { RequestDataValidators.validateLocation(this) }
     }
 
     override fun relatedAction() = createPayload(this)

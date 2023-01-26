@@ -42,11 +42,11 @@ private fun Application.module() {
         }
     }
     routing {
-        this@module.service("/service")
+        this@module.service()
         this@module.authorization(authHandler)
-        this@module.buttons("/buttons", contentHandler)
-        this@module.payloads("/payloads", contentHandler)
-        this@module.keyboards("/keyboards", contentHandler)
+        this@module.buttons(contentHandler)
+        this@module.payloads(contentHandler)
+        this@module.keyboards(contentHandler)
         this@module.telegram(Properties.get("bot.webhook.endpoint"), webhookHandler)
     }
 }

@@ -3,7 +3,7 @@ package server.models.requests.data
 import com.google.gson.annotations.SerializedName
 import server.RequestActions.deleteButton
 import server.models.requests.Request
-import server.validations.RequestValidator
+import server.validations.RequestDataValidators
 
 data class DeleteButtonRequest(
     @SerializedName("button_id") val buttonId: String,
@@ -13,8 +13,8 @@ data class DeleteButtonRequest(
         get() = "json-schemas/models/requests/delete_button_request.json"
 
     override fun validateData() {
-        RequestValidator.validateIds(buttonId)
-        RequestValidator.validateButtonExistence(buttonId)
+        RequestDataValidators.validateIds(buttonId)
+        RequestDataValidators.validateButtonExists(buttonId)
     }
 
     override fun relatedAction() = deleteButton(this)

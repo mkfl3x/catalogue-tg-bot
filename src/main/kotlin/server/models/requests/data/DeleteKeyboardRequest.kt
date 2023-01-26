@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName
 import database.mongo.managers.DataManager
 import server.RequestActions.deleteKeyboard
 import server.models.requests.Request
-import server.validations.RequestValidator
+import server.validations.RequestDataValidators
 
 data class DeleteKeyboardRequest(
     @SerializedName("keyboard_id") val keyboardId: String
@@ -14,10 +14,10 @@ data class DeleteKeyboardRequest(
         get() = "json-schemas/models/requests/delete_keyboard_request.json"
 
     override fun validateData() {
-        RequestValidator.validateIds(keyboardId)
-        RequestValidator.validateKeyboardExistence(keyboardId)
-        RequestValidator.validateKeyboardDeletion(keyboardId)
+        RequestDataValidators.validateIds(keyboardId)
+        RequestDataValidators.validateKeyboardExists(keyboardId)
+        RequestDataValidators.validateKeyboardDeletion(keyboardId)
     }
 
-    override fun relatedAction() = deleteKeyboard(DataManager.getKeyboard(keyboardId)!!, false)
+    override fun relatedAction() = deleteKeyboard(DataManager.getKeyboard(keyboardId), false)
 }

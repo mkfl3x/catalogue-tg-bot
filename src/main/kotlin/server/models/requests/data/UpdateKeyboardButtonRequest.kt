@@ -3,7 +3,7 @@ package server.models.requests.data
 import com.google.gson.annotations.SerializedName
 import server.RequestActions
 import server.models.requests.Request
-import server.validations.RequestValidator
+import server.validations.RequestDataValidators
 
 data class UpdateKeyboardButtonRequest(
     @SerializedName("keyboard_id") val keyboardId: String,
@@ -15,13 +15,13 @@ data class UpdateKeyboardButtonRequest(
         get() = "json-schemas/models/requests/update_keyboard_button_request.json"
 
     override fun validateData() {
-        RequestValidator.validateIds(keyboardId, buttonId)
-        RequestValidator.validateIsInList(action, listOf("add", "delete"))
-        RequestValidator.validateKeyboardExistence(keyboardId)
-        RequestValidator.validateButtonExistence(buttonId)
+        RequestDataValidators.validateIds(keyboardId, buttonId)
+        RequestDataValidators.validateValueInList(action, listOf("add", "delete"))
+        RequestDataValidators.validateKeyboardExists(keyboardId)
+        RequestDataValidators.validateButtonExists(buttonId)
         if (action == "add") {
-            RequestValidator.validateLoopButton(keyboardId, buttonId)
-            RequestValidator.validateKeyboardButtonsDuplication(keyboardId, buttonId)
+            RequestDataValidators.validateLoopButton(keyboardId, buttonId)
+            RequestDataValidators.validateKeyboardDoesNotContainButton(keyboardId, buttonId)
         }
     }
 

@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName
 import server.RequestActions.createButton
 import server.models.objects.Location
 import server.models.requests.Request
-import server.validations.RequestValidator
+import server.validations.RequestDataValidators
 
 data class CreateButtonRequest(
     @SerializedName("text") val text: String,
@@ -17,12 +17,12 @@ data class CreateButtonRequest(
         get() = "json-schemas/models/requests/objects/button.json"
 
     override fun validateData() {
-        RequestValidator.validateIds(link, hostKeyboard)
-        RequestValidator.validateReservedNames(text)
-        RequestValidator.validateResourceExistence(type, link)
-        hostKeyboard?.let { keyboard ->
-            RequestValidator.validateLocation(Location(text, keyboard))
-            if (type == "keyboard") RequestValidator.validateLoopLinking(link, keyboard)
+        RequestDataValidators.validateIds(link, hostKeyboard)
+        RequestDataValidators.validateReservedNames(text)
+        RequestDataValidators.validateLinkingResourceExistence(type, link)
+        hostKeyboard?.apply {
+            RequestDataValidators.validateLocation(Location(text, this))
+            if (type == "keyboard") RequestDataValidators.validateLoopLinking(link, this)
         }
     }
 

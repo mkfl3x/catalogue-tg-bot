@@ -1,11 +1,9 @@
 package server.models.requests.data
 
 import com.google.gson.annotations.SerializedName
-import database.mongo.managers.DataManager
-import org.bson.types.ObjectId
 import server.RequestActions.linkButton
 import server.models.requests.Request
-import server.validations.RequestValidator
+import server.validations.RequestDataValidators
 
 data class LinkButtonRequest(
     @SerializedName("button_id") val buttonId: String,
@@ -17,16 +15,10 @@ data class LinkButtonRequest(
         get() = "json-schemas/models/requests/link_button_request.json"
 
     override fun validateData() {
-        RequestValidator.validateIds(buttonId, link)
-        RequestValidator.validateButtonExistence(buttonId)
-        RequestValidator.validateResourceExistence(type, link)
-        if (type == "keyboard") {
-            DataManager.getKeyboards()
-                .filter { it.buttons.contains(ObjectId(buttonId)) }
-                .forEach { keyboard ->
-                    RequestValidator.validateLoopLinking(link, keyboard.id.toHexString())
-                }
-        }
+        RequestDataValidators.validateIds(buttonId, link)
+        RequestDataValidators.validateButtonExists(buttonId)
+        RequestDataValidators.validateLinkingResourceExistence(type, link)
+        if (type == "keyboard") RequestDataValidators.validateLoopButton(link, buttonId)
     }
 
     override fun relatedAction() = linkButton(this)

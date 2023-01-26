@@ -11,39 +11,39 @@ import server.models.requests.data.DeleteButtonRequest
 import server.models.requests.data.EditButtonRequest
 import server.models.requests.data.LinkButtonRequest
 
-fun Application.buttons(section: String, handler: ContentHandler) {
+fun Application.buttons(handler: ContentHandler) {
     routing {
         authenticate {
-            route("$section/get") {
+            route("/buttons") {
                 get {
                     handler.getButtons(call.request.queryParameters["filter"] ?: "all").apply {
-                        call.respond(this.httpCode, this.content)
+                        call.respond(httpCode, content)
                     }
                 }
                 get("/{button_id}") {
                     handler.getButton(call.parameters["button_id"].toString()).apply {
-                        call.respond(this.httpCode, this.content)
+                        call.respond(httpCode, content)
                     }
                 }
-            }
-            post("$section/create") {
-                handler.handleRequest(call.receive<CreateButtonRequest>()).apply {
-                    call.respond(this.httpCode, this.content)
+                post("/create") {
+                    handler.handleRequest(call.receive<CreateButtonRequest>()).apply {
+                        call.respond(httpCode, content)
+                    }
                 }
-            }
-            delete("$section/delete") {
-                handler.handleRequest(call.receive<DeleteButtonRequest>()).apply {
-                    call.respond(this.httpCode, this.content)
+                delete("/delete") {
+                    handler.handleRequest(call.receive<DeleteButtonRequest>()).apply {
+                        call.respond(httpCode, content)
+                    }
                 }
-            }
-            put("$section/edit") {
-                handler.handleRequest(call.receive<EditButtonRequest>()).apply {
-                    call.respond(this.httpCode, this.content)
+                put("/edit") {
+                    handler.handleRequest(call.receive<EditButtonRequest>()).apply {
+                        call.respond(httpCode, content)
+                    }
                 }
-            }
-            put("$section/link") {
-                handler.handleRequest(call.receive<LinkButtonRequest>()).apply {
-                    call.respond(this.httpCode, this.content)
+                put("/link") {
+                    handler.handleRequest(call.receive<LinkButtonRequest>()).apply {
+                        call.respond(httpCode, content)
+                    }
                 }
             }
         }

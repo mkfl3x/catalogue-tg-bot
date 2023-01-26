@@ -1,19 +1,23 @@
 package server.handlers
 
+import database.mongo.MongoNullDataException
 import io.ktor.http.*
 import server.models.requests.auth.AuthRequest
 import server.models.responses.Response
 import server.validations.RequestValidationException
 
-class AuthHandler {
+class AuthHandler : RequestHandler {
 
     fun authorize(request: AuthRequest) = try {
         request.validateSchema()
         request.validateData()
         request.relatedAction()
     } catch (e: RequestValidationException) {
-        Response(HttpStatusCode.BadRequest, e.message ?: "Unknown problems with request validation")
+        Response(HttpStatusCode.BadRequest, e.message!!)
+    } catch (e: MongoNullDataException) {
+        Response(HttpStatusCode.BadRequest, e.message!!)
     } catch (e: Exception) {
-        Response(HttpStatusCode.InternalServerError, e.message ?: "Something went wrong")
+        // TODO: add exception log
+        Response(HttpStatusCode.InternalServerError, commonError)
     }
 }

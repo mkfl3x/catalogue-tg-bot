@@ -11,12 +11,10 @@ object JwtConfig {
 
     private val secret = Properties.get("jwt.secret")
     private val issuer = Properties.get("jwt.issuer")
-    private val realm = Properties.get("jwt.realm")
-
     private val algorithm = Algorithm.HMAC256(secret)
 
     fun configure(config: JWTAuthenticationProvider.Config) {
-        config.realm = realm
+        config.realm = Properties.get("jwt.realm")
         config.verifier(getVerifier())
         config.validate { credential ->
             if (credential.payload.getClaim("issuer").asString() != Properties.get("jwt.issuer"))

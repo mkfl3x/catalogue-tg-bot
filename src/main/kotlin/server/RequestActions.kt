@@ -15,7 +15,7 @@ import server.models.responses.Response
 
 object RequestActions {
 
-    // TODO: add safety execution
+    // Keyboards
 
     fun createKeyboard(request: CreateKeyboardRequest): Response {
         with(request) {
@@ -35,6 +35,51 @@ object RequestActions {
             return Response(HttpStatusCode.OK, "Keyboard ${keyboard.id.toHexString()} added")
         }
     }
+
+    fun deleteKeyboard(keyboard: Keyboard, detachOnly: Boolean): Response {
+        with(keyboard) {
+            // Delete keyboard from states
+            // TODO: add mechanism for update user's keyboards
+            KeyboardStates.deleteKeyboard(id.toHexString())
+            // Delete lead buttons (if keyboard is not detached)
+            leadButtons.forEach { leadButton ->
+                // Delete buttons leads to deleting keyboard from all keyboards
+                DataManager.getKeyboards()
+                    .filter { buttons.contains(leadButton) }
+                    .forEach { keyboard -> deleteButtonFromKeyboard(leadButton, keyboard.id) }
+                // Delete button leads to deleting keyboard
+                MongoClient.delete(MongoCollections.BUTTONS.collectionName, BasicDBObject("_id", leadButton))
+                // Delete button from lead_buttons of deleting keyboard (if deleting keyboard is not detached)
+                if (leadButtons.contains(leadButton))
+                    deleteButtonFromKeyboard(leadButton, id, leadButtons = true)
+            }
+            // Delete keyboard from collection
+            if (detachOnly.not()) {
+                MongoClient.delete(MongoCollections.KEYBOARDS.collectionName, BasicDBObject("_id", id))
+                return Response(HttpStatusCode.OK, "Keyboard ${id.toHexString()} deleted")
+            }
+            return Response(HttpStatusCode.OK, "Keyboard ${id.toHexString()} detached")
+        }
+    }
+
+    fun updateKeyboardButton(request: UpdateKeyboardButtonRequest, action: String) = when (action) {
+        "add" -> addKeyboardButton(request.keyboardId, request.buttonId)
+        "delete" -> deleteKeyboardButton(request.keyboardId, request.buttonId)
+        else -> throw Exception("Unknown \"$action\" parameter")
+    }
+
+    fun renameKeyboard(keyboardId: String, newName: String): Response {
+        MongoClient.update(
+            MongoCollections.KEYBOARDS.collectionName,
+            Keyboard::class.java,
+            BasicDBObject("_id", ObjectId(keyboardId)),
+            BasicDBObject("\$set", BasicDBObject("name", newName))
+        )
+        return Response(HttpStatusCode.OK, "Keyboard $keyboardId renamed")
+    }
+
+
+    // Buttons
 
     fun createButton(request: CreateButtonRequest): Response {
         with(request) {
@@ -62,9 +107,59 @@ object RequestActions {
                     BasicDBObject("\$set", BasicDBObject(it.name, it.value))
                 )
             }
-            return Response(HttpStatusCode.OK, request.buttonId)
+            return Response(HttpStatusCode.OK, buttonId)
         }
     }
+
+    fun deleteButton(request: DeleteButtonRequest): Response {
+        with(request) {
+            // Get button from
+            val button = DataManager.getButton(buttonId)
+            // If button leads to keyboard then detach keyboard
+            DataManager.getKeyboards()
+                .find { keyboard -> keyboard.leadButtons.contains(button.id) }
+                ?.let { deleteButtonFromKeyboard(button.id, it.id, leadButtons = true) }
+            // Delete button
+            // TODO: add mechanism for update user's keyboards
+            MongoClient.delete(MongoCollections.BUTTONS.collectionName, BasicDBObject("_id", buttonId))
+            // Delete button from all keyboards
+            DataManager.getKeyboards()
+                .filter { keyboard -> keyboard.buttons.contains(button.id) }
+                .forEach { keyboard -> deleteButtonFromKeyboard(button.id, keyboard.id) }
+            return Response(HttpStatusCode.OK, "Button ${button.id.toHexString()} deleted")
+        }
+    }
+
+    fun linkButton(request: LinkButtonRequest): Response {
+        with(request) {
+            // If button leading to keyboard then remove this button from lead_buttons
+            val button = DataManager.getButton(buttonId)
+            if (button.type == "keyboard")
+                DataManager.getKeyboards()
+                    .filter { keyboard -> keyboard.leadButtons.contains(button.id) }
+                    .forEach { keyboard -> deleteButtonFromKeyboard(button.id, keyboard.id, leadButtons = true) }
+            // If linking to keyboard then add button to lead_buttons of keyboard
+            if (type == "keyboard")
+                addButtonToKeyboard(ObjectId(buttonId), ObjectId(link), leadButtons = true)
+            // Update button's link and link type
+            MongoClient.update(
+                MongoCollections.BUTTONS.collectionName,
+                Button::class.java,
+                BasicDBObject("_id", ObjectId(buttonId)),
+                BasicDBObject("\$set", BasicDBObject("link_to", ObjectId(link)))
+            )
+            MongoClient.update(
+                MongoCollections.BUTTONS.collectionName,
+                Button::class.java,
+                BasicDBObject("_id", ObjectId(buttonId)),
+                BasicDBObject("\$set", BasicDBObject("type", type))
+            )
+            return Response(HttpStatusCode.OK, "Button ${button.id.toHexString()} linked")
+        }
+    }
+
+
+    // Payloads
 
     fun createPayload(request: CreatePayloadRequest): Response {
         with(request) {
@@ -86,9 +181,9 @@ object RequestActions {
     fun editPayload(request: EditPayloadRequest): Response {
         with(request) {
             // Get payload
-            val payload = DataManager.getPayload(payloadId)!!
+            val payload = DataManager.getPayload(payloadId)
             // Update fields
-            request.fields.forEach {
+            fields.forEach {
                 MongoClient.update(
                     MongoCollections.PAYLOADS.collectionName,
                     Button::class.java,
@@ -100,61 +195,10 @@ object RequestActions {
         }
     }
 
-    fun deleteKeyboard(keyboard: Keyboard, detachOnly: Boolean): Response {
-        with(keyboard) {
-            // Delete keyboard from states
-            // TODO: add mechanism for update user's keyboards
-            KeyboardStates.deleteKeyboard(id.toHexString())
-            // Delete lead buttons (if keyboard is not detached)
-            leadButtons.forEach { leadButton ->
-                // Delete buttons leads to deleting keyboard from all keyboards
-                DataManager.getKeyboards()
-                    .filter { keyboard -> keyboard.buttons.contains(leadButton) }
-                    .forEach { keyboard -> deleteButtonFromKeyboard(leadButton, keyboard.id) }
-                // Delete button leads to deleting keyboard
-                MongoClient.delete(MongoCollections.BUTTONS.collectionName, BasicDBObject("_id", leadButton))
-                // Delete button from lead_buttons of deleting keyboard (if deleting keyboard is not detached)
-                if (leadButtons.contains(leadButton))
-                    deleteButtonFromKeyboard(leadButton, id, leadButtons = true)
-            }
-            // Delete keyboard from collection
-            if (detachOnly.not()) {
-                MongoClient.delete(MongoCollections.KEYBOARDS.collectionName, BasicDBObject("_id", id))
-                return Response(HttpStatusCode.OK, "Keyboard ${id.toHexString()} deleted")
-            }
-            return Response(HttpStatusCode.OK, "Keyboard ${id.toHexString()} detached")
-        }
-    }
-
-    fun updateKeyboardButton(request: UpdateKeyboardButtonRequest, action: String) = when (action) {
-        "add" -> addKeyboardButton(request.keyboardId, request.buttonId)
-        "delete" -> deleteKeyboardButton(request.keyboardId, request.buttonId)
-        else -> throw Exception("Unknown \"$action\" parameter")
-    }
-
-    fun deleteButton(request: DeleteButtonRequest): Response {
-        with(request) {
-            // Get button from
-            val button = DataManager.getButton(buttonId)!!
-            // If button leads to keyboard then detach keyboard
-            DataManager.getKeyboards()
-                .find { keyboard -> keyboard.leadButtons.contains(button.id) }
-                ?.let { deleteButtonFromKeyboard(button.id, it.id, leadButtons = true) }
-            // Delete button
-            // TODO: add mechanism for update user's keyboards
-            MongoClient.delete(MongoCollections.BUTTONS.collectionName, BasicDBObject("_id", buttonId))
-            // Delete button from all keyboards
-            DataManager.getKeyboards()
-                .filter { keyboard -> keyboard.buttons.contains(button.id) }
-                .forEach { keyboard -> deleteButtonFromKeyboard(button.id, keyboard.id) }
-            return Response(HttpStatusCode.OK, "Button ${button.id.toHexString()} deleted")
-        }
-    }
-
     fun deletePayload(request: DeletePayloadRequest): Response {
         with(request) {
             // Get payload
-            val payload = DataManager.getPayload(payloadId)!!
+            val payload = DataManager.getPayload(payloadId)
 
             // Delete payload from collection
             MongoClient.delete(MongoCollections.PAYLOADS.collectionName, BasicDBObject("_id", payload.id))
@@ -174,33 +218,8 @@ object RequestActions {
         }
     }
 
-    fun linkButton(request: LinkButtonRequest): Response {
-        with(request) {
-            // If button leading to keyboard then remove this button from lead_buttons
-            val button = DataManager.getButton(request.buttonId)!!
-            if (button.type == "keyboard")
-                DataManager.getKeyboards()
-                    .filter { keyboard -> keyboard.leadButtons.contains(button.id) }
-                    .forEach { keyboard -> deleteButtonFromKeyboard(button.id, keyboard.id, leadButtons = true) }
-            // If linking to keyboard then add button to lead_buttons of keyboard
-            if (request.type == "keyboard")
-                addButtonToKeyboard(ObjectId(request.buttonId), ObjectId(request.link), leadButtons = true)
-            // Update button's link and link type
-            MongoClient.update(
-                MongoCollections.BUTTONS.collectionName,
-                Button::class.java,
-                BasicDBObject("_id", ObjectId(request.buttonId)),
-                BasicDBObject("\$set", BasicDBObject("link_to", ObjectId(request.link)))
-            )
-            MongoClient.update(
-                MongoCollections.BUTTONS.collectionName,
-                Button::class.java,
-                BasicDBObject("_id", ObjectId(request.buttonId)),
-                BasicDBObject("\$set", BasicDBObject("type", request.type))
-            )
-            return Response(HttpStatusCode.OK, "Button ${button.id.toHexString()} linked")
-        }
-    }
+    
+    // Internal
 
     private fun addKeyboardButton(keyboardId: String, buttonId: String): Response {
         addButtonToKeyboard(ObjectId(buttonId), ObjectId(keyboardId))

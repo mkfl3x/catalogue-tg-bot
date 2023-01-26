@@ -52,7 +52,6 @@ dependencies {
 
     // khttp
     implementation "khttp:khttp:$khttpVersion"
-
 }
 
 shadowJar {

@@ -10,34 +10,34 @@ import server.models.requests.data.CreatePayloadRequest
 import server.models.requests.data.DeletePayloadRequest
 import server.models.requests.data.EditPayloadRequest
 
-fun Application.payloads(section: String, handler: ContentHandler) {
+fun Application.payloads(handler: ContentHandler) {
     routing {
         authenticate {
-            route("/get") {
+            route("/payloads") {
                 get {
                     handler.getPayloads().apply {
-                        call.respond(this.httpCode, this.content)
+                        call.respond(httpCode, content)
                     }
                 }
                 get("/{payload_id}") {
                     handler.getPayload(call.parameters["payload_id"].toString()).apply {
-                        call.respond(this.httpCode, this.content)
+                        call.respond(httpCode, content)
                     }
                 }
-            }
-            post("$section/create") {
-                handler.handleRequest(call.receive<CreatePayloadRequest>()).apply {
-                    call.respond(this.httpCode, this.content)
+                post("/create") {
+                    handler.handleRequest(call.receive<CreatePayloadRequest>()).apply {
+                        call.respond(httpCode, content)
+                    }
                 }
-            }
-            put("$section/edit") {
-                handler.handleRequest(call.receive<EditPayloadRequest>()).apply {
-                    call.respond(this.httpCode, this.content)
+                put("/edit") {
+                    handler.handleRequest(call.receive<EditPayloadRequest>()).apply {
+                        call.respond(httpCode, content)
+                    }
                 }
-            }
-            delete("$section/delete") {
-                handler.handleRequest(call.receive<DeletePayloadRequest>()).apply {
-                    call.respond(this.httpCode, this.content)
+                delete("/delete") {
+                    handler.handleRequest(call.receive<DeletePayloadRequest>()).apply {
+                        call.respond(httpCode, content)
+                    }
                 }
             }
         }

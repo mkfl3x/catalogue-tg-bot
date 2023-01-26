@@ -1,54 +1,51 @@
 package server.routes
 
-import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import server.handlers.ContentHandler
-import server.models.requests.data.CreateKeyboardRequest
-import server.models.requests.data.DeleteKeyboardRequest
-import server.models.requests.data.DetachKeyboardRequest
-import server.models.requests.data.UpdateKeyboardButtonRequest
+import server.models.requests.data.*
 
-fun Application.keyboards(section: String, handler: ContentHandler) {
+fun Application.keyboards(handler: ContentHandler) {
     routing {
         authenticate {
-            route("$section/get") {
+            route("/keyboards") {
                 get {
                     handler.getKeyboards(call.request.queryParameters["filter"] ?: "all").apply {
-                        call.respond(this.httpCode, this.content)
+                        call.respond(httpCode, content)
                     }
                 }
                 get("/{keyboard_id}") {
                     handler.getKeyboard(call.parameters["keyboard_id"].toString()).apply {
-                        call.respond(this.httpCode, this.content)
+                        call.respond(httpCode, content)
                     }
                 }
-            }
-            post("$section/create") {
-                handler.handleRequest(call.receive<CreateKeyboardRequest>()).apply {
-                    call.respond(this.httpCode, this.content)
+                post("/create") {
+                    handler.handleRequest(call.receive<CreateKeyboardRequest>()).apply {
+                        call.respond(httpCode, content)
+                    }
                 }
-            }
-            put("$section/detach") {
-                handler.handleRequest(call.receive<DetachKeyboardRequest>()).apply {
-                    call.respond(this.httpCode, this.content)
+                delete("/delete") {
+                    handler.handleRequest(call.receive<DeleteKeyboardRequest>()).apply {
+                        call.respond(httpCode, content)
+                    }
                 }
-            }
-            delete("$section/delete") {
-                handler.handleRequest(call.receive<DeleteKeyboardRequest>()).apply {
-                    call.respond(this.httpCode, this.content)
+                put("/detach") {
+                    handler.handleRequest(call.receive<DetachKeyboardRequest>()).apply {
+                        call.respond(httpCode, content)
+                    }
                 }
-            }
-            put("$section/rename") {
-                // TODO
-                call.respond(HttpStatusCode.NotImplemented, "API method under construction")
-            }
-            put("$section/updateKeyboardButton") {
-                handler.handleRequest(call.receive<UpdateKeyboardButtonRequest>()).apply {
-                    call.respond(this.httpCode, this.content)
+                put("/rename") {
+                    handler.handleRequest(call.receive<RenameKeyboardRequest>()).apply {
+                        call.respond(httpCode, content)
+                    }
+                }
+                put("/updateKeyboardButton") {
+                    handler.handleRequest(call.receive<UpdateKeyboardButtonRequest>()).apply {
+                        call.respond(httpCode, content)
+                    }
                 }
             }
         }

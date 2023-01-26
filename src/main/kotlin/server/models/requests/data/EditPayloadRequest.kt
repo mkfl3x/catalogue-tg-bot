@@ -4,8 +4,7 @@ import com.google.gson.annotations.SerializedName
 import server.RequestActions.editPayload
 import server.models.objects.Field
 import server.models.requests.Request
-import server.validations.RequestValidator
-import server.validations.RequestValidator.validatePayloadAbsence
+import server.validations.RequestDataValidators
 
 data class EditPayloadRequest(
     @SerializedName("payload_id") val payloadId: String,
@@ -16,13 +15,13 @@ data class EditPayloadRequest(
         get() = "json-schemas/models/requests/edit_payload_request.json"
 
     override fun validateData() {
-        RequestValidator.validateIds(payloadId)
-        RequestValidator.validatePayloadExistence(payloadId)
+        RequestDataValidators.validateIds(payloadId)
+        RequestDataValidators.validatePayloadExists(payloadId)
         fields.forEach { field ->
-            RequestValidator.validateIsInList(field.name, listOf("name", "data"))
-            RequestValidator.validateReservedNames(field.value)
+            RequestDataValidators.validateValueInList(field.name, listOf("name", "data"))
+            RequestDataValidators.validateReservedNames(field.value)
             when (field.name) {
-                "name" -> validatePayloadAbsence(field.value) // Check that name is unique
+                "name" -> RequestDataValidators.validatePayloadDoesNotExist(field.value)
             }
         }
     }

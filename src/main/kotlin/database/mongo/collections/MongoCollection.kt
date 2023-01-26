@@ -4,7 +4,7 @@ import database.mongo.MongoClient
 import database.mongo.MongoCollections
 import database.mongo.models.MongoEntity
 
-class MongoCollection<T: MongoEntity>(val name: MongoCollections, private val entityType: Class<T>) {
+class MongoCollection<T : MongoEntity>(val name: MongoCollections, private val entityType: Class<T>) {
 
     lateinit var entities: HashSet<T>
 

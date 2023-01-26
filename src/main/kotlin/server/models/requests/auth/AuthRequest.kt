@@ -5,7 +5,7 @@ import io.ktor.http.*
 import security.JwtConfig
 import server.models.requests.Request
 import server.models.responses.Response
-import server.validations.RequestValidator
+import server.validations.RequestDataValidators
 
 data class AuthRequest(
     @SerializedName("username") val username: String,
@@ -16,11 +16,8 @@ data class AuthRequest(
         get() = "json-schemas/models/requests/auth_request.json"
 
     override fun validateData() {
-        RequestValidator.validateUserExistence(username)
+        RequestDataValidators.validateUserExists(username)
     }
 
-    override fun relatedAction(): Response {
-        val token = JwtConfig.generateToken(this)
-        return Response(HttpStatusCode.OK, "JWT token: $token")
-    }
+    override fun relatedAction() = Response(HttpStatusCode.OK, "JWT token: ${JwtConfig.generateToken(this)}")
 }

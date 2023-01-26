@@ -4,8 +4,8 @@ import com.google.gson.annotations.SerializedName
 import server.RequestActions.editButton
 import server.models.objects.Field
 import server.models.requests.Request
-import server.validations.RequestValidator
-import server.validations.RequestValidator.validateButtonNameDuplication
+import server.validations.RequestDataValidators
+import server.validations.RequestDataValidators.validateButtonNameDuplication
 
 data class EditButtonRequest(
     @SerializedName("button_id") val buttonId: String,
@@ -16,11 +16,11 @@ data class EditButtonRequest(
         get() = "json-schemas/models/requests/edit_button_request.json"
 
     override fun validateData() {
-        RequestValidator.validateIds(buttonId)
-        RequestValidator.validateButtonExistence(buttonId)
+        RequestDataValidators.validateIds(buttonId)
+        RequestDataValidators.validateButtonExists(buttonId)
         fields.forEach { field ->
-            RequestValidator.validateIsInList(field.name, listOf("text"))
-            RequestValidator.validateReservedNames(field.value)
+            RequestDataValidators.validateValueInList(field.name, listOf("text"))
+            RequestDataValidators.validateReservedNames(field.value)
             when (field.name) {
                 "text" -> validateButtonNameDuplication(buttonId, field.value)
             }
