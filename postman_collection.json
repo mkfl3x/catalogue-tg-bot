@@ -1,0 +1,726 @@
+{
+	"info": {
+		"_postman_id": "89417c00-7bfe-4e92-8ac9-da716f49b36d",
+		"name": "catalogue-tg-bot",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "/keyboards",
+			"item": [
+				{
+					"name": "/get",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/keyboards",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"keyboards"
+							],
+							"query": [
+								{
+									"key": "filter",
+									"value": "detached",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/get/{keyboard_id}",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/keyboards/63b5dedf34595e41e379e1a9",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"keyboards",
+								"63b5dedf34595e41e379e1a9"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/create",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"New keyboard\",\n    \"buttons\": [\n        \"63cf15dc1d0b2c39dd4e8063\",\n        \"63cf12491d0b2c39dd4e8060\"\n    ],\n    \"location\": {\n        \"lead_button\": \"To new keyboard\",\n        \"host_keyboard\": \"63b5dedf34595e41e379e1a9\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/keyboards/create",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"keyboards",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/rename",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"keyboard_id\": \"63d83dc2f314bc44b765be8f\",\n    \"new_name\": \"renamed keyboard\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/keyboards/rename",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"keyboards",
+								"rename"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/updateKeyboardButton",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"keyboard_id\": \"63d83dc2f314bc44b765be8f\",\n    \"button_id\": \"63c8b2da9825ee69fe797308\",\n    \"action\": \"add\" \n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/keyboards/updateKeyboardButton",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"keyboards",
+								"updateKeyboardButton"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/detach",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"keyboard_id\": \"63d83dc2f314bc44b765be8f\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/keyboards/detach",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"keyboards",
+								"detach"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"keyboard_id\": \"63cf15dc1d0b2c39dd4e8062\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/keyboards/delete",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"keyboards",
+								"delete"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "/buttons",
+			"item": [
+				{
+					"name": "/get",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/buttons",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"buttons"
+							],
+							"query": [
+								{
+									"key": "filter",
+									"value": "all",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/get/{button_id}",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/buttons/63cf12491d0b2c39dd4e8060",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"buttons",
+								"63cf12491d0b2c39dd4e8060"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/create",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"text\": \"New button\",\n    \"type\": \"payload\",\n    \"link\": \"63cb4d54b91be11cc7f19f55\",\n    \"host_keyboard\": \"63d83dc2f314bc44b765be8f\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/buttons/create",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"buttons",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/rename",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"button_id\": \"63d2b33807c0967665724d75\",\n    \"new_name\": \"renamed button\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/buttons/rename",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"buttons",
+								"rename"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/link",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"button_id\": \"63cf12491d0b2c39dd4e8060\",\n    \"type\": \"keyboard\",\n    \"link\": \"63d83dc2f314bc44b765be8f\"\n}\n\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/buttons/link",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"buttons",
+								"link"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"button_id\": \"63d842f221c9796e3d178c96\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/buttons/delete",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"buttons",
+								"delete"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "/payloads",
+			"item": [
+				{
+					"name": "/get",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/payloads",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"payloads"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/get/{payload_id}",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/payloads/63cb4d54b91be11cc7f19f55",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"payloads",
+								"63cb4d54b91be11cc7f19f55"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/create",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"New payload\",\n    \"type\": \"tutorial\",\n    \"data\": \"Some data\",\n    \"location\": {\n        \"host_keyboard\": \"63d83dc2f314bc44b765be8f\",\n        \"lead_button\": \"to new payload\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/payloads/create",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"payloads",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"payload_id\": \"6355aafbb524064abc64b2f9\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/payloads/delete",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"payloads",
+								"delete"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/edit",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"payload_id\": \"63d84a0a734cd5587fde8044\",\n    \"fields\": [\n        {\"name\": \"name\", \"value\": \"renamed payload\"},\n        {\"name\": \"data\", \"value\": \"Updated content\"}\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/payloads/edit",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"payloads",
+								"edit"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "/service",
+			"item": [
+				{
+					"name": "/ping",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/service/ping",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"service",
+								"ping"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "/auth",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"admin\",\n    \"password\": \"admin\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/auth",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"auth"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
