@@ -7,17 +7,14 @@
       "type": "string",
       "minLength": 1
     },
-    "fields": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "$ref": "objects/updating_field.json"
-      }
+    "new_name": {
+      "type": "string",
+      "minLength": 1
     }
   },
   "required": [
     "button_id",
-    "fields"
+    "new_name"
   ],
   "additionalProperties": false
 }

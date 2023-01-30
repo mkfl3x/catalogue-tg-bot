@@ -8,7 +8,7 @@ import io.ktor.server.routing.*
 import server.handlers.ContentHandler
 import server.models.requests.data.CreatePayloadRequest
 import server.models.requests.data.DeletePayloadRequest
-import server.models.requests.data.EditPayloadRequest
+import server.models.requests.data.RenamePayloadRequest
 
 fun Application.payloads(handler: ContentHandler) {
     routing {
@@ -30,7 +30,7 @@ fun Application.payloads(handler: ContentHandler) {
                     }
                 }
                 put("/edit") {
-                    handler.handleRequest(call.receive<EditPayloadRequest>()).apply {
+                    handler.handleRequest(call.receive<RenamePayloadRequest>()).apply {
                         call.respond(httpCode, content)
                     }
                 }

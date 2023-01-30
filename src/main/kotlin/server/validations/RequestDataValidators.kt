@@ -72,7 +72,8 @@ object RequestDataValidators {
 
     fun validateLocation(location: Location) {
         validateReservedNames(location.leadButtonText)
-        validateKeyboardDoesNotContainButton(location.hostKeyboard, location.leadButtonText)
+        validateKeyboardExists(location.hostKeyboard)
+        validateButtonDoesNotExist(location.leadButtonText)
     }
 
     fun validateKeyboardDeletion(keyboardId: String) {
@@ -81,17 +82,7 @@ object RequestDataValidators {
                 throw RequestValidationException("'${ReservedNames.MAIN_KEYBOARD.text}' can't be deleted")
         }
     }
-
-    fun validateButtonNameDuplication(buttonId: String, buttonName: String) {
-        DataManager.getKeyboards()
-            .filter { ObjectId(buttonId) in it.buttons }
-            .joinToString("") { "${it.name} [${it.id}]\n" }
-            .apply {
-                if (this.isNotEmpty())
-                    throw RequestValidationException("Button with '$buttonName' name already exists on following keyboards:\n $this")
-            }
-    }
-
+    
     fun validateLinkingResourceExistence(type: String, id: String) {
         when (type) {
             "keyboard" -> validateKeyboardExists(id)

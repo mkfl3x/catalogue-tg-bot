@@ -8,8 +8,8 @@ import io.ktor.server.routing.*
 import server.handlers.ContentHandler
 import server.models.requests.data.CreateButtonRequest
 import server.models.requests.data.DeleteButtonRequest
-import server.models.requests.data.EditButtonRequest
 import server.models.requests.data.LinkButtonRequest
+import server.models.requests.data.RenameButtonRequest
 
 fun Application.buttons(handler: ContentHandler) {
     routing {
@@ -35,8 +35,8 @@ fun Application.buttons(handler: ContentHandler) {
                         call.respond(httpCode, content)
                     }
                 }
-                put("/edit") {
-                    handler.handleRequest(call.receive<EditButtonRequest>()).apply {
+                put("/rename") {
+                    handler.handleRequest(call.receive<RenameButtonRequest>()).apply {
                         call.respond(httpCode, content)
                     }
                 }

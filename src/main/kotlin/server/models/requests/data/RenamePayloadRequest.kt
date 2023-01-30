@@ -6,7 +6,7 @@ import server.models.objects.Field
 import server.models.requests.Request
 import server.validations.RequestDataValidators
 
-data class EditPayloadRequest(
+data class RenamePayloadRequest(
     @SerializedName("payload_id") val payloadId: String,
     @SerializedName("fields") val fields: List<Field>
 ) : Request {

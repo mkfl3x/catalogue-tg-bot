@@ -22,6 +22,8 @@ object RequestActions {
             // Create keyboard
             val keyboard = Keyboard(ObjectId(), name, emptyList(), emptyList())
             MongoClient.create(MongoCollections.KEYBOARDS.collectionName, keyboard, Keyboard::class.java)
+            // Add buttons to keyboard
+            buttons?.onEach { addButtonToKeyboard(ObjectId(it), keyboard.id) }
             // Create button leads to new keyboard (if keyboard creating as not detached)
             location?.let {
                 // Create button
@@ -32,7 +34,7 @@ object RequestActions {
                 // Add button to new keyboard lead_buttons
                 addButtonToKeyboard(button.id, keyboard.id, leadButtons = true)
             }
-            return Response(HttpStatusCode.OK, "Keyboard ${keyboard.id.toHexString()} added")
+            return Response(HttpStatusCode.OK, "Keyboard ${keyboard.id.toHexString()} created")
         }
     }
 
@@ -92,22 +94,20 @@ object RequestActions {
             // If button leads to keyboard then add button to host keyboard's lead_buttons
             if (button.type == "keyboard")
                 addButtonToKeyboard(button.id, ObjectId(link), leadButtons = true)
-            return Response(HttpStatusCode.OK, "Button ${button.id.toHexString()} added")
+            return Response(HttpStatusCode.OK, "Button ${button.id.toHexString()} created")
 
         }
     }
 
-    fun editButton(request: EditButtonRequest): Response {
+    fun renameButton(request: RenameButtonRequest): Response {
         with(request) {
-            request.fields.forEach {
-                MongoClient.update(
-                    MongoCollections.BUTTONS.collectionName,
-                    Button::class.java,
-                    BasicDBObject("_id", ObjectId(buttonId)), // TODO: not explicitly that ObjectId required
-                    BasicDBObject("\$set", BasicDBObject(it.name, it.value))
-                )
-            }
-            return Response(HttpStatusCode.OK, buttonId)
+            MongoClient.update(
+                MongoCollections.BUTTONS.collectionName,
+                Button::class.java,
+                BasicDBObject("_id", ObjectId(buttonId)),
+                BasicDBObject("\$set", BasicDBObject("text", newName))
+            )
+            return Response(HttpStatusCode.OK, "Button '$buttonId' renamed")
         }
     }
 
@@ -121,7 +121,7 @@ object RequestActions {
                 ?.let { deleteButtonFromKeyboard(button.id, it.id, leadButtons = true) }
             // Delete button
             // TODO: add mechanism for update user's keyboards
-            MongoClient.delete(MongoCollections.BUTTONS.collectionName, BasicDBObject("_id", buttonId))
+            MongoClient.delete(MongoCollections.BUTTONS.collectionName, BasicDBObject("_id", ObjectId(buttonId)))
             // Delete button from all keyboards
             DataManager.getKeyboards()
                 .filter { keyboard -> keyboard.buttons.contains(button.id) }
@@ -174,11 +174,11 @@ object RequestActions {
                 // Add button to host keyboard
                 addButtonToKeyboard(button.id, ObjectId(it.hostKeyboard))
             }
-            return Response(HttpStatusCode.OK, "Payload ${payload.id.toHexString()} added")
+            return Response(HttpStatusCode.OK, "Payload ${payload.id.toHexString()} created")
         }
     }
 
-    fun editPayload(request: EditPayloadRequest): Response {
+    fun editPayload(request: RenamePayloadRequest): Response {
         with(request) {
             // Get payload
             val payload = DataManager.getPayload(payloadId)
@@ -218,7 +218,7 @@ object RequestActions {
         }
     }
 
-    
+
     // Internal
 
     private fun addKeyboardButton(keyboardId: String, buttonId: String): Response {

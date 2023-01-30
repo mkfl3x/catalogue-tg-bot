@@ -5,6 +5,7 @@ import database.mongo.managers.DataManager
 import io.ktor.http.*
 import server.models.requests.Request
 import server.models.responses.Response
+import server.validations.RequestDataValidators
 import server.validations.RequestValidationException
 
 class ContentHandler : RequestHandler {
@@ -26,8 +27,11 @@ class ContentHandler : RequestHandler {
     }
 
     fun getKeyboard(keyboardId: String) = try {
+        RequestDataValidators.validateIds(keyboardId)
         Response(HttpStatusCode.OK, DataManager.getKeyboard(keyboardId).toJson())
     } catch (e: MongoNullDataException) {
+        Response(HttpStatusCode.BadRequest, e.message!!)
+    } catch (e: RequestValidationException) {
         Response(HttpStatusCode.BadRequest, e.message!!)
     }
 
@@ -41,8 +45,11 @@ class ContentHandler : RequestHandler {
     }
 
     fun getButton(buttonId: String) = try {
+        RequestDataValidators.validateIds(buttonId)
         Response(HttpStatusCode.OK, DataManager.getButton(buttonId).toJson())
     } catch (e: MongoNullDataException) {
+        Response(HttpStatusCode.BadRequest, e.message!!)
+    } catch (e: RequestValidationException) {
         Response(HttpStatusCode.BadRequest, e.message!!)
     }
 
@@ -55,8 +62,11 @@ class ContentHandler : RequestHandler {
     }
 
     fun getPayload(payloadId: String) = try {
+        RequestDataValidators.validateIds(payloadId)
         Response(HttpStatusCode.OK, DataManager.getPayload(payloadId).toJson())
     } catch (e: MongoNullDataException) {
+        Response(HttpStatusCode.BadRequest, e.message!!)
+    } catch (e: RequestValidationException) {
         Response(HttpStatusCode.BadRequest, e.message!!)
     }
 

@@ -26,7 +26,6 @@ class WebhookHandler : RequestHandler {
             }
         } catch (e: Exception) {
             // TODO: add exception log
-        } finally {
             bot.actions.sendMessage(chatId, commonError)
         }
     }
